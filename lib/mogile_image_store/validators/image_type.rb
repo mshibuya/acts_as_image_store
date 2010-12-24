@@ -7,11 +7,13 @@ module MogileImageStore
         def validate_each(record, attribute, value)
           type = record.image_attributes[attribute]['type'] rescue nil
           if options[:type]
-            unless type == options[:type]
+            typearr = Array.wrap(options[:type]).map{ |i| ::MogileImageStore::EXT_TO_TYPE[i.to_sym] }
+            unless typearr.include?(type)
               record.errors[attribute] << I18n.translate('mogile_image_store.errors.messages.must_be_image_type') % [options[:type]]
             end
           else
-            unless ::MogileImageStore::IMAGE_FORMATS.include?(type)
+            typearr = ::MogileImageStore::IMAGE_FORMATS
+            unless typearr.include?(type)
               record.errors[attribute] << I18n.translate('mogile_image_store.errors.messages.must_be_image')
             end
           end

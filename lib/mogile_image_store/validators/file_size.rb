@@ -5,13 +5,14 @@ module MogileImageStore
 
       class FileSizeValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
+          size = record.image_attributes[attribute]['size'] rescue nil
           if options[:max]
-            unless value['image']['size'] > options[:max]
+            if size > options[:max]
               record.errors[attribute] << "must be smaller than #{options[:max] / 1000}KB."
             end
           end
           if options[:min]
-            unless value['image']['size'] < options[:min]
+            if size < options[:min]
               record.errors[attribute] << "must be larger than #{options[:min] / 1000}KB."
             end
           end
