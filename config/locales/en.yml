@@ -1,0 +1,7 @@
+en:
+  mogile_image_store:
+    errors:
+      messages:
+        must_be_image_type: "must be %s file."
+        must_be_image:      "must be JPEG, GIF or PNG file."
+
