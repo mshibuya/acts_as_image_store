@@ -34,7 +34,7 @@ class MogileImageStoreGenerator < Rails::Generators::Base
     tmp.write migration
     tmp.close
 
-    migration_template  '../../../tmp/~migration_ready.rb',
+    migration_template  File.expand_path(tmp.path),
                         'db/migrate/create_mogile_image_tables.rb'
     remove_file 'tmp/~migration_ready.rb'
   end

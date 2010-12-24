@@ -22,6 +22,12 @@ require "capybara/rails"
 Capybara.default_driver   = :rack_test
 Capybara.default_selector = :css
 
+# generate migration files
+require "#{File.dirname(__FILE__)}/../lib/rails/generators/mogile_image_store/mogile_image_store_generator"
+Dir["#{File.dirname(__FILE__)}/../db/migrate/*_create_mogile_image_tables.rb"].each { |f| File.unlink f }
+MogileImageStoreGenerator.new.create_migration_file
+# Run generated migration
+ActiveRecord::Migrator.migrate File.expand_path("../../db/migrate/", __FILE__)
 # Run any available migration
 ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
 

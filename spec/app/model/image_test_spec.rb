@@ -1,12 +1,12 @@
 # coding: utf-8
 require 'spec_helper'
 
-describe MogileImage do
+describe ImageTest do
   before do
 #    debugger
   end
   it "test" do
-    lambda{ MogileImage.new }.should_not raise_error
+    lambda{ ImageTest.new }.should_not raise_error
   end
 end
 
