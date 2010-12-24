@@ -5,13 +5,14 @@ module MogileImageStore
 
       class WidthValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
+          width = record.image_attributes[attribute]['width'] rescue nil
           if options[:max]
-            unless value['image']['width'] > options[:max]
+            if width > options[:max]
               record.errors[attribute] << "'s width must be smaller than #{options[:max]} pixels."
             end
           end
           if options[:min]
-            unless value['image']['width'] < options[:min]
+            if width < options[:min]
               record.errors[attribute] << "'s width must be larger than #{options[:min]} pixels."
             end
           end

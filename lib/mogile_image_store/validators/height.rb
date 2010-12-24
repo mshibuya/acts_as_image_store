@@ -5,13 +5,14 @@ module MogileImageStore
 
       class HeightValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
+          height = record.image_attributes[attribute]['height'] rescue nil
           if options[:max]
-            unless value['image']['height'] > options[:max]
+            if height > options[:max]
               record.errors[attribute] << "'s height must be smaller than #{options[:max]} pixels."
             end
           end
           if options[:min]
-            unless value['image']['height'] < options[:min]
+            if height < options[:min]
               record.errors[attribute] << "'s height must be larger than #{options[:min]} pixels."
             end
           end

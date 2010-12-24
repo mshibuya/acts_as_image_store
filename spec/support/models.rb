@@ -56,3 +56,39 @@ class ImageMinTwentyMaxFourty < Tableless
   validates :image, :file_size => { :min => 20.kilobytes, :max => 40.kilobytes }
 end
 
+class ImageWidthMaxFive < Tableless
+  column :image, :string
+  has_images
+  validates :image, :width => { :max => 500 }
+end
+
+class ImageWidthMinFive < Tableless
+  column :image, :string
+  has_images
+  validates :image, :width => { :min => 500 }
+end
+
+class ImageWidthMinFiveMaxSix < Tableless
+  column :image, :string
+  has_images
+  validates :image, :width => { :min => 500, :max => 600 }
+end
+
+class ImageHeightMaxFive < Tableless
+  column :image, :string
+  has_images
+  validates :image, :height => { :max => 500 }
+end
+
+class ImageHeightMinFive < Tableless
+  column :image, :string
+  has_images
+  validates :image, :height => { :min => 500 }
+end
+
+class ImageHeightMinFourThirtyMaxFive < Tableless
+  column :image, :string
+  has_images
+  validates :image, :height => { :min => 430, :max => 500 }
+end
+
