@@ -20,15 +20,17 @@ describe MogileImageStore do
         @mogadm.create_domain MogileImageStore.config[:domain]
       end
       unless @mogadm.get_domains[MogileImageStore.config[:domain]][MogileImageStore.config[:class]]
-        @mogadm.create_class  MogileImageStore.config[:domain], MogileImageStore.config[:class], MogileImageStore.config[:mindevcount] || 2
+        @mogadm.create_class  MogileImageStore.config[:domain], MogileImageStore.config[:class], 2
       end
+    end
+
+    before do
       @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.config[:domain], :hosts  => MogileImageStore.config[:hosts] })
     end
 
     context "saving" do
       before do
         @image_test = Factory.build(:image_test)
-        @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.config[:domain], :hosts  => MogileImageStore.config[:hosts] })
       end
 
       it "should return hash value when saved" do
@@ -51,20 +53,48 @@ describe MogileImageStore do
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.png"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-        @mg.list_keys('').shift.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
       end
     end
 
-    context "deleting" do
+    context "retrieval" do
+      it "should return 2 urls" do
+        sleep(5) # wait until replication becomes ready
+        MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02').pop.should have(2).items
+        MogileImage.fetch_urls('60de57a8f5cd0a10b296b1f553cb41a9').pop.should have(2).items
+      end
+
+      it "should return raw jpeg image" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02')
+        content_type.should == 'image/jpeg'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'JPEG'
+        img.columns.should == 725
+        img.rows.should == 544
+        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+      end
+
+      it "should return raw png image" do
+        content_type, data = MogileImage.fetch_data('60de57a8f5cd0a10b296b1f553cb41a9')
+        content_type.should == 'image/png'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'PNG'
+        img.columns.should == 460
+        img.rows.should == 445
+        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+      end
+    end
+
+    context "deletion" do
       before do
         @image_test = ImageTest.first
       end
 
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').shift.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
       end

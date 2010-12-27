@@ -57,21 +57,19 @@ class MogileImage < ActiveRecord::Base
     :gif => 'image/gif',
     :png => 'image/png',
   })
-  def self.fetch_urls(name, format, size)
-    key = get_key(name, format, size)
-    mg = mogilefs_connect
-    urls = mg.get_paths "#{name}.#{format}"
-    [ self::CONTENT_TYPES[format], urls ]
+  def self.fetch_urls(name, format=nil, size='raw')
+    content_type, key = get_key(name, format, size)
+    urls = mogilefs_connect.get_paths key
+    [ content_type, urls ]
   end
 
-  def self.fetch_data(name, format, size)
-    key = get_key(name, format, size)
-    data = mg.get_file_data "#{name}.#{format}"
-    [ self::CONTENT_TYPES[format], data ]
+  def self.fetch_data(name, format=nil, size='raw')
+    content_type, key = get_key(name, format, size)
+    data = mogilefs_connect.get_file_data key
+    [ content_type, data ]
   end
 
   def self.get_key(name, format, size)
-    mg = mogilefs_connect
     record = find_by_name(name)
     raise ActiveRecord::RecordNotFound unless record
     if size == 'raw'
@@ -85,8 +83,10 @@ class MogileImage < ActiveRecord::Base
     else
       suffix = "/#{w}x#{h}"
     end
+    format = record.image_type unless format
     key = "#{name}.#{format}#{suffix}"
-    unless mg.list_keys(key, nil, 1)
+    mg = mogilefs_connect
+    unless mg.size(key)
       # image not exists. generate
       img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
       img.resize_to_fit! w, h if w > 0 || h > 0
@@ -94,7 +94,7 @@ class MogileImage < ActiveRecord::Base
       img.format = new_format if img.format != new_format
       mg.store_file key, MogileImageStore.config[:class], img.to_blob
     end
-    return key
+    return [self::CONTENT_TYPES[format.to_sym], key]
   end
 
   def self.mogilefs_connect
