@@ -77,7 +77,7 @@ class MogileImage < ActiveRecord::Base
     else
       w, h = size.scan(/(\d*)x(\d*)/).shift.map{|i| i.to_i}
     end
-    if (w == 0 || w <= record.witdh) && (h == 0 || h <= record.height)
+    if (w == 0 || w > record.width) && (h == 0 || h > record.height)
       #needs no resizing
       suffix = ""
     else
@@ -86,13 +86,15 @@ class MogileImage < ActiveRecord::Base
     format = record.image_type unless format
     key = "#{name}.#{format}#{suffix}"
     mg = mogilefs_connect
-    unless mg.size(key)
+    begin
+      mg.size(key)
+    rescue
       # image not exists. generate
       img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
       img.resize_to_fit! w, h if w > 0 || h > 0
       new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
       img.format = new_format if img.format != new_format
-      mg.store_file key, MogileImageStore.config[:class], img.to_blob
+      mg.store_content key, MogileImageStore.config[:class], img.to_blob
     end
     return [self::CONTENT_TYPES[format.to_sym], key]
   end

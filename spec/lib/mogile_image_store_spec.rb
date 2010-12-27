@@ -18,9 +18,7 @@ describe MogileImageStore do
       @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.config[:hosts]
       unless @mogadm.get_domains[MogileImageStore.config[:domain]]
         @mogadm.create_domain MogileImageStore.config[:domain]
-      end
-      unless @mogadm.get_domains[MogileImageStore.config[:domain]][MogileImageStore.config[:class]]
-        @mogadm.create_class  MogileImageStore.config[:domain], MogileImageStore.config[:class], 2
+        @mogadm.create_class  MogileImageStore.config[:domain], MogileImageStore.config[:class], 2 rescue nil
       end
     end
 
@@ -61,7 +59,7 @@ describe MogileImageStore do
 
     context "retrieval" do
       it "should return 2 urls" do
-        sleep(5) # wait until replication becomes ready
+        sleep(3) # wait until replication becomes ready
         MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02').pop.should have(2).items
         MogileImage.fetch_urls('60de57a8f5cd0a10b296b1f553cb41a9').pop.should have(2).items
       end
@@ -85,6 +83,41 @@ describe MogileImageStore do
         img.rows.should == 445
         @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
       end
+
+      it "should return jpeg=>png converted image" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'png')
+        content_type.should == 'image/png'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'PNG'
+        img.columns.should == 725
+        img.rows.should == 544
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg', 'bcadded5ee18bfa7c99834f307332b02.png']
+      end
+
+      it "should return resized jpeg image" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '600x450')
+        content_type.should == 'image/jpeg'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'JPEG'
+        img.columns.should == 600
+        img.rows.should == 450
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
+      end
+
+      it "should return raw jpeg image when requested larger size" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x600')
+        content_type.should == 'image/jpeg'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'JPEG'
+        img.columns.should == 725
+        img.rows.should == 544
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
+      end
     end
 
     context "deletion" do
@@ -94,7 +127,9 @@ describe MogileImageStore do
 
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
       end
@@ -112,7 +147,6 @@ describe MogileImageStore do
       @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.config[:hosts]
       @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.config[:domain], :hosts  => MogileImageStore.config[:hosts] })
       @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_class  MogileImageStore.config[:domain], MogileImageStore.config[:class]
       @mogadm.delete_domain MogileImageStore.config[:domain]
     end
 
