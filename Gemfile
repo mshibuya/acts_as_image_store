@@ -15,6 +15,7 @@ group :development do
   gem "bundler"
   gem "jeweler"
   gem "capybara"
+  gem "webmock"
   if RUBY_VERSION >= '1.9'
     gem "ruby-debug19"
   else

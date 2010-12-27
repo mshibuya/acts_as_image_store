@@ -5,7 +5,7 @@ describe MogileImageStore do
   context "Validators" do
     context "FileSize" do
       describe "with <=20k validation" do
-        before{ @image = ImageMaxTwenty.new }
+        before{ @image = ImageMax20.new }
         it "should accept 16k image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
@@ -24,7 +24,7 @@ describe MogileImageStore do
       end
 
       describe "with >=20k validation" do
-        before{ @image = ImageMinTwenty.new }
+        before{ @image = ImageMin20.new }
         it "should not accept 16k image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
@@ -43,7 +43,7 @@ describe MogileImageStore do
       end
 
       describe "with 20k-40k validation" do
-        before{ @image = ImageMinTwentyMaxFourty.new }
+        before{ @image = ImageMin20Max40.new }
         it "should not accept 16k image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',

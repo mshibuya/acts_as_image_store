@@ -14,18 +14,41 @@ class MogileImage < ActiveRecord::Base
   end
 
   def self.save_image(image_attrs)
-    mg = MogileFS::MogileFS.new :domain => 'hoge', :hosts => %w[192.168.56.101:7001]
     content = image_attrs['content']
     name = Digest::MD5.hexdigest(content)
-    record = image_attrs.reject { |k,v| !%w[size width height].include? k }
-    record['imgtype'] = ::MogileImageStore::TYPE_TO_EXT[image_attrs['type'].to_sym.upcase]
-    record['name'] = name
-    if self.create record
-      filename = name+'.'+record['imgtype']
-      mg.store_content filename, 'fuga', content
-      filename
-    else
-      nil
+    self.transaction do
+      record = find_or_initialize_by_name name
+      unless record.persisted?
+        image_attrs.map{ |k,v| record[k] = v if %w[size width height].include? k }
+        record.image_type = ::MogileImageStore::TYPE_TO_EXT[image_attrs['type'].to_sym.upcase]
+        record.refcount = 1
+        record.save!
+        filename = name+'.'+record['image_type']
+        mg = mogilefs_connect
+        mg.store_content filename, MogileImageStore.config[:class], content
+        filename
+      else
+        record.refcount += 1
+        record.save
+        filename = name+'.'+record['image_type']
+      end
+    end
+  end
+
+  def self.destroy_image(key)
+    name, ext = key.split('.')
+    self.transaction do
+      record = find_by_name name
+      raise MogileImageStore::ImageNotFound unless record
+      if record.refcount > 1
+        record.refcount -= 1
+        record.save
+      else
+        record.delete
+        #delete all size/type of images of given hash name
+        mg = mogilefs_connect
+        mg.each_key(name){|k| mg.delete k }
+      end
     end
   end
 
@@ -65,18 +88,23 @@ class MogileImage < ActiveRecord::Base
     key = "#{name}.#{format}#{suffix}"
     unless mg.list_keys(key, nil, 1)
       # image not exists. generate
-      img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.imgtype}")).shift
+      img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
       img.resize_to_fit! w, h if w > 0 || h > 0
       new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
       img.format = new_format if img.format != new_format
-      mg.store_file key, 'fuga', img.to_blob
+      mg.store_file key, MogileImageStore.config[:class], img.to_blob
     end
     return key
   end
 
   def self.mogilefs_connect
-    return @@mogilefs if @@mogilefs
-    @@mogilefs = MogileFS::MogileFS.new :domain => 'hoge', :hosts => %w[192.168.56.101:7001]
-    return @@mogilefs
+    begin
+      return @@mogilefs
+    rescue
+      @@mogilefs = MogileFS::MogileFS.new({
+        :domain => MogileImageStore.config[:domain],
+        :hosts  => MogileImageStore.config[:hosts],
+      })
+    end
   end
 end

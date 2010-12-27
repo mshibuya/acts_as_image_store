@@ -14,6 +14,12 @@ module MogileImageStore
     base.extend(ClassMethods)
   end
 
+  def self.config
+    MogileImageStore::Engine.config.mogile_fs[Rails.env.to_sym]
+  end
+
+  class ImageNotFound < StandardError; end
+
   IMAGE_FORMATS = ['JPEG', 'GIF', 'PNG']
   TYPE_TO_EXT = { :JPEG => 'jpg', :JPG => 'jpg', :GIF => 'gif', :PNG => 'png'}
   EXT_TO_TYPE = { :jpg => 'JPEG', :gif => 'GIF', :png => 'PNG'}
@@ -26,9 +32,7 @@ module MogileImageStore
       cattr_accessor  :image_columns, :version_message, :deleted_message
       attr_accessor  :image_attributes
 
-      self.image_columns  = columns || ['image']
-      #      self.version_message = options[:msg_updated] || I18n.translate('acts_as_optimistic_lock.errors.messages.updated')
-      #      self.deleted_message = options[:msg_deleted] || I18n.translate('acts_as_optimistic_lock.errors.messages.deleted')
+      self.image_columns  = Array.wrap(columns || 'image').map!{|item| item.to_sym }
 
       class_eval <<-EOV
         include MogileImageStore::InstanceMethods
@@ -37,8 +41,9 @@ module MogileImageStore
         include MogileImageStore::Validators::ValidatesWidth
         include MogileImageStore::Validators::ValidatesHeight
 
-        before_validation :validate_attachments
-        before_save       :save_attachments
+        before_validation :validate_images
+        before_save       :save_images
+        before_destroy    :destroy_images
       EOV
     end
   end
@@ -49,7 +54,7 @@ module MogileImageStore
     #
     # before_validateにフック。
     #
-    def validate_attachments
+    def validate_images
       image_columns.each do |c|
         set_image_attributes c
       end
@@ -57,18 +62,36 @@ module MogileImageStore
     #
     # before_saveにフック。
     #
-    def save_attachments
+    def save_images
       image_columns.each do |c|
-        set_image_attributes(c) if attributes[c] && !@image_attributes[c]
+        set_image_attributes(c) if self[c] && !(@image_attributes[c] rescue nil)
         next unless @image_attributes[c]
         self[c] = ::MogileImage.save_image(@image_attributes[c])
       end
     end
+    #
+    # before_destroyにフック。
+    #
+    def destroy_images
+      image_columns.each do |c|
+        ::MogileImage.destroy_image(self[c]) if self[c]
+      end
+    end
 
-    protected
+    ##
+    # 画像ファイルをセットするためのメソッド。
+    # formからのアップロード時以外に画像を登録する際などに使用。
+    #
+    def set_image_file(column, path)
+      self[column] = ActionDispatch::Http::UploadedFile.new({
+        :tempfile => File.open(path)
+      })
+    end
+
+  protected
 
     def set_image_attributes(column)
-      file = attributes[column]
+      file = self[column]
       return unless file.is_a?(ActionDispatch::Http::UploadedFile)
 
       @image_attributes ||= HashWithIndifferentAccess.new
@@ -99,6 +122,6 @@ end
 ActiveRecord::Base.class_eval { include MogileImageStore }
 
 Dir[File.join("#{File.dirname(__FILE__)}/../config/locales/*.yml")].each do |locale|
-    I18n.load_path.unshift(locale)
+  I18n.load_path.unshift(locale)
 end
 

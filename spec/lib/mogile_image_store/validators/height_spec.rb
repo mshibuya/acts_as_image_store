@@ -5,7 +5,7 @@ describe MogileImageStore do
   context "Validators" do
     context "Height" do
       describe "with <=500 validation" do
-        before{ @image = ImageHeightMaxFive.new }
+        before{ @image = ImageHeightMax500.new }
         it "should accept 445 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
@@ -24,7 +24,7 @@ describe MogileImageStore do
       end
 
       describe "with >=500 validation" do
-        before{ @image = ImageHeightMinFive.new }
+        before{ @image = ImageHeightMin500.new }
         it "should not accept 445 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
@@ -43,7 +43,7 @@ describe MogileImageStore do
       end
 
       describe "with 430-500 validation" do
-        before{ @image = ImageHeightMinFourThirtyMaxFive.new }
+        before{ @image = ImageHeightMin430Max500.new }
         it "should not accept 420 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
