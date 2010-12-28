@@ -3,16 +3,11 @@ require 'mogilefs'
 require 'digest/md5'
 
 class MogileImage < ActiveRecord::Base
-  SHORTEST_HASH_LENGTH = 7
-  def create_unique_hash(name)
-    start = self::SHORTEST_HASH_LENGTH
-    for i in start..31
-      record = self.unscoped.select("1").where('name = ?', name[0,i]).first
-      return name[0,i] if !record
-    end
-    hash
-  end
-
+  ##
+  # 同一ハッシュのレコードが存在するかどうか調べ、
+  # なければレコードを作成すると同時にMogileFSに保存する。
+  # あれば参照カウントを1増やす。
+  #
   def self.save_image(image_attrs)
     content = image_attrs['content']
     name = Digest::MD5.hexdigest(content)
@@ -35,6 +30,10 @@ class MogileImage < ActiveRecord::Base
     end
   end
 
+  ##
+  # 指定されたハッシュ値を持つレコードを削除し、
+  # 同時にMogileFSからリサイズ分も含めその画像を削除する。
+  #
   def self.destroy_image(key)
     name, ext = key.split('.')
     self.transaction do
@@ -57,18 +56,30 @@ class MogileImage < ActiveRecord::Base
     :gif => 'image/gif',
     :png => 'image/png',
   })
+  ##
+  # 指定されたキーを持つ画像のURLをMogileFSより取得して返す。
+  # X-REPROXY-FORヘッダでの出力に使う。
+  #
   def self.fetch_urls(name, format=nil, size='raw')
     content_type, key = get_key(name, format, size)
     urls = mogilefs_connect.get_paths key
     [ content_type, urls ]
   end
 
+  ##
+  # 指定されたキーを持つ画像のデータを取得して返す。
+  #
   def self.fetch_data(name, format=nil, size='raw')
     content_type, key = get_key(name, format, size)
     data = mogilefs_connect.get_file_data key
     [ content_type, data ]
   end
 
+  protected
+
+  ##
+  # パラメータからMogileFSのキーを生成する。
+  #
   def self.get_key(name, format, size)
     record = find_by_name(name)
     raise MogileImageStore::ImageNotFound unless record
@@ -99,6 +110,8 @@ class MogileImage < ActiveRecord::Base
     return [self::CONTENT_TYPES[format.to_sym], key]
   end
 
+  ##
+  # :nodoc:
   def self.mogilefs_connect
     begin
       return @@mogilefs
