@@ -14,11 +14,12 @@ module MogileImageStore
     base.extend(ClassMethods)
   end
 
-  def self.config
+  def self.backend
     MogileImageStore::Engine.config.mogile_fs[Rails.env.to_sym]
   end
 
   class ImageNotFound < StandardError; end
+  class SizeNotAllowed < StandardError; end
 
   IMAGE_FORMATS = ['JPEG', 'GIF', 'PNG']
   TYPE_TO_EXT = { :JPEG => 'jpg', :JPG => 'jpg', :GIF => 'gif', :PNG => 'png'}

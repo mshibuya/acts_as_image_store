@@ -9,21 +9,21 @@ describe MogileImageStore do
   it "should be configured" do
     MogileImageStore::Engine.config.mount_at.should_not be_nil
     MogileImageStore::Engine.config.mogile_fs.should_not be_nil
-    MogileImageStore.config.should_not be_nil
+    MogileImageStore.backend.should_not be_nil
   end
 
   context "MogileFS backend" do
     before(:all) do
       #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.config[:hosts]
-      unless @mogadm.get_domains[MogileImageStore.config[:domain]]
-        @mogadm.create_domain MogileImageStore.config[:domain]
-        @mogadm.create_class  MogileImageStore.config[:domain], MogileImageStore.config[:class], 2 rescue nil
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend[:hosts]
+      unless @mogadm.get_domains[MogileImageStore.backend[:domain]]
+        @mogadm.create_domain MogileImageStore.backend[:domain]
+        @mogadm.create_class  MogileImageStore.backend[:domain], MogileImageStore.backend[:class], 2 rescue nil
       end
     end
 
     before do
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.config[:domain], :hosts  => MogileImageStore.config[:hosts] })
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend[:domain], :hosts  => MogileImageStore.backend[:hosts] })
     end
 
     context "saving" do
@@ -144,10 +144,10 @@ describe MogileImageStore do
 
     after(:all) do
       #cleanup
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.config[:hosts]
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.config[:domain], :hosts  => MogileImageStore.config[:hosts] })
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend[:hosts]
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend[:domain], :hosts  => MogileImageStore.backend[:hosts] })
       @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.config[:domain]
+      @mogadm.delete_domain MogileImageStore.backend[:domain]
     end
 
   end

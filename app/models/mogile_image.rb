@@ -25,7 +25,7 @@ class MogileImage < ActiveRecord::Base
         record.save!
         filename = name+'.'+record['image_type']
         mg = mogilefs_connect
-        mg.store_content filename, MogileImageStore.config[:class], content
+        mg.store_content filename, MogileImageStore.backend[:class], content
         filename
       else
         record.refcount += 1
@@ -94,7 +94,7 @@ class MogileImage < ActiveRecord::Base
       img.resize_to_fit! w, h if w > 0 || h > 0
       new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
       img.format = new_format if img.format != new_format
-      mg.store_content key, MogileImageStore.config[:class], img.to_blob
+      mg.store_content key, MogileImageStore.backend[:class], img.to_blob
     end
     return [self::CONTENT_TYPES[format.to_sym], key]
   end
@@ -104,8 +104,8 @@ class MogileImage < ActiveRecord::Base
       return @@mogilefs
     rescue
       @@mogilefs = MogileFS::MogileFS.new({
-        :domain => MogileImageStore.config[:domain],
-        :hosts  => MogileImageStore.config[:hosts],
+        :domain => MogileImageStore.backend[:domain],
+        :hosts  => MogileImageStore.backend[:hosts],
       })
     end
   end
