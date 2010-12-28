@@ -48,13 +48,14 @@ describe MogileImagesController do
     end
 
     context "Reproxing" do
-      before(:all){ MogileImageStore.backend[:reproxy] = true  }
+      before(:all){ MogileImageStore.backend[:reproxy] = 7.days }
       after (:all){ MogileImageStore.backend[:reproxy] = false }
 
       it "should return url for jpeg image" do
         get 'show', :name => 'bcadded5ee18bfa7c99834f307332b02', :format => 'jpg', :size => 'raw'
         response.should be_success
         response.header['Content-Type'].should == 'image/jpeg'
+        response.header['X-REPROXY-CACHE-FOR'].should == '604800; Content-Type'
         urls = response.header['X-REPROXY-URL'].split(' ')
         url = URI.parse(urls.shift)
         img = ::Magick::Image.from_blob(Net::HTTP.get(url.host, url.path, url.port)).shift

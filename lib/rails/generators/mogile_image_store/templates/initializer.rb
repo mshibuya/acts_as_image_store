@@ -14,13 +14,13 @@ module MogileImageStore
         :hosts   => %w[192.168.56.101:7001],
         :domain  => 'mogile_image_store_test',
         :class   => 'test',
-        :reproxy => true,
+        :reproxy => false,
       },
       :production => {
         :hosts   => %w[192.168.56.101:7001 192.168.56.102:7001],
         :domain  => 'xxx',
         :class   => 'xxx',
-        :reproxy => true,
+        :reproxy => 7.days,
       },
     }
   end
