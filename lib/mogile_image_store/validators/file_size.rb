@@ -8,12 +8,14 @@ module MogileImageStore
           size = record.image_attributes[attribute]['size'] rescue nil
           if options[:max]
             if size > options[:max]
-              record.errors[attribute] << "must be smaller than #{options[:max] / 1000}KB."
+              record.errors[attribute] << (options[:message] ||
+                    I18n.translate('mogile_image_store.errors.messages.size_smaller') % [options[:max]/1024])
             end
           end
           if options[:min]
             if size < options[:min]
-              record.errors[attribute] << "must be larger than #{options[:min] / 1000}KB."
+              record.errors[attribute] << (options[:message] ||
+                    I18n.translate('mogile_image_store.errors.messages.size_larger') % [options[:min]/1024])
             end
           end
         end

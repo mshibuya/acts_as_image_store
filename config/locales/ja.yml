@@ -4,4 +4,10 @@ ja:
       messages:
         must_be_image_type: "は%sファイルでなければなりません。"
         must_be_image:      "はJPEG,GIFまたはPNGファイルでなければなりません。"
+        size_smaller:       "は%dKB以下でなければなりません。"
+        size_larger:        "は%dKB以上でなければなりません。"
+        width_smaller:      "の幅は%dpixel以下でなければなりません。"
+        width_larger:       "の幅は%dpixel以上でなければなりません。"
+        height_smaller:      "の高さは%dpixel以下でなければなりません。"
+        height_larger:       "の高さは%dpixel以上でなければなりません。"
 

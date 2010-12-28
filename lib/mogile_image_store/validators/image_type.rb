@@ -9,12 +9,14 @@ module MogileImageStore
           if options[:type]
             typearr = Array.wrap(options[:type]).map{ |i| ::MogileImageStore::EXT_TO_TYPE[i.to_sym] }
             unless typearr.include?(type)
-              record.errors[attribute] << I18n.translate('mogile_image_store.errors.messages.must_be_image_type') % [options[:type]]
+              record.errors[attribute] << (options[:message] ||
+                              I18n.translate('mogile_image_store.errors.messages.must_be_image_type') % [options[:type]])
             end
           else
             typearr = ::MogileImageStore::IMAGE_FORMATS
             unless typearr.include?(type)
-              record.errors[attribute] << I18n.translate('mogile_image_store.errors.messages.must_be_image')
+              record.errors[attribute] << (options[:message] ||
+                              I18n.translate('mogile_image_store.errors.messages.must_be_image'))
             end
           end
         end

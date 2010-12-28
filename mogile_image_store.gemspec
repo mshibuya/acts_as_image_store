@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2010-12-27}
+  s.date = %q{2010-12-28}
   s.description = %q{Rails plugin for using MogileFS as image storage}
   s.email = %q{shibuya@lavan7.co.jp}
   s.extra_rdoc_files = [
@@ -42,7 +42,6 @@ Gem::Specification.new do |s|
     "lib/rails/generators/mogile_image_store/templates/migration.rb",
     "lib/rails/generators/mogile_image_store/templates/schema.rb",
     "mogile_image_store.gemspec",
-    "spec/app/model/image_test_spec.rb",
     "spec/app/model/mogile_image_spec.rb",
     "spec/dummy/Rakefile",
     "spec/dummy/app/controllers/application_controller.rb",
@@ -67,10 +66,12 @@ Gem::Specification.new do |s|
     "spec/dummy/config/initializers/backtrace_silencers.rb",
     "spec/dummy/config/initializers/inflections.rb",
     "spec/dummy/config/initializers/mime_types.rb",
+    "spec/dummy/config/initializers/mogile_image_store.rb.example",
     "spec/dummy/config/initializers/secret_token.rb",
     "spec/dummy/config/initializers/session_store.rb",
     "spec/dummy/config/locales/en.yml",
     "spec/dummy/config/routes.rb",
+    "spec/dummy/db/migrate/20101224074948_create_image_tests.rb",
     "spec/dummy/public/404.html",
     "spec/dummy/public/422.html",
     "spec/dummy/public/500.html",
@@ -83,6 +84,7 @@ Gem::Specification.new do |s|
     "spec/lib/mogile_image_store/validators/height_spec.rb",
     "spec/lib/mogile_image_store/validators/image_type_spec.rb",
     "spec/lib/mogile_image_store/validators/width_spec.rb",
+    "spec/lib/mogile_image_store_spec.rb",
     "spec/routing_spec.rb",
     "spec/sample.gif",
     "spec/sample.jpg",
@@ -97,7 +99,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Rails plugin for using MogileFS as image storage}
   s.test_files = [
-    "spec/app/model/image_test_spec.rb",
     "spec/app/model/mogile_image_spec.rb",
     "spec/dummy/app/controllers/application_controller.rb",
     "spec/dummy/app/controllers/image_tests_controller.rb",
@@ -147,7 +148,6 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<capybara>, [">= 0"])
-      s.add_development_dependency(%q<webmock>, [">= 0"])
       s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
     else
       s.add_dependency(%q<activerecord>, [">= 3.0.0"])
@@ -163,7 +163,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<capybara>, [">= 0"])
-      s.add_dependency(%q<webmock>, [">= 0"])
       s.add_dependency(%q<ruby-debug19>, [">= 0"])
     end
   else
@@ -180,7 +179,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<capybara>, [">= 0"])
-    s.add_dependency(%q<webmock>, [">= 0"])
     s.add_dependency(%q<ruby-debug19>, [">= 0"])
   end
 end

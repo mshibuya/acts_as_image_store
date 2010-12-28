@@ -97,7 +97,7 @@ module MogileImageStore
       @image_attributes ||= HashWithIndifferentAccess.new
 
       content = file.read
-      img = ::Magick::Image.from_blob(content).shift
+      img = ::Magick::Image.from_blob(content).shift rescue return
       if  ::MogileImageStore::IMAGE_FORMATS.include?(img.format)
         @image_attributes[column] = HashWithIndifferentAccess.new({ 
             'content' => content,

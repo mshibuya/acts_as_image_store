@@ -4,4 +4,10 @@ en:
       messages:
         must_be_image_type: "must be %s file."
         must_be_image:      "must be JPEG, GIF or PNG file."
+        size_smaller:       "must be smaller than %dKB."
+        size_larger:        "must be larger than %dKB."
+        width_smaller:      "'s width must be smaller than %d pixels."
+        width_larger:       "'s width must be larger than %d pixels."
+        height_smaller:     "'s height must be smaller than %d pixels."
+        height_larger:      "'s height must be larger than %d pixels."
 

@@ -8,12 +8,14 @@ module MogileImageStore
           width = record.image_attributes[attribute]['width'] rescue nil
           if options[:max]
             if width > options[:max]
-              record.errors[attribute] << "'s width must be smaller than #{options[:max]} pixels."
+              record.errors[attribute] << (options[:message] ||
+                    I18n.translate('mogile_image_store.errors.messages.width_smaller') % [options[:max]])
             end
           end
           if options[:min]
             if width < options[:min]
-              record.errors[attribute] << "'s width must be larger than #{options[:min]} pixels."
+              record.errors[attribute] << (options[:message] ||
+                    I18n.translate('mogile_image_store.errors.messages.width_larger') % [options[:min]])
             end
           end
         end

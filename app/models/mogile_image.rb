@@ -71,7 +71,7 @@ class MogileImage < ActiveRecord::Base
 
   def self.get_key(name, format, size)
     record = find_by_name(name)
-    raise ActiveRecord::RecordNotFound unless record
+    raise MogileImageStore::ImageNotFound unless record
     if size == 'raw'
       w = h = 0
     else
