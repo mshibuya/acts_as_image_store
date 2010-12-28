@@ -9,7 +9,7 @@ describe MogileImageStore do
         it "should accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_true
         end
@@ -17,7 +17,7 @@ describe MogileImageStore do
         it "should accept gif image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_true
         end
@@ -25,7 +25,7 @@ describe MogileImageStore do
         it "should accept png image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_true
         end
@@ -33,7 +33,7 @@ describe MogileImageStore do
         it "should not accept text file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../spec_helper.rb")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
           })
           @image.valid?.should be_false
         end
@@ -44,7 +44,7 @@ describe MogileImageStore do
         it "should accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_true
         end
@@ -52,7 +52,7 @@ describe MogileImageStore do
         it "should not accept gif image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
         end
@@ -60,7 +60,7 @@ describe MogileImageStore do
         it "should not accept png image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_false
         end
@@ -71,7 +71,7 @@ describe MogileImageStore do
         it "should not accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_false
         end
@@ -79,7 +79,7 @@ describe MogileImageStore do
         it "should accept gif image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_true
         end
@@ -87,7 +87,7 @@ describe MogileImageStore do
         it "should not accept png image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_false
         end
@@ -98,7 +98,7 @@ describe MogileImageStore do
         it "should not accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_false
         end
@@ -106,7 +106,7 @@ describe MogileImageStore do
         it "should not accept gif image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
         end
@@ -114,7 +114,7 @@ describe MogileImageStore do
         it "should accept png image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_true
         end
@@ -125,7 +125,7 @@ describe MogileImageStore do
         it "should accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_true
         end
@@ -133,7 +133,7 @@ describe MogileImageStore do
         it "should not accept gif image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
         end
@@ -141,7 +141,7 @@ describe MogileImageStore do
         it "should accept png image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_true
         end
@@ -152,7 +152,7 @@ describe MogileImageStore do
         it "should accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_true
         end
@@ -160,7 +160,7 @@ describe MogileImageStore do
         it "should not accept text file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../spec_helper.rb")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
           })
           @image.valid?.should be_false
         end
@@ -171,7 +171,7 @@ describe MogileImageStore do
         it "should not accept text file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../spec_helper.rb")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == 'must be JPEG, GIF or PNG file.'
@@ -191,7 +191,7 @@ describe MogileImageStore do
         it "should not accept text file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../spec_helper.rb")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == 'はJPEG,GIFまたはPNGファイルでなければなりません。'
@@ -203,7 +203,7 @@ describe MogileImageStore do
         it "should not accept text file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../spec_helper.rb")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == 'custom'

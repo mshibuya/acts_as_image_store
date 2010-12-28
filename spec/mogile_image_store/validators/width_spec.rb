@@ -9,7 +9,7 @@ describe MogileImageStore do
         it "should accept 460 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_true
         end
@@ -17,7 +17,7 @@ describe MogileImageStore do
         it "should not accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
         end
@@ -28,7 +28,7 @@ describe MogileImageStore do
         it "should not accept 460 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_false
         end
@@ -36,7 +36,7 @@ describe MogileImageStore do
         it "should accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_true
         end
@@ -47,7 +47,7 @@ describe MogileImageStore do
         it "should not accept 460 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_false
         end
@@ -55,7 +55,7 @@ describe MogileImageStore do
         it "should accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_true
         end
@@ -63,7 +63,7 @@ describe MogileImageStore do
         it "should not accept 725 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.jpg")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
           })
           @image.valid?.should be_false
         end
@@ -74,7 +74,7 @@ describe MogileImageStore do
         it "should accept 460 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.png")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
           })
           @image.valid?.should be_true
         end
@@ -82,7 +82,7 @@ describe MogileImageStore do
         it "should not accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
         end
@@ -93,7 +93,7 @@ describe MogileImageStore do
         it "should not accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == '\'s width must be smaller than 500 pixels.'
@@ -113,7 +113,7 @@ describe MogileImageStore do
         it "should not accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == 'の幅は500pixel以下でなければなりません。'
@@ -125,7 +125,7 @@ describe MogileImageStore do
         it "should not accept 513 image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../../sample.gif")
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == 'custom'
