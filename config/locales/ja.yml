@@ -11,3 +11,6 @@ ja:
         height_smaller:      "の高さは%dpixel以下でなければなりません。"
         height_larger:       "の高さは%dpixel以上でなければなりません。"
 
+    form_helper:
+      delete: "削除"
+

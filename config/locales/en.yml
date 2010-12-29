@@ -11,3 +11,5 @@ en:
         height_smaller:     "'s height must be smaller than %d pixels."
         height_larger:      "'s height must be larger than %d pixels."
 
+    form_helper:
+      delete: "delete"

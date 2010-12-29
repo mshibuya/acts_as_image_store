@@ -35,6 +35,8 @@ end
 
 ActiveRecord::Base.class_eval { include MogileImageStore::ActiveRecord }
 ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
+require 'tag_helper'
+require 'form_helper'
 
 Dir[File.join("#{File.dirname(__FILE__)}/../config/locales/*.yml")].each do |locale|
   I18n.load_path.unshift(locale)
