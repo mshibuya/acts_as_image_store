@@ -165,7 +165,7 @@ describe MogileImageStore do
           @image.valid?.should be_false
         end
       end
-      
+
       describe "with error message of image validation" do
         before{ @image = ImageAll.new }
         it "should not accept text file" do
@@ -177,7 +177,7 @@ describe MogileImageStore do
           @image.errors[:image].shift.should be == 'must be JPEG, GIF or PNG file.'
         end
       end
-      
+
       describe "with ja error message of image validation" do
         before do
           @image = ImageAll.new
@@ -197,7 +197,7 @@ describe MogileImageStore do
           @image.errors[:image].shift.should be == 'はJPEG,GIFまたはPNGファイルでなければなりません。'
         end
       end
-      
+
       describe "with custom error message of image validation" do
         before{ @image = ImageAllCustomMsg.new }
         it "should not accept text file" do

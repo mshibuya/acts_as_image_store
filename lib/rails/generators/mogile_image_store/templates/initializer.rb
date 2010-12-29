@@ -2,7 +2,7 @@ module MogileImageStore
   class Engine < Rails::Engine
 
     config.mount_at = '/image/'
-        
+
     config.mogile_fs = {
       :development => {
         :hosts   => %w[192.168.56.101:7001],
