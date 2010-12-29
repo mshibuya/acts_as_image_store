@@ -1,4 +1,5 @@
 class ImageTestsController < ApplicationController
+  image_deletable
   # GET /image_tests
   # GET /image_tests.xml
   def index

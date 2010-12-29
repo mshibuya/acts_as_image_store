@@ -1,5 +1,6 @@
 Dummy::Application.routes.draw do
   resources :image_tests
+  match 'image_tests/:id/image_delete/:column' => 'image_tests#image_delete'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
