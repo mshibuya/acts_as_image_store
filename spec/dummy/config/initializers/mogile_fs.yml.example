@@ -1,0 +1,17 @@
+development:
+  hosts:   [192.168.56.101:7001]
+  domain:  dev
+  class:   image
+  reproxy: false
+test:
+  hosts:   [192.168.56.101:7001]
+  domain:  mogile_image_store_test
+  class:   test
+  reproxy: false
+production:
+  hosts:   [192.168.56.101:7001, 192.168.56.102:7001]
+  domain:  xxx
+  class:   xxx
+  reproxy: true
+  cache:   86400
+

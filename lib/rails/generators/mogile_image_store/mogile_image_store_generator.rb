@@ -41,6 +41,7 @@ class MogileImageStoreGenerator < Rails::Generators::Base
 
   def copy_initializer_file
     copy_file 'initializer.rb', 'config/initializers/mogile_image_store.rb'
+    copy_file 'mogile_fs.yml', 'config/initializers/mogile_fs.yml'
   end
 
 end

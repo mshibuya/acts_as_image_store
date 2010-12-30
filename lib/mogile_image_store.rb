@@ -9,7 +9,11 @@ module MogileImageStore
   require 'mogile_image_store/engine' if defined?(Rails)
 
   def self.backend
-    MogileImageStore::Engine.config.mogile_fs[Rails.env.to_sym]
+    MogileImageStore::Engine.config.mogile_fs[Rails.env]
+  end
+
+  def self.options
+    MogileImageStore::Engine.config.options
   end
 
   class ImageNotFound < StandardError; end

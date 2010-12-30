@@ -10,27 +10,27 @@ describe ImageTestsController do
   context "With MogileFS Backend" do
     before(:all) do
       #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend[:hosts]
-      unless @mogadm.get_domains[MogileImageStore.backend[:domain]]
-        @mogadm.create_domain MogileImageStore.backend[:domain]
-        @mogadm.create_class  MogileImageStore.backend[:domain], MogileImageStore.backend[:class], 2 rescue nil
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
+      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
+        @mogadm.create_domain MogileImageStore.backend['domain']
+        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
       end
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend[:domain], :hosts  => MogileImageStore.backend[:hosts] })
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
       @image_test = Factory.build(:image_test)
       @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
       @image_test.save
     end
     before do
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend[:domain], :hosts  => MogileImageStore.backend[:hosts] })
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
     end
     after(:all) do
       #cleanup
       ImageTest.delete_all
       MogileImage.delete_all
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend[:hosts]
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend[:domain], :hosts  => MogileImageStore.backend[:hosts] })
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
       @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.backend[:domain]
+      @mogadm.delete_domain MogileImageStore.backend['domain']
     end
 
     it "should return status 404 when requested non-existent column" do

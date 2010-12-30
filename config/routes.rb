@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       :name =>/[0-9a-f]{0,32}/,
       :format =>/(jpg|gif|png)/,
     }
+    match ':controller/:id/image_delete/:column', :to => 'image_tests#image_delete'
   rescue NoMethodError
     #do nothing
   end
