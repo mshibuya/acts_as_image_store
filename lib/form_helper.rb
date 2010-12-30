@@ -10,12 +10,13 @@ module ActionView
     class FormBuilder
       include TagHelper
       def image_field(method, options = {})
+        options = options.symbolize_keys
         output = ''.html_safe
         if @object[method]
           # 画像を表示
           width  = options.delete(:w) || MogileImageStore.options[:field_w]
           height = options.delete(:h) || MogileImageStore.options[:field_h]
-          output += image(@object[method], options.update({:w => width, :h => height}))
+          output += image(@object[method], options.merge({:w => width, :h => height}))
           # 画像削除用のリンク表示
           delete_link_enabled = options.delete(:delete_link)
           delete_link_enabled = true if delete_link_enabled.nil?

@@ -7,6 +7,7 @@
 module ActionView::Helpers::TagHelper
   def image(key, options = {})
     return if !key || key.empty?
+    options = options.symbolize_keys
     width  = options.delete(:w) || 0
     height = options.delete(:h) || 0
     if width == 0 && height == 0
@@ -16,7 +17,7 @@ module ActionView::Helpers::TagHelper
     end
     if (format = options.delete(:format)) != nil
       name, ext = key.split('.')
-      key = name + '.' + format
+      key = name + '.' + format.to_s
     end
     options[:src] = MogileImageStore::Engine.config.mount_at + size + '/' + key
     tag("img", options)

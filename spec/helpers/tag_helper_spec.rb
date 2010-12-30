@@ -10,6 +10,14 @@ describe ActionView::Helpers::TagHelper do
     image('01234567890abcdef0123456789abcdef.jpg', :w => 80, :h => 80).should == '<img src="/image/80x80/01234567890abcdef0123456789abcdef.jpg" />'
   end
 
+  it "should show image tag with string-keyed size" do
+    image('01234567890abcdef0123456789abcdef.jpg', 'w' => 80, 'h' => 80).should == '<img src="/image/80x80/01234567890abcdef0123456789abcdef.jpg" />'
+  end
+
+  it "should show image tag with size and format" do
+    image('01234567890abcdef0123456789abcdef.jpg', :w => 80, :h => 80, :format => :png).should == '<img src="/image/80x80/01234567890abcdef0123456789abcdef.png" />'
+  end
+
   it "should show image tag with size and alt" do
     image('01234567890abcdef0123456789abcdef.jpg', :w => 80, :h => 80, :alt => 'alt text').should == 
       '<img alt="alt text" src="/image/80x80/01234567890abcdef0123456789abcdef.jpg" />'

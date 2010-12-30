@@ -19,7 +19,7 @@ module MogileImageStore
     #
     module ClassMethods
       def has_images(columns=nil, options = {})
-        cattr_accessor  :image_columns, :version_message, :deleted_message
+        cattr_accessor  :image_columns
         attr_accessor  :image_attributes
 
         self.image_columns  = Array.wrap(columns || 'image').map!{|item| item.to_sym }
