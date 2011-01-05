@@ -76,61 +76,74 @@ class MogileImage < ActiveRecord::Base
     # 指定されたキーを持つ画像のURLをMogileFSより取得して返す。
     # X-REPROXY-FORヘッダでの出力に使う。
     #
-    def fetch_urls(name, format=nil, size='raw')
-      content_type, key = get_key(name, format, size)
-      urls = mogilefs_connect.get_paths key
-      [ content_type, urls ]
+    def fetch_urls(name, format, size='raw')
+      [self::CONTENT_TYPES[format.to_sym],
+        retrieve_image(name, format, size) {|mg,key| mg.get_paths key }]
     end
 
     ##
     # 指定されたキーを持つ画像のデータを取得して返す。
     #
-    def fetch_data(name, format=nil, size='raw')
-      content_type, key = get_key(name, format, size)
-      data = mogilefs_connect.get_file_data key
-      [ content_type, data ]
+    def fetch_data(name, format, size='raw')
+      [self::CONTENT_TYPES[format.to_sym],
+        retrieve_image(name, format, size) {|mg,key| mg.get_file_data key }]
     end
 
     protected
 
     ##
-    # パラメータからMogileFSのキーを生成する。
+    # パラメータからMogileFSのキーを生成し、引数で受け取ったブロックに渡す
     #
-    def get_key(name, format, size)
+    def retrieve_image(name, format, size, &block)
       record = find_by_name(name)
       raise MogileImageStore::ImageNotFound unless record
-      if size == 'raw'
-        w = h = 0
+
+      if resize_needed? record, format, size
+        key = "#{name}.#{format}/#{size}"
       else
-        w, h, cmd = size.scan(/(\d+)x(\d+)([a-z]*\d*)/).shift
-        w, h = [w, h].map{|i| i.to_i}
-      end
-      if (w == 0 || w > record.width) && (h == 0 || h > record.height)
         #needs no resizing
-        suffix = ""
-      else
-        suffix = "/#{w}x#{h}#{cmd}"
+        key = "#{name}.#{format}"
       end
-      format = record.image_type unless format
-      key = "#{name}.#{format}#{suffix}"
       mg = mogilefs_connect
       begin
-        mg.size(key)
-      rescue
-        # image not exists. generate
+        return block.call(mg, key)
+      rescue MogileFS::Backend::UnknownKeyError
+        # 画像がまだ生成されていないので生成する
         begin
           img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
-        rescue
+        rescue MogileFS::Backend::UnknownKeyError
           raise MogileImageStore::ImageNotFound
         end
-        img.resize_to_fit! w, h if w > 0 || h > 0
-        new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
-        img.format = new_format if img.format != new_format
-        mg.store_content key, MogileImageStore.backend['class'], img.to_blob
+        mg.store_content key, MogileImageStore.backend['class'], resize_image(img, format, size).to_blob
       end
-      return [self::CONTENT_TYPES[format.to_sym], key]
+      return block.call(mg, key)
     end
 
+    ##
+    # 画像をリサイズ・変換
+    #
+    def resize_image(img, format, size)
+      w, h, method, n = size.scan(/(\d+)x(\d+)([a-z]*)(\d*)/).shift
+      w, h, n = [w, h, n].map {|i| i.to_i if i }
+      case method
+      when 'fill'
+        img.resize_to_fit! w, h
+        background = ::Magick::Image.new(w, h) { self.background_color = "black" }
+        img = background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)
+      when 'frame'
+        n ||= 1
+        img.resize_to_fit! w-n*2, h-n*2
+        background = ::Magick::Image.new(w, h) { self.background_color = "black" }
+        img = background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)
+      else
+        if size != 'raw' && (img.columns > w || img.rows > h)
+          img.resize_to_fit! w, h
+        end
+      end
+      new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
+      img.format = new_format if img.format != new_format
+      img
+    end
     ##
     # MogileFSキーからURLを復元する
     #
@@ -138,6 +151,25 @@ class MogileImage < ActiveRecord::Base
       name, format, size = key.scan(/([0-9a-f]{32})\.(jpg|gif|png)(?:\/(\d+x\d+[a-z]*\d*))?/).shift
       size ||= 'raw'
       MogileImageStore::Engine.config.mount_at + size + '/' + name + '.' + format if name && format
+    end
+
+    ##
+    # 画像リサイズが必要かどうか判定
+    #
+    def resize_needed?(record, format, size)
+      return false if size == 'raw'
+
+      # 加工が指定されているなら必要
+      w, h, method = size.scan(/(\d+)x(\d+)([a-z]*\d*)/).shift
+      return true if method && !method.empty?
+
+      # オリジナルの画像サイズと比較
+      w, h =  [w, h].map{|i| i.to_i}
+      if w > record.width && h > record.height
+        false
+      else
+        true
+      end
     end
 
     ##

@@ -60,12 +60,12 @@ describe MogileImageStore do
     context "retrieval" do
       it "should return 2 urls" do
         sleep(3) # wait until replication becomes ready
-        MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02').pop.should have(2).items
-        MogileImage.fetch_urls('60de57a8f5cd0a10b296b1f553cb41a9').pop.should have(2).items
+        MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg').pop.should have(2).items
+        MogileImage.fetch_urls('60de57a8f5cd0a10b296b1f553cb41a9', 'png').pop.should have(2).items
       end
 
       it "should return raw jpeg image" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02')
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -75,7 +75,7 @@ describe MogileImageStore do
       end
 
       it "should return raw png image" do
-        content_type, data = MogileImage.fetch_data('60de57a8f5cd0a10b296b1f553cb41a9')
+        content_type, data = MogileImage.fetch_data('60de57a8f5cd0a10b296b1f553cb41a9', 'png')
         content_type.should == 'image/png'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'PNG'
