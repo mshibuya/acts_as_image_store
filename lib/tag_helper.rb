@@ -19,7 +19,12 @@ module ActionView::Helpers::TagHelper
       name, ext = key.split('.')
       key = name + '.' + format.to_s
     end
-    options[:src] = MogileImageStore::Engine.config.mount_at + size + '/' + key
+    path = MogileImageStore::Engine.config.mount_at + size + '/' + key
+    if MogileImageStore.backend['imghost']
+      options[:src] = 'http://' + MogileImageStore.backend['imghost'] + path
+    else
+      options[:src] = path
+    end
     tag("img", options)
   end
 end

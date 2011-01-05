@@ -47,6 +47,11 @@ describe MogileImagesController do
       response.status.should == 404
     end
 
+    it "should respond 206 if reproxying is disabled" do
+      post 'flush'
+      response.status.should == 206
+    end
+
     context "Reproxing" do
       before(:all) do
         MogileImageStore.backend['reproxy'] = true
@@ -65,6 +70,21 @@ describe MogileImagesController do
         img.format.should == 'JPEG'
         img.columns.should == 725
         img.rows.should == 544
+      end
+
+      it "should respond 401 with authorization failure" do
+        request.env[MogileImageStore::AUTH_HEADER_ENV] = 'abc'
+        request.env['RAW_POST_DATA'] = '/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg'
+        post 'flush'
+        response.status.should == 401
+      end
+
+      it "should respond reproxy cache clear header" do
+        request.env[MogileImageStore::AUTH_HEADER_ENV] = MogileImageStore.auth_key('/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg')
+        request.env['RAW_POST_DATA'] = '/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg'
+        post 'flush'
+        response.should be_success
+        response.header['X-REPROXY-CACHE-CLEAR'].should == '/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg'
       end
     end
   end
