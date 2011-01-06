@@ -98,6 +98,9 @@ class MogileImage < ActiveRecord::Base
       record = find_by_name(name)
       raise MogileImageStore::ImageNotFound unless record
 
+      # check whether size is allowd
+      raise MogileImageStore::SizeNotAllowed unless size_allowed?(size)
+
       if resize_needed? record, format, size
         key = "#{name}.#{format}/#{size}"
       else
@@ -166,6 +169,20 @@ class MogileImage < ActiveRecord::Base
       else
         true
       end
+    end
+
+    ##
+    # 画像サイズが許可されているかどうか判定
+    #
+    def size_allowed?(size)
+      MogileImageStore.options[:allowed_sizes].each do |item|
+        if item.is_a? Regexp
+          return true if size.match(item)
+        else
+          return true if size == item
+        end
+      end
+      return false
     end
 
     ##

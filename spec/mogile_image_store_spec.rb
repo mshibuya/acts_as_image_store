@@ -175,6 +175,12 @@ describe MogileImageStore do
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
            'bcadded5ee18bfa7c99834f307332b02.png']
       end
+
+      it "should raise error when size is not allowed" do
+        lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '83x60') }.should raise_error MogileImageStore::SizeNotAllowed
+        lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x60fill') }.should raise_error MogileImageStore::SizeNotAllowed
+        lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x604') }.should raise_error MogileImageStore::SizeNotAllowed
+      end
     end
 
     context "deletion" do

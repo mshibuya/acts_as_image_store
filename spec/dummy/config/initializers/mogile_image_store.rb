@@ -21,6 +21,7 @@ module MogileImageStore
         /^\d+0x\d+0$/,
         # resizing with fill
         '40x40fill1',
+        /^80x80fill\d*/,
       ]
     }
   end
