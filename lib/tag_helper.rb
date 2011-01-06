@@ -6,7 +6,7 @@
 #
 module ActionView::Helpers::TagHelper
   def image(key, options = {})
-    return if !key || key.empty?
+    return if !key || !key.respond_to?(:empty?) || key.empty?
     options = options.symbolize_keys
     width  = options.delete(:w) || 0
     height = options.delete(:h) || 0

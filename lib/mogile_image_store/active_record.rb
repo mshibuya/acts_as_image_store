@@ -49,6 +49,7 @@ module MogileImageStore
         image_columns.each do |c|
           set_image_attributes c
         end
+        false if errors.size > 0
       end
       #
       # before_saveにフック。
@@ -86,6 +87,13 @@ module MogileImageStore
       def set_image_attributes(column)
         file = self[column]
         return unless file.is_a?(ActionDispatch::Http::UploadedFile)
+
+        if file.size > ::MogileImageStore::options[:maxsize]
+          errors[column] << (
+            I18n.translate('mogile_image_store.errors.messages.size_smaller')
+            % [::MogileImageStore::options[:maxsize]/1024]
+          )
+        end
 
         content = file.read
         img = ::Magick::Image.from_blob(content).shift rescue return

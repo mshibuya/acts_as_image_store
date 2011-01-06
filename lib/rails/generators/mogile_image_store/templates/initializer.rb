@@ -9,9 +9,17 @@ module MogileImageStore
       # default image size for FormBuilder#image_field
       :field_w => 80,
       :field_h => 80,
+      # global maximum uploadable filesize in byte
+      :maxsize => 5.megabytes,
       # allowed resizes for image
       :allowed_sizes => [
-        '80x80', 'raw',
+        # no resizing
+        'raw',
+        # resizing
+        '80x80',
+        '88x31',
+        # resizing with fill
+        '40x40fill1',
       ]
     }
   end

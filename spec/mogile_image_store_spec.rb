@@ -12,6 +12,18 @@ describe MogileImageStore do
     MogileImageStore.backend.should_not be_nil
   end
 
+  it "should not accept file larger than maxsize" do
+    image_test = ImageTest.new
+    t = Tempfile.new('mogileimagetest')
+    for i in 1..(1.megabytes)
+      t << 'abcde'
+    end
+    t << 'f'
+    t.size.should == 5.megabytes+1
+    image_test.set_image_file :image, t
+    image_test.valid?.should be_false
+  end
+
   context "MogileFS backend" do
     before(:all) do
       #prepare mogilefs

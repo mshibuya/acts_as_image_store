@@ -12,7 +12,7 @@ module ActionView
       def image_field(method, options = {})
         options = options.symbolize_keys
         output = ''.html_safe
-        if @object[method]
+        if @object[method].is_a?(String) && @object.persisted?
           # 画像を表示
           width  = options.delete(:w) || MogileImageStore.options[:field_w]
           height = options.delete(:h) || MogileImageStore.options[:field_h]
