@@ -127,11 +127,7 @@ class MogileImage < ActiveRecord::Base
       w, h, n = [w, h, n].map {|i| i.to_i if i }
       case method
       when 'fill'
-        img.resize_to_fit! w, h
-        background = ::Magick::Image.new(w, h) { self.background_color = "black" }
-        img = background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)
-      when 'frame'
-        n ||= 1
+        n ||= 0
         img.resize_to_fit! w-n*2, h-n*2
         background = ::Magick::Image.new(w, h) { self.background_color = "black" }
         img = background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)

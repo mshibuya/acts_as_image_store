@@ -118,6 +118,51 @@ describe MogileImageStore do
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
            'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
       end
+
+      it "should return filled jpeg image" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill')
+        content_type.should == 'image/jpeg'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'JPEG'
+        img.columns.should == 80
+        img.rows.should == 80
+        dark = ::Magick::Pixel.from_color('#070707')
+        img.pixel_color(40, 0).should < dark
+        img.pixel_color(40,79).should < dark
+        img.pixel_color( 0,40).should > dark
+        img.pixel_color(79,40).should > dark
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
+           'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
+           'bcadded5ee18bfa7c99834f307332b02.png']
+      end
+ 
+      it "should return filled jpeg image" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill2')
+        content_type.should == 'image/jpeg'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'JPEG'
+        img.columns.should == 80
+        img.rows.should == 80
+        dark = ::Magick::Pixel.from_color('#070707')
+        img.pixel_color(40, 0).should < dark
+        img.pixel_color(40,79).should < dark
+        img.pixel_color( 0,40).should < dark
+        img.pixel_color(79,40).should < dark
+        img.pixel_color(40, 2).should < dark
+        img.pixel_color(40,77).should < dark
+        img.pixel_color( 2,40).should > dark
+        img.pixel_color(77,40).should > dark
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
+           'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.png']
+      end
     end
 
     context "deletion" do
@@ -128,8 +173,12 @@ describe MogileImageStore do
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
         @mg.list_keys('').shift.sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
+           'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.png']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
       end
