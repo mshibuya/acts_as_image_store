@@ -18,7 +18,7 @@ module MogileImageStore
     # ActiveRecord::Baseにextendされるモジュール
     #
     module ClassMethods
-      def has_images(columns=nil, options = {})
+      def has_images(columns=nil)
         cattr_accessor  :image_columns
         attr_accessor  :image_attributes
 

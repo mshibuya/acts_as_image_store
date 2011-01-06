@@ -11,7 +11,7 @@ en:
         height_smaller:     "'s height must be smaller than %d pixels."
         height_larger:      "'s height must be larger than %d pixels."
       flashes:
-        not_deleted:        "Failed to delete Image."
+        delete_failed:      "Failed to delete Image."
 
     form_helper:
       delete: "delete"

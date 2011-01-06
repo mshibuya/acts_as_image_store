@@ -24,6 +24,12 @@ describe ActionView::Helpers::FormHelper do
       end
     end
 
+    it "should show file field with image without delete link" do
+      form_for(@image_test) do |f|
+        f.image_field(:image, :deletable => false).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/01234567890abcdef0123456789abcdef.jpg" /><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+      end
+    end
+
     it "should show file field with image and delete link with width and height" do
       form_for(@image_test) do |f|
         f.image_field(:image, :w => 80, :h => 80).should ==

@@ -1,0 +1,27 @@
+<h1>Listing multiples</h1>
+
+<table>
+  <tr>
+    <th>Title</th>
+    <th>Banner1</th>
+    <th>Banner2</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @multiples.each do |multiple| %>
+  <tr>
+    <td><%= multiple.title %></td>
+    <td><%= multiple.banner1 %></td>
+    <td><%= multiple.banner2 %></td>
+    <td><%= link_to 'Show', multiple %></td>
+    <td><%= link_to 'Edit', edit_multiple_path(multiple) %></td>
+    <td><%= link_to 'Destroy', multiple, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Multiple', new_multiple_path %>

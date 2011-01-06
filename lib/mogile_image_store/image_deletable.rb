@@ -34,24 +34,25 @@ module MogileImageStore
     #
     module InstanceMethods
       def image_delete
-        deleted = false
-        image_model.transaction do
-          @record = image_model.lock(true).find(params[:id])
-          column = params[:column].to_sym
-          raise MogileImageStore::ColumnNotFound unless @record.image_columns.include?(column)
-          key = @record[column]
-          raise MogileImageStore::ImageNotFound if !key || key.empty?
-          @record[column] = ''
-          if @record.save
-            MogileImage.destroy_image(key)
-            deleted = true
+        begin
+          image_model.transaction do
+            @record = image_model.lock(true).find(params[:id])
+            column = params[:column].to_sym
+            raise MogileImageStore::ColumnNotFound unless @record.image_columns.include?(column)
+            key = @record[column]
+            raise MogileImageStore::ImageNotFound if !key || key.empty?
+            @record[column] = ''
+            if @record.save!
+              MogileImage.destroy_image(key)
+              deleted = true
+            end
           end
+        rescue ::ActiveRecord::RecordInvalid, ::MogileImageStore::ImageNotFound
+          redirect_to({ :action => 'edit', :id => @record },
+                      :alert => I18n.translate('mogile_image_store.errors.flashes.delete_failed'))
+          return
         end
-        if deleted
-          redirect_to @record
-        else
-          redirect_to ['edit', @record], :notice => I18n.translate('mogile_image_store.errors.flashes.not_deleted')
-        end
+        redirect_to @record
       end
     end
   end
