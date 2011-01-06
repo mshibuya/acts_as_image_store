@@ -19,6 +19,8 @@ module MogileImageStore
       def image_deletable(model=nil)
         cattr_accessor  :image_model
 
+        model = eval(model.to_s) unless model.is_a? ::ActiveRecord::Base
+
         self.image_model  = model || eval(self.name[/(.+)Controller/,1].singularize)
 
         class_eval <<-EOV
@@ -32,17 +34,24 @@ module MogileImageStore
     #
     module InstanceMethods
       def image_delete
+        deleted = false
         image_model.transaction do
           @record = image_model.lock(true).find(params[:id])
           column = params[:column].to_sym
           raise MogileImageStore::ColumnNotFound unless @record.image_columns.include?(column)
           key = @record[column]
           raise MogileImageStore::ImageNotFound if !key || key.empty?
-          MogileImage.destroy_image(key)
           @record[column] = ''
-          @record.save
+          if @record.save
+            MogileImage.destroy_image(key)
+            deleted = true
+          end
         end
-        redirect_to @record
+        if deleted
+          redirect_to @record
+        else
+          redirect_to ['edit', @record], :notice => I18n.translate('mogile_image_store.errors.flashes.not_deleted')
+        end
       end
     end
   end

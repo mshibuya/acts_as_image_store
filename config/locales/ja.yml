@@ -10,6 +10,9 @@ ja:
         width_larger:       "の幅は%dpixel以上でなければなりません。"
         height_smaller:      "の高さは%dpixel以下でなければなりません。"
         height_larger:       "の高さは%dpixel以上でなければなりません。"
+      flashes:
+        not_deleted:         "画像の削除に失敗しました。"
+
 
     form_helper:
       delete: "削除"

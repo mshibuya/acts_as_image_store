@@ -22,7 +22,8 @@ module ActionView
           delete_link_enabled = true if delete_link_enabled.nil?
           output += @template.link_to(
             (I18n.translate!('mogile_image_store.form_helper.delete') rescue 'delete'),
-            { :action => 'image_delete',
+            { :controller => @template.controller.controller_name,
+              :action => 'image_delete',
               :id => @object,
               :column => method, }
           )

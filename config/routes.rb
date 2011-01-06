@@ -11,7 +11,7 @@ Rails.application.routes.draw do
       match "#{mount_at}flush", :to => "mogile_images#flush", :via => 'post'
     end
 
-    match ':controller/:id/image_delete/:column', :to => 'image_tests#image_delete'
+    match ':controller/:id/image_delete/:column', :action => 'image_delete'
   rescue NoMethodError
     #do nothing
   end
