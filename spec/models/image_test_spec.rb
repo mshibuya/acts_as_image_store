@@ -174,6 +174,25 @@ describe ImageTest do
       end
     end
 
+    context "overwriting" do
+      it "should delete old image when overwritten" do
+        @image_test = ImageTest.find_by_image('60de57a8f5cd0a10b296b1f553cb41a9.png')
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.gif"
+        lambda{ @image_test.save }.should_not raise_error
+        @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
+        @mg.list_keys('').shift.sort.should ==
+          ['5d1e43dfd47173ae1420f061111e0776.gif',
+           'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.png']
+        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
+        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
+        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
+      end
+    end
+
     context "deletion" do
       before do
         @image_test = ImageTest.first
@@ -182,21 +201,23 @@ describe ImageTest do
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
         @mg.list_keys('').shift.sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
+          ['5d1e43dfd47173ae1420f061111e0776.gif',
            'bcadded5ee18bfa7c99834f307332b02.jpg',
            'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
            'bcadded5ee18bfa7c99834f307332b02.png']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
+        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
+        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
 
       it "should delete image data when deleting image" do
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').shift.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
+        @mg.list_keys('').shift.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
+        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
+        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
     end
 

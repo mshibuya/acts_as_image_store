@@ -2,49 +2,60 @@
 require 'spec_helper'
 
 describe ActionView::Helpers::FormHelper do
-  before do
-    @image_test = Factory.build(:image_test)
-  end
-
-  it "should show file field" do
-    form_for(@image_test) do |f|
-      f.image_field(:image).should == '<input id="image_test_image" name="image_test[image]" type="file" />'
+  context "MogileFS backend" do
+    before(:all) do
+      #prepare mogilefs
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
+      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
+        @mogadm.create_domain MogileImageStore.backend['domain']
+        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
+      end
     end
-  end
 
-  describe "when image exists" do
+    after(:all) do
+      #cleanup
+      MogileImage.destroy_all
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+      @mg.each_key('') {|k| @mg.delete k }
+      @mogadm.delete_domain MogileImageStore.backend['domain']
+    end
+
     before do
-      @image_test.image = '01234567890abcdef0123456789abcdef.jpg'
-      @image_test.save
+      @image_test = Factory.build(:image_test)
     end
 
-    it "should show file field with image and delete link" do
+    it "should show file field" do
       form_for(@image_test) do |f|
-        f.image_field(:image).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/01234567890abcdef0123456789abcdef.jpg" /><a href="/test/'+@image_test.id.to_s+'/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+        f.image_field(:image).should == '<input id="image_test_image" name="image_test[image]" type="file" />'
       end
     end
 
-    it "should show file field with image without delete link" do
-      form_for(@image_test) do |f|
-        f.image_field(:image, :deletable => false).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/01234567890abcdef0123456789abcdef.jpg" /><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+    describe "when image exists" do
+      before do
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.png"
+        @image_test.save
       end
-    end
 
-    it "should show file field with image and delete link with width and height" do
-      form_for(@image_test) do |f|
-        f.image_field(:image, :w => 80, :h => 80).should ==
-          '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/01234567890abcdef0123456789abcdef.jpg" /><a href="/test/' +
-          @image_test.id.to_s +
-          '/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+      it "should show file field with image and delete link" do
+        form_for(@image_test) do |f|
+          f.image_field(:image).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/'+@image_test.id.to_s+'/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+        end
       end
-    end
 
-    it "should show file field with image and delete link with stringfied width and height" do
-      form_for(@image_test) do |f|
-        f.image_field(:image, 'w' => 80, 'h' => 80).should ==
-          '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/01234567890abcdef0123456789abcdef.jpg" /><a href="/test/' +
-          @image_test.id.to_s +
-          '/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+      it "should show file field with image without delete link" do
+        form_for(@image_test) do |f|
+          f.image_field(:image, :deletable => false).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png" /><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+        end
+      end
+
+      it "should show file field with image and delete link with width and height" do
+        form_for(@image_test) do |f|
+          f.image_field(:image, :w => 100, :h => 100).should ==
+            '<img src="http://'+MogileImageStore.backend['imghost']+'/image/100x100/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/' +
+            @image_test.id.to_s +
+            '/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+        end
       end
     end
   end

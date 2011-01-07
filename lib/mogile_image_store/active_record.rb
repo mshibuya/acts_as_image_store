@@ -59,7 +59,11 @@ module MogileImageStore
         image_columns.each do |c|
           next if !self[c]
           set_image_attributes(c) unless @image_attributes[c]
-          next unless @image_attributes[c]
+          if !@image_attributes[c]
+            self[c] = ''
+            next
+          end
+          ::MogileImage.destroy_image(self.send(c.to_s+'_was')) if self.send(c.to_s+'_was')
           self[c] = ::MogileImage.save_image(@image_attributes[c])
         end
       end
