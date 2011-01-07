@@ -41,7 +41,7 @@ module MogileImageStore
             raise MogileImageStore::ColumnNotFound unless @record.image_columns.include?(column)
             key = @record[column]
             raise MogileImageStore::ImageNotFound if !key || key.empty?
-            @record[column] = ''
+            @record[column] = nil
             if @record.save!
               MogileImage.destroy_image(key)
               deleted = true

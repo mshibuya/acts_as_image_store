@@ -45,7 +45,7 @@ describe ImageTestsController do
       response.header['Location'].should == "http://test.host/image_tests/#{@image_test.id}"
       MogileImage.count.should == 0
       @mg.list_keys('').should be_nil
-      @image_test.reload[:image].should be_empty
+      @image_test.reload[:image].should be_nil
     end
 
     it "should show alert on failure" do

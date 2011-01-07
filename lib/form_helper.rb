@@ -13,7 +13,7 @@ module ActionView
         options = options.symbolize_keys
         output = ''.html_safe
         deletable = options.delete(:deletable)
-        if @object[method].is_a?(String) && @object.persisted?
+        if @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
           # 画像を表示
           width  = options.delete(:w) || MogileImageStore.options[:field_w]
           height = options.delete(:h) || MogileImageStore.options[:field_h]

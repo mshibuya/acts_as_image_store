@@ -61,10 +61,13 @@ module MogileImageStore
           set_image_attributes(c) unless @image_attributes[c]
           if !@image_attributes[c]
             # バリデーションなしで画像ではないファイルが指定された場合はクリアしておく
-            self[c] = '' if self[c].is_a? ActionDispatch::Http::UploadedFile
+            self[c] = nil if self[c].is_a? ActionDispatch::Http::UploadedFile
             next
           end
-          ::MogileImage.destroy_image(self.send(c.to_s+'_was')) if self.send(c.to_s+'_was')
+          prev_image = self.send(c.to_s+'_was')
+          if prev_image.is_a?(String) && !prev_image.empty?
+            ::MogileImage.destroy_image(prev_image)
+          end
           self[c] = ::MogileImage.save_image(@image_attributes[c])
         end
       end

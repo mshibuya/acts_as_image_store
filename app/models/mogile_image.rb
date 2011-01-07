@@ -43,6 +43,7 @@ class MogileImage < ActiveRecord::Base
     # 同時にMogileFSからリサイズ分も含めその画像を削除する。
     #
     def destroy_image(key)
+      return unless key.is_a?(String) && !key.empty?
       name, ext = key.split('.')
       self.transaction do
         record = find_by_name name
