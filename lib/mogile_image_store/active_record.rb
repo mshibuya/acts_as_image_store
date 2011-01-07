@@ -60,7 +60,8 @@ module MogileImageStore
           next if !self[c]
           set_image_attributes(c) unless @image_attributes[c]
           if !@image_attributes[c]
-            self[c] = ''
+            # バリデーションなしで画像ではないファイルが指定された場合はクリアしておく
+            self[c] = '' if self[c].is_a? ActionDispatch::Http::UploadedFile
             next
           end
           ::MogileImage.destroy_image(self.send(c.to_s+'_was')) if self.send(c.to_s+'_was')
@@ -92,6 +93,7 @@ module MogileImageStore
         file = self[column]
         return unless file.is_a?(ActionDispatch::Http::UploadedFile)
 
+        # ファイルサイズの判定
         if file.size > ::MogileImageStore::options[:maxsize]
           errors[column] << (
             I18n.translate('mogile_image_store.errors.messages.size_smaller')
@@ -100,16 +102,28 @@ module MogileImageStore
         end
 
         content = file.read
-        img = ::Magick::Image.from_blob(content).shift rescue return
-        if  ::MogileImageStore::IMAGE_FORMATS.include?(img.format)
-          @image_attributes[column] = HashWithIndifferentAccess.new({
-            'content' => content,
-            'size' => file.size,
-            'type' => img.format,
-            'width' => img.columns,
-            'height' => img.rows,
-          })
+        begin
+          img = ::Magick::Image.from_blob(content).shift
+        rescue
+          # 画像ではない場合
+          errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_image')
+          return
         end
+
+        unless ::MogileImageStore::IMAGE_FORMATS.include?(img.format)
+          # 対応フォーマットではない場合
+          errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_valid_type')
+          return
+        end
+
+        # メタデータを設定
+        @image_attributes[column] = HashWithIndifferentAccess.new({
+          'content' => content,
+          'size' => file.size,
+          'type' => img.format,
+          'width' => img.columns,
+          'height' => img.rows,
+        })
       end
     end
   end

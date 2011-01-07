@@ -2,7 +2,7 @@
 
 class MogileImagesController < ApplicationController
   protect_from_forgery :except => [:flush]
-  
+
   rescue_from MogileImageStore::ImageNotFound, :with => :error_404
   rescue_from MogileImageStore::SizeNotAllowed, :with => :error_404
 

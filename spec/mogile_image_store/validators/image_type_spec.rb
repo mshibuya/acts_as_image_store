@@ -4,41 +4,6 @@ require 'spec_helper'
 describe MogileImageStore do
   context "Validators" do
     context "ImageType" do
-      describe "with image validation" do
-        before{ @image = ImageAll.new }
-        it "should accept jpeg image" do
-          @image.image = ActionDispatch::Http::UploadedFile.new({
-            :filename => 'sample.jpg',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
-          })
-          @image.valid?.should be_true
-        end
-
-        it "should accept gif image" do
-          @image.image = ActionDispatch::Http::UploadedFile.new({
-            :filename => 'sample.gif',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
-          })
-          @image.valid?.should be_true
-        end
-
-        it "should accept png image" do
-          @image.image = ActionDispatch::Http::UploadedFile.new({
-            :filename => 'sample.png',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.png")
-          })
-          @image.valid?.should be_true
-        end
-
-        it "should not accept text file" do
-          @image.image = ActionDispatch::Http::UploadedFile.new({
-            :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
-          })
-          @image.valid?.should be_false
-        end
-      end
-
       describe "with jpeg validation" do
         before{ @image = ImageJpeg.new }
         it "should accept jpeg image" do
@@ -148,7 +113,7 @@ describe MogileImageStore do
       end
 
       describe "with old form image validation" do
-        before{ @image = ImageAllOldForm.new }
+        before{ @image = ImageJpegOldForm.new }
         it "should accept jpeg image" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'sample.jpg',
@@ -167,20 +132,20 @@ describe MogileImageStore do
       end
 
       describe "with error message of image validation" do
-        before{ @image = ImageAll.new }
+        before{ @image = ImageJpeg.new }
         it "should not accept text file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
             :filename => 'spec_helper.rb',
             :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
           })
           @image.valid?.should be_false
-          @image.errors[:image].shift.should be == 'must be JPEG, GIF or PNG file.'
+          @image.errors[:image].shift.should be == 'must be image file.'
         end
       end
 
       describe "with ja error message of image validation" do
         before do
-          @image = ImageAll.new
+          @image = ImageJpegPng.new
           I18n.locale = :ja
         end
 
@@ -188,22 +153,22 @@ describe MogileImageStore do
           I18n.locale = I18n.default_locale
         end
 
-        it "should not accept text file" do
+        it "should not accept gif file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
-            :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
+            :filename => 'sample.gif',
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
-          @image.errors[:image].shift.should be == 'はJPEG,GIFまたはPNGファイルでなければなりません。'
+          @image.errors[:image].shift.should be == 'はJPEG,PNGファイルでなければなりません。'
         end
       end
 
       describe "with custom error message of image validation" do
-        before{ @image = ImageAllCustomMsg.new }
-        it "should not accept text file" do
+        before{ @image = ImageJpegCustomMsg.new }
+        it "should not accept gif file" do
           @image.image = ActionDispatch::Http::UploadedFile.new({
-            :filename => 'spec_helper.rb',
-            :tempfile => File.open("#{File.dirname(__FILE__)}/../../spec_helper.rb")
+            :filename => 'sample.gif',
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
           })
           @image.valid?.should be_false
           @image.errors[:image].shift.should be == 'custom'

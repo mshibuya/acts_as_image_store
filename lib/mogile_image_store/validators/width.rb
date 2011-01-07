@@ -5,7 +5,7 @@ module MogileImageStore
 
       class WidthValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
-          width = record.image_attributes[attribute]['width'] rescue nil
+          width = record.image_attributes[attribute]['width'] rescue return
           if options[:max]
             if width > options[:max]
               record.errors[attribute] << (options[:message] ||

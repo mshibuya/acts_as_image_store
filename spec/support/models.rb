@@ -8,12 +8,6 @@ class Tableless < ActiveRecord::Base
   end
 end
 
-class ImageAll < Tableless
-  column :image, :string
-  has_images
-  validates :image, :image_type => true
-end
-
 class ImageJpeg < Tableless
   column :image, :string
   has_images
@@ -38,16 +32,16 @@ class ImageJpegPng < Tableless
   validates :image, :image_type => { :type => [:jpg, :png] }
 end
 
-class ImageAllOldForm < Tableless
+class ImageJpegOldForm < Tableless
   column :image, :string
   has_images
-  validates_image_type_of :image
+  validates_image_type_of :image, :type => :jpg
 end
 
-class ImageAllCustomMsg < Tableless
+class ImageJpegCustomMsg < Tableless
   column :image, :string
   has_images
-  validates :image, :image_type => { :message => "custom" }
+  validates :image, :image_type => { :type => :jpg, :message => "custom" }
 end
 
 class ImageMax20 < Tableless
@@ -140,3 +134,26 @@ class ImageHeightMax500CustomMsg < Tableless
   validates :image, :height => { :max => 500, :message => 'custom' }
 end
 
+class ImageTestWithImageType < ActiveRecord::Base
+  self.table_name = 'image_tests'
+  has_images
+  validates :image, :image_type => { :type => [:jpg, :png] }
+end
+
+class ImageTestWithFileSize < ActiveRecord::Base
+  self.table_name = 'image_tests'
+  has_images
+  validates :image, :file_size => { :max => 20.kilobytes }
+end
+
+class ImageTestWithWidth < ActiveRecord::Base
+  self.table_name = 'image_tests'
+  has_images
+  validates :image, :width => { :max => 500 }
+end
+
+class ImageTestWithHeight < ActiveRecord::Base
+  self.table_name = 'image_tests'
+  has_images
+  validates :image, :height => { :max => 500 }
+end

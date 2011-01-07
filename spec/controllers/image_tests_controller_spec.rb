@@ -52,7 +52,7 @@ describe ImageTestsController do
       get 'image_delete', :id => @image_test.id, :column => 'image'
       response.status.should == 302
       response.header['Location'].should == "http://test.host/image_tests/#{@image_test.id}/edit"
-      flash.now[:alert].should == 'Failed to delete Image.'
+      flash.now[:alert].should == 'Failed to delete image.'
     end
   end
 end

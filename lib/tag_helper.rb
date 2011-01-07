@@ -12,7 +12,7 @@ module ActionView::Helpers::TagHelper
     height = options.delete(:h) || 0
     if width == 0 && height == 0
       size = 'raw'
-    else      
+    else
       size = (width > 0 ? width.to_s : '') + 'x' + (height > 0 ? height.to_s : '')
     end
     if (format = options.delete(:format)) != nil

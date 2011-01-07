@@ -18,4 +18,7 @@ describe MogileImage do
   it{ { :put => '/image/flush' }.should_not be_routable }
   it{ { :delete => '/image/flush' }.should_not be_routable }
   it{ { :get => '/image/' }.should_not be_routable }
+
+  it{ { :get => '/image_tests/2/image_delete/image' }.should route_to(:controller => 'image_tests', :action => 'image_delete', :id => '2', :column => 'image') }
+  it{ { :get => '/multiples/65/image_delete/banner' }.should route_to(:controller => 'multiples', :action => 'image_delete', :id => '65', :column => 'banner') }
 end

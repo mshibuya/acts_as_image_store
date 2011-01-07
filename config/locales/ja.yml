@@ -3,7 +3,8 @@ ja:
     errors:
       messages:
         must_be_image_type: "は%sファイルでなければなりません。"
-        must_be_image:      "はJPEG,GIFまたはPNGファイルでなければなりません。"
+        must_be_image:      "は画像ファイルでなければなりません。"
+        must_be_valid_type: "はJPEG,GIFまたはPNGファイルでなければなりません。"
         size_smaller:       "は%dKB以下でなければなりません。"
         size_larger:        "は%dKB以上でなければなりません。"
         width_smaller:      "の幅は%dpixel以下でなければなりません。"

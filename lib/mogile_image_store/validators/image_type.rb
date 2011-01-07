@@ -5,18 +5,12 @@ module MogileImageStore
 
       class ImageTypeValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
-          type = record.image_attributes[attribute]['type'] rescue nil
+          type = record.image_attributes[attribute]['type'] rescue return
           if options[:type]
             typearr = Array.wrap(options[:type]).map{ |i| ::MogileImageStore::EXT_TO_TYPE[i.to_sym] }
             unless typearr.include?(type)
               record.errors[attribute] << (options[:message] ||
-                              I18n.translate('mogile_image_store.errors.messages.must_be_image_type') % [options[:type]])
-            end
-          else
-            typearr = ::MogileImageStore::IMAGE_FORMATS
-            unless typearr.include?(type)
-              record.errors[attribute] << (options[:message] ||
-                              I18n.translate('mogile_image_store.errors.messages.must_be_image'))
+                              I18n.translate('mogile_image_store.errors.messages.must_be_image_type') % [typearr.join(',')])
             end
           end
         end

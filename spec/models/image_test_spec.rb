@@ -14,6 +14,50 @@ describe ImageTest do
     image_test.valid?.should be_false
   end
 
+  context "default validation" do
+    before{ @image_test = ImageTest.new }
+    it "should accept jpeg image" do
+      @image_test.image = ActionDispatch::Http::UploadedFile.new({
+        :filename => 'sample.jpg',
+        :tempfile => File.open("#{File.dirname(__FILE__)}/../sample.jpg")
+      })
+      @image_test.valid?.should be_true
+    end
+
+    it "should accept gif image" do
+      @image_test.image = ActionDispatch::Http::UploadedFile.new({
+        :filename => 'sample.gif',
+        :tempfile => File.open("#{File.dirname(__FILE__)}/../sample.gif")
+      })
+      @image_test.valid?.should be_true
+    end
+
+    it "should accept png image" do
+      @image_test.image = ActionDispatch::Http::UploadedFile.new({
+        :filename => 'sample.png',
+        :tempfile => File.open("#{File.dirname(__FILE__)}/../sample.png")
+      })
+      @image_test.valid?.should be_true
+    end
+
+     it "should not accept bmp image" do
+      @image_test.image = ActionDispatch::Http::UploadedFile.new({
+        :filename => 'sample.bmp',
+        :tempfile => File.open("#{File.dirname(__FILE__)}/../sample.bmp")
+      })
+      @image_test.valid?.should be_false
+      @image_test.errors[:image].shift.should == "must be JPEG, GIF or PNG file."
+    end
+
+    it "should not accept text file" do
+      @image_test.image = ActionDispatch::Http::UploadedFile.new({
+        :filename => 'spec_helper.rb',
+        :tempfile => File.open("#{File.dirname(__FILE__)}/../spec_helper.rb")
+      })
+      @image_test.valid?.should be_false
+      @image_test.errors[:image].shift.should == "must be image file."
+    end
+  end
 
   context "MogileFS backend" do
     before(:all) do
@@ -141,7 +185,7 @@ describe ImageTest do
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
            'bcadded5ee18bfa7c99834f307332b02.png']
       end
- 
+
       it "should return filled jpeg image" do
         content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill2')
         content_type.should == 'image/jpeg'
@@ -190,6 +234,55 @@ describe ImageTest do
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
         MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
+      end
+    end
+
+    context "saving without uploading image" do
+      it "should preserve image name" do
+        @image_test = ImageTest.find_by_image('5d1e43dfd47173ae1420f061111e0776.gif')
+        new_name = @image_test.name + ' new'
+        @image_test.name = new_name
+        lambda{ @image_test.save }.should_not raise_error
+        @image_test.name.should == new_name
+        @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
+        @mg.list_keys('').shift.sort.should ==
+          ['5d1e43dfd47173ae1420f061111e0776.gif',
+           'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.png']
+        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
+        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
+        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
+      end
+
+      it "should preserve image name with image_type validation" do
+        @image_test = ImageTestWithImageType.first
+        @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+        new_name = @image_test.name + ' imagetype'
+        @image_test.valid?.should be_true
+      end
+
+      it "should preserve image name with file_size validation" do
+        @image_test = ImageTestWithFileSize.first
+        @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+        new_name = @image_test.name + ' filesize'
+        @image_test.valid?.should be_true
+      end
+
+      it "should preserve image name with width validation" do
+        @image_test = ImageTestWithWidth.first
+        @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+        new_name = @image_test.name + ' width'
+        @image_test.valid?.should be_true
+      end
+
+      it "should preserve image name with height validation" do
+        @image_test = ImageTestWithHeight.first
+        @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+        new_name = @image_test.name + ' height'
+        @image_test.valid?.should be_true
       end
     end
 

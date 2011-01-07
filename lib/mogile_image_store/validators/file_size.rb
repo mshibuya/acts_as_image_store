@@ -5,7 +5,7 @@ module MogileImageStore
 
       class FileSizeValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
-          size = record.image_attributes[attribute]['size'] rescue nil
+          size = record.image_attributes[attribute]['size'] rescue return
           if options[:max]
             if size > options[:max]
               record.errors[attribute] << (options[:message] ||

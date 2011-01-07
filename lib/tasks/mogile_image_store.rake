@@ -15,7 +15,7 @@ namespace :mogile_image_store do
     # create class
     print "Input mindevcount for class #{MogileImageStore.backend['class']}:"
     mindevcount = STDIN.gets
-    begin 
+    begin
       mogadm.create_class MogileImageStore.backend['domain'], MogileImageStore.backend['class'], mindevcount
       puts "Created class #{MogileImageStore.backend['class']}."
     rescue
