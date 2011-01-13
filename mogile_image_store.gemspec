@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2011-01-07}
+  s.date = %q{2011-01-13}
   s.description = %q{Rails plugin for using MogileFS as image storage}
   s.email = %q{shibuya@lavan7.co.jp}
   s.extra_rdoc_files = [
@@ -35,7 +35,6 @@ Gem::Specification.new do |s|
     "lib/mogile_image_store/active_record.rb",
     "lib/mogile_image_store/engine.rb",
     "lib/mogile_image_store/image_deletable.rb",
-    "lib/mogile_image_store/resizer.rb",
     "lib/mogile_image_store/validators/file_size.rb",
     "lib/mogile_image_store/validators/height.rb",
     "lib/mogile_image_store/validators/image_type.rb",
@@ -188,6 +187,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<capybara>, [">= 0"])
+      s.add_development_dependency(%q<rdoc>, [">= 3.0.0"])
       s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
     else
       s.add_dependency(%q<activerecord>, [">= 3.0.0"])
@@ -203,6 +203,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<capybara>, [">= 0"])
+      s.add_dependency(%q<rdoc>, [">= 3.0.0"])
       s.add_dependency(%q<ruby-debug19>, [">= 0"])
     end
   else
@@ -219,6 +220,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<capybara>, [">= 0"])
+    s.add_dependency(%q<rdoc>, [">= 3.0.0"])
     s.add_dependency(%q<ruby-debug19>, [">= 0"])
   end
 end

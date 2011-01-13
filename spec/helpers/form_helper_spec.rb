@@ -64,6 +64,18 @@ describe ActionView::Helpers::FormHelper do
             '/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
         end
       end
+
+      it "should show file field with image and delete link with options" do
+        form_for(@image_test) do |f|
+          f.image_field(:image, :w => 100, :h => 100,
+                        :image_options => {:alt=>'alt text'},
+                        :link_options => {:rel=>'external'},
+                        :input_options => {:class=>'upload'}).should ==
+            '<img alt="alt text" src="http://'+MogileImageStore.backend['imghost']+'/image/100x100/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/' +
+            @image_test.id.to_s +
+            '/image_delete/image" rel="external">delete</a><br /><input class="upload" id="image_test_image" name="image_test[image]" type="file" />'
+        end
+      end
     end
   end
 end

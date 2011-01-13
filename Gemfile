@@ -15,6 +15,7 @@ group :development do
   gem "bundler"
   gem "jeweler"
   gem "capybara"
+  gem "rdoc", ">= 3.0.0"
   if RUBY_VERSION >= '1.9'
     gem "ruby-debug19"
   else

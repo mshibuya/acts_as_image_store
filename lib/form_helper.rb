@@ -1,39 +1,57 @@
 # coding: utf-8
 
-##
-# == 概要
-# FormHelperを拡張する。
-# 入力フォームの作成支援用。
-#
-module ActionView
-  module Helpers
+module ActionView # :nodoc:
+  module Helpers # :nodoc:
+    ##
+    # == 概要
+    # FormBuilderを拡張する。
+    # 入力フォームの作成支援用。
+    #
     class FormBuilder
       include TagHelper
+      ##
+      # ===画像フォーム表示メソッド
+      #
+      # 画像アップロード用のinputタグ、及び画像がすでにセットされている際には
+      # サムネイル画像タグと画像削除用リンクのタグを生成します。
+      #
+      # ==== _method_
+      # 画像を格納するカラムを指定します。
+      #
+      # ==== _options_
+      # w, h, deletable, image_options, link_options, input_options
+      #
+      # ====返り値
+      # 生成したタグを返します。
+      #
       def image_field(method, options = {})
         options = options.symbolize_keys
-        output = ''.html_safe
+        width  = options.delete(:w) || MogileImageStore.options[:field_w]
+        height = options.delete(:h) || MogileImageStore.options[:field_h]
         deletable = options.delete(:deletable)
+        image_options = options.delete(:image_options) || {}
+        link_options  = options.delete(:link_options) || {}
+        input_options = options.delete(:input_options) || {}
+
+        output = ''.html_safe
         if @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
           # 画像を表示
-          width  = options.delete(:w) || MogileImageStore.options[:field_w]
-          height = options.delete(:h) || MogileImageStore.options[:field_h]
-          output += image(@object[method], options.merge({:w => width, :h => height}))
+          output += image(@object[method], {:w => width, :h => height}.merge(image_options))
           # 画像削除用のリンク表示
-          if deletable == nil || deletable
+          if deletable === nil || deletable
             output += @template.link_to(
               (I18n.translate!('mogile_image_store.form_helper.delete') rescue 'delete'),
               { :controller => @template.controller.controller_name,
                 :action => 'image_delete',
                 :id => @object,
-                :column => method, }
+                :column => method, },
+                link_options,
             )
           end
           output += tag('br')
-          #to prevent src being set
-          options.update({:src => nil})
         end
         # 画像アップロード用フィールド表示
-        output +=  @template.file_field(@object_name, method, objectify_options(options))
+        output +=  @template.file_field(@object_name, method, objectify_options(input_options))
       end
     end
   end

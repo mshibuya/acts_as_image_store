@@ -8,3 +8,4 @@ spec/dummy/config/initializers/mogile_fs.yml
 spec/dummy/log/*.log
 spec/dummy/tmp/
 coverage*
+rdoc/

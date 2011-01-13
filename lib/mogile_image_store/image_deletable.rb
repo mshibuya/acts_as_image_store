@@ -1,21 +1,28 @@
 # coding: utf-8
 
-##
-# == 概要
-# 添付画像をMogileFSに格納するプラグイン
-#
 module MogileImageStore
   #
   # ActionControllerにincludeするモジュール
   #
-  module ImageDeletable
-    def self.included(base)
+  module ImageDeletable # :nodoc:
+    def self.included(base) # :nodoc:
       base.extend(ClassMethods)
     end
     #
     # ActionControllerにextendされるモジュール
     #
     module ClassMethods
+      ##
+      # 画像削除機能の利用を宣言する。
+      #
+      # ==== model
+      # 削除したい画像を保持しているモデルクラスを指定。
+      # 省略時はコントローラ名より判別。
+      #
+      # ==== 例:
+      #   image_deletable
+      #   image_deletable Cast
+      # 
       def image_deletable(model=nil)
         cattr_accessor  :image_model
 
@@ -33,6 +40,7 @@ module MogileImageStore
     # 各コントローラにincludeされるモジュール
     #
     module InstanceMethods
+      # 画像削除を行うアクション
       def image_delete
         begin
           image_model.transaction do

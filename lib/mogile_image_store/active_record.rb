@@ -2,22 +2,31 @@
 
 require 'RMagick'
 
-##
-# == 概要
-# ActiveRecord::Baseを拡張するモジュール
-#
 module MogileImageStore
+  ##
+  # == 概要
+  # ActiveRecord::Baseを拡張するモジュール
   #
-  # ActiveRecord::Baseにincludeするモジュール
-  #
-  module ActiveRecord
-    def self.included(base)
+  module ActiveRecord # :nodoc:
+    def self.included(base) # :nodoc:
       base.extend(ClassMethods)
     end
     #
     # ActiveRecord::Baseにextendされるモジュール
     #
-    module ClassMethods
+    module ClassMethods 
+      ##
+      # 画像保存用のコールバックを設定する。
+      #
+      # ==== columns
+      # 画像が保存されるカラム名を指定。データ型は :string, :limit=>36を使用。
+      # 省略時のカラム名はimageとなる。
+      #
+      # ==== 例:
+      #   has_images
+      #   has_images :logo
+      #   has_images ['banner1', 'banner2']
+      # 
       def has_images(columns=nil)
         cattr_accessor  :image_columns
         attr_accessor  :image_attributes
@@ -26,15 +35,15 @@ module MogileImageStore
 
         class_eval <<-EOV
         include MogileImageStore::ActiveRecord::InstanceMethods
-        include MogileImageStore::Validators::ValidatesImageType
-        include MogileImageStore::Validators::ValidatesFileSize
-        include MogileImageStore::Validators::ValidatesWidth
-        include MogileImageStore::Validators::ValidatesHeight
+        include MogileImageStore::ValidatesImageType
+        include MogileImageStore::ValidatesFileSize
+        include MogileImageStore::ValidatesWidth
+        include MogileImageStore::ValidatesHeight
 
         before_validation :validate_images
         before_save       :save_images
         before_destroy    :destroy_images
-      EOV
+        EOV
       end
     end
     #
