@@ -94,8 +94,8 @@ describe ImageTest do
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
 
-      it "should accept another image" do
-        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.png"
+      it "should accept another image using set_image_data" do
+        @image_test.set_image_data :image, File.open("#{File.dirname(__FILE__)}/../sample.png").read
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
         @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']

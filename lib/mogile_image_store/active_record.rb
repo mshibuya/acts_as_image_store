@@ -96,6 +96,15 @@ module MogileImageStore
         })
       end
 
+      ##
+      # 画像データをファイルを経由せず直接セットするためのメソッド。
+      #
+      def set_image_data(column, data)
+        self[column] = ActionDispatch::Http::UploadedFile.new({
+          :tempfile => StringIO.new(data)
+        })
+      end
+
       protected
 
       def set_image_attributes(column)
