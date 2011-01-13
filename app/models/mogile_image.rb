@@ -61,8 +61,8 @@ class MogileImage < ActiveRecord::Base
             url = parse_key k
             urls.push(url) if url
           end
-          if urls.size > 0 && MogileImageStore.backend['perlbal']
-            host, port = MogileImageStore.backend['perlbal'].split(':')
+          if urls.size > 0 && MogileImageStore.backend['reproxy']
+            host, port = MogileImageStore.backend['imghost'].split(':')
             # Request asynchronously
             t = Thread.new(urls.join(' ')) do |body|
               Net::HTTP.start(host, port || 80) do |http|

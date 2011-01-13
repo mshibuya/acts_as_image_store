@@ -17,6 +17,5 @@ production:
   reproxy: true
   cache:   86400
   imghost: image.example.com
-  perlbal: 192.168.56.101
   secret:  xxx
 
