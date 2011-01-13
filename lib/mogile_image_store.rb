@@ -40,15 +40,9 @@ module MogileImageStore
   EXT_TO_TYPE = { :jpg => 'JPEG', :gif => 'GIF', :png => 'PNG'}
 
   autoload :ActiveRecord, 'mogile_image_store/active_record'
-
-  autoload :ValidatesImageType, 'mogile_image_store/validators/image_type'
-  autoload :ValidatesFileSize,  'mogile_image_store/validators/file_size'
-  autoload :ValidatesWidth,     'mogile_image_store/validators/width'
-  autoload :ValidatesHeight,    'mogile_image_store/validators/height'
-
+  autoload :ValidatesImageAttribute,    'mogile_image_store/validates_image_attribute'
   autoload :ImageDeletable, 'mogile_image_store/image_deletable'
 end
-
 
 ActiveRecord::Base.class_eval { include MogileImageStore::ActiveRecord }
 ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }

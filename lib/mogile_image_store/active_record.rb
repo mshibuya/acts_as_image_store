@@ -35,10 +35,7 @@ module MogileImageStore
 
         class_eval <<-EOV
         include MogileImageStore::ActiveRecord::InstanceMethods
-        include MogileImageStore::ValidatesImageType
-        include MogileImageStore::ValidatesFileSize
-        include MogileImageStore::ValidatesWidth
-        include MogileImageStore::ValidatesHeight
+        include MogileImageStore::ValidatesImageAttribute
 
         before_validation :validate_images
         before_save       :save_images

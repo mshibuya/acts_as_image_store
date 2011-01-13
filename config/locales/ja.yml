@@ -9,8 +9,10 @@ ja:
         size_larger:        "は%dKB以上でなければなりません。"
         width_smaller:      "の幅は%dpixel以下でなければなりません。"
         width_larger:       "の幅は%dpixel以上でなければなりません。"
+        width:              "の幅は%dpixelでなければなりません。"
         height_smaller:     "の高さは%dpixel以下でなければなりません。"
         height_larger:      "の高さは%dpixel以上でなければなりません。"
+        height:             "の高さは%dpixelでなければなりません。"
       flashes:
         delete_failed:      "画像の削除に失敗しました。"
 

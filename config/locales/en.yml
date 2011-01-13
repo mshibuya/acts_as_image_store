@@ -9,8 +9,10 @@ en:
         size_larger:        "must be larger than %dKB."
         width_smaller:      "'s width must be smaller than %d pixels."
         width_larger:       "'s width must be larger than %d pixels."
+        width:              "'s width must be %d pixels."
         height_smaller:     "'s height must be smaller than %d pixels."
         height_larger:      "'s height must be larger than %d pixels."
+        height:             "'s height must be %d pixels."
       flashes:
         delete_failed:      "Failed to delete image."
 

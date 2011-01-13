@@ -130,6 +130,25 @@ describe MogileImageStore do
           @image.errors[:image].shift.should be == 'custom'
         end
       end
+
+      describe "with ==420 validation" do
+        before{ @image = ImageHeight420.new }
+        it "should accept 420 image" do
+          @image.image = ActionDispatch::Http::UploadedFile.new({
+            :filename => 'sample.png',
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.gif")
+          })
+          @image.valid?.should be_true
+        end
+
+        it "should not accept 544 image" do
+          @image.image = ActionDispatch::Http::UploadedFile.new({
+            :filename => 'sample.jpg',
+            :tempfile => File.open("#{File.dirname(__FILE__)}/../../sample.jpg")
+          })
+          @image.valid?.should be_false
+        end
+      end
     end
   end
 end
