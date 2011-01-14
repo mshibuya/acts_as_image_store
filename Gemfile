@@ -16,6 +16,7 @@ group :development do
   gem "jeweler"
   gem "capybara"
   gem "rdoc", ">= 3.0.0"
+  gem 'rails3_acts_as_paranoid', :git => 'git://github.com/mshibuya/rails3_acts_as_paranoid.git', :ref => '5578dc5'
   if RUBY_VERSION >= '1.9'
     gem "ruby-debug19"
   else

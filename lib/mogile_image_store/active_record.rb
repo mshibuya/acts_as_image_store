@@ -39,7 +39,7 @@ module MogileImageStore
 
         before_validation :validate_images
         before_save       :save_images
-        before_destroy    :destroy_images
+        after_destroy     :destroy_images
         EOV
       end
     end
@@ -78,11 +78,11 @@ module MogileImageStore
         end
       end
       #
-      # before_destroyにフック。
+      # after_destroyにフック。
       #
       def destroy_images
         image_columns.each do |c|
-          ::MogileImage.destroy_image(self[c]) if self[c]
+          ::MogileImage.destroy_image(self[c]) if self[c] && destroyed?
         end
       end
 
