@@ -2,6 +2,8 @@
 $:.unshift(File.dirname(__FILE__))
 
 require 'digest/sha1'
+require 'active_record/base'
+require 'action_controller/base'
 ##
 # == 概要
 # 添付画像をMogileFSに格納するプラグイン
