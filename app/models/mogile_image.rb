@@ -16,7 +16,8 @@ class MogileImage < ActiveRecord::Base
     # なければレコードを作成すると同時にMogileFSに保存する。
     # あれば参照カウントを1増やす。
     #
-    def save_image(image_attrs)
+    def save_image(image_attrs, options = {})
+      temporary = options.delete(:temporary) || false
       content = image_attrs['content']
       name = Digest::MD5.hexdigest(content)
       self.transaction do
@@ -24,17 +25,43 @@ class MogileImage < ActiveRecord::Base
         unless record.persisted?
           image_attrs.map{ |k,v| record[k] = v if %w[size width height].include? k }
           record.image_type = ::MogileImageStore::TYPE_TO_EXT[image_attrs['type'].to_sym.upcase]
-          record.refcount = 1
+          if temporary
+            record.refcount = 0
+            record.keep_till = Time.now + (MogileImageStore.options[:upload_cache] || 3600)
+          else
+            record.refcount = 1
+          end
           record.save!
           filename = name+'.'+record['image_type']
           mg = mogilefs_connect
           mg.store_content filename, MogileImageStore.backend['class'], content
           filename
         else
-          record.refcount += 1
+          if temporary
+            record.keep_till = Time.now + (MogileImageStore.options[:upload_cache] || 3600)
+          else
+            record.refcount += 1
+          end
           record.save
           filename = name+'.'+record['image_type']
         end
+      end
+    end
+
+    ##
+    # 確認画面経由で一時保存されているデータを確定
+    #
+    def commit_image(key)
+      return unless key.is_a?(String) && !key.empty?
+      name, ext = key.split('.')
+      self.transaction do
+        record = find_by_name name
+        raise MogileImageStore::ImageNotFound unless record
+        record.refcount += 1
+        if record.keep_till && record.keep_till < Time.now
+          record.keep_till = nil
+        end
+        record.save
       end
     end
 
@@ -52,26 +79,16 @@ class MogileImage < ActiveRecord::Base
           record.refcount -= 1
           record.save
         else
-          record.delete
-          #delete all size/type of images of given hash name
-          mg = mogilefs_connect
-          urls = []
-          mg.each_key(name) do |k|
-            mg.delete k
-            url = parse_key k
-            urls.push(url) if url
-          end
-          if urls.size > 0 && MogileImageStore.backend['reproxy']
-            host, port = MogileImageStore.backend['imghost'].split(':')
-            # Request asynchronously
-            t = Thread.new(urls.join(' ')) do |body|
-              Net::HTTP.start(host, port || 80) do |http|
-                http.post(MogileImageStore::Engine.config.mount_at + 'flush', body, {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
-              end
-            end
+          if record.keep_till && record.keep_till > Time.now
+            record.refcount = 0
+            record.save
+          else
+            record.delete
+            purge_image_data(name)
           end
         end
       end
+      cleanup_temporary_image
     end
     ##
     # 指定されたキーを持つ画像のURLをMogileFSより取得して返す。
@@ -88,6 +105,23 @@ class MogileImage < ActiveRecord::Base
     def fetch_data(name, format, size='raw')
       [self::CONTENT_TYPES[format.to_sym],
         retrieve_image(name, format, size) {|mg,key| mg.get_file_data key }]
+    end
+
+    ##
+    # 保存期限を過ぎた一時データを消去する
+    #
+    def cleanup_temporary_image
+      self.transaction do
+        self.where('keep_till < ?', Time.now).all.each do |record|
+          if record.refcount > 0
+            record.keep_till = nil
+            record.save
+          else
+            record.delete
+            purge_image_data(record.name)
+          end
+        end
+      end
     end
 
     protected
@@ -184,6 +218,28 @@ class MogileImage < ActiveRecord::Base
         end
       end
       return false
+    end
+
+    ##
+    # MogileFS上の指定されたハッシュ値を持つ画像データを消去
+    #
+    def purge_image_data(name)
+      mg = mogilefs_connect
+      urls = []
+      mg.each_key(name) do |k|
+        mg.delete k
+        url = parse_key k
+        urls.push(url) if url
+      end
+      if urls.size > 0 && MogileImageStore.backend['reproxy']
+        host, port = MogileImageStore.backend['imghost'].split(':')
+        # Request asynchronously
+        t = Thread.new(urls.join(' ')) do |body|
+          Net::HTTP.start(host, port || 80) do |http|
+            http.post(MogileImageStore::Engine.config.mount_at + 'flush', body, {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
+          end
+        end
+      end
     end
 
     ##

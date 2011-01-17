@@ -20,7 +20,11 @@ module MogileImageStore
         '88x31',
         # resizing with fill
         '40x40fill1',
-      ]
+        # regexp can also be used
+        # /^\d+0x\d+0$/,
+      ],
+      # temporal image expiry time when confirmation is enabled
+      :upload_cache = 1.day,
     }
   end
 end

@@ -1,4 +1,13 @@
 Dummy::Application.routes.draw do
+  resources :confirms do
+    collection do
+      post :confirm
+    end
+    member do
+      put :confirm
+    end
+  end
+
   resources :multiples
 
   resources :image_tests

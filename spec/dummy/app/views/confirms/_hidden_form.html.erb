@@ -1,0 +1,27 @@
+<%= form_for @confirm, :url  => (@confirm.new_record? ? confirms_path : confirm_path(@confirm)),
+  :html => { :method => (@confirm.new_record? ? :post : :put) } do |f| %>
+  <% if @confirm.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@confirm.errors.count, "error") %> prohibited this confirm from being saved:</h2>
+
+      <ul>
+      <% @confirm.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= @confirm.name %>
+    <%= f.hidden_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :image %><br />
+    <%= f.image_field :image, :confirm => true %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

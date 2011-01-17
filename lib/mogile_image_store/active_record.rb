@@ -27,11 +27,12 @@ module MogileImageStore
       #   has_images :logo
       #   has_images ['banner1', 'banner2']
       # 
-      def has_images(columns=nil)
-        cattr_accessor  :image_columns
+      def has_images(columns=nil, options={})
+        cattr_accessor  :image_columns, :image_options
         attr_accessor  :image_attributes
 
-        self.image_columns  = Array.wrap(columns || 'image').map!{|item| item.to_sym }
+        self.image_columns = Array.wrap(columns || 'image').map!{|item| item.to_sym }
+        self.image_options = options.symbolize_keys
 
         class_eval <<-EOV
         include MogileImageStore::ActiveRecord::InstanceMethods
@@ -65,17 +66,27 @@ module MogileImageStore
         @image_attributes ||= HashWithIndifferentAccess.new
         image_columns.each do |c|
           next if !self[c]
-          set_image_attributes(c) unless @image_attributes[c]
-          if !@image_attributes[c]
-            # バリデーションなしで画像ではないファイルが指定された場合はクリアしておく
-            self[c] = nil if self[c].is_a? ActionDispatch::Http::UploadedFile
-            next
+          if image_options[:confirm]
+            # 確認あり経由：すでに画像は保存済み
+            prev_image = self.send(c.to_s+'_was')
+            if prev_image.is_a?(String) && !prev_image.empty?
+              ::MogileImage.destroy_image(prev_image)
+            end
+            ::MogileImage.commit_image(self[c])
+          else
+            # 通常時
+            set_image_attributes(c) unless @image_attributes[c]
+            if !@image_attributes[c]
+              # バリデーションなしで画像ではないファイルが指定された場合はクリアしておく
+              self[c] = nil if self[c].is_a? ActionDispatch::Http::UploadedFile
+              next
+            end
+            prev_image = self.send(c.to_s+'_was')
+            if prev_image.is_a?(String) && !prev_image.empty?
+              ::MogileImage.destroy_image(prev_image)
+            end
+            self[c] = ::MogileImage.save_image(@image_attributes[c])
           end
-          prev_image = self.send(c.to_s+'_was')
-          if prev_image.is_a?(String) && !prev_image.empty?
-            ::MogileImage.destroy_image(prev_image)
-          end
-          self[c] = ::MogileImage.save_image(@image_attributes[c])
         end
       end
       #
@@ -143,6 +154,10 @@ module MogileImageStore
           'width' => img.columns,
           'height' => img.rows,
         })
+        # 確認ありの時はこの時点で仮保存
+        if image_options[:confirm]
+          self[column] = ::MogileImage.save_image(@image_attributes[column], :temporary => true)
+        end
       end
     end
   end

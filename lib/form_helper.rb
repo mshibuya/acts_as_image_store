@@ -19,22 +19,41 @@ module ActionView # :nodoc:
       # 画像を格納するカラムを指定します。
       #
       # ==== _options_
-      # w, h, deletable, image_options, link_options, input_options
+      # ===== confirm=false
+      # 確認画面でhiddenフィールドを表示させたい時に指定します。
+      #
+      # ===== w, h
+      # 幅、高さを指定します。
+      #
+      # ===== deletable=true
+      # 削除用リンクを表示するかどうかを指定します。
+      #
+      # ===== image_options={}, link_options={}, input_options={}
+      # それぞれimgタグ、削除用リンクタグ、inputタグに渡す個別オプションを指定します。
       #
       # ====返り値
       # 生成したタグを返します。
       #
       def image_field(method, options = {})
         options = options.symbolize_keys
-        width  = options.delete(:w) || MogileImageStore.options[:field_w]
-        height = options.delete(:h) || MogileImageStore.options[:field_h]
-        deletable = options.delete(:deletable)
+        confirm   = options.delete(:confirm) || false
+        if confirm
+          width  = options.delete(:w) || 0
+          height = options.delete(:h) || 0
+          deletable = false
+          show_image = @object[method].is_a?(String) && !@object[method].empty?
+        else
+          width  = options.delete(:w) || MogileImageStore.options[:field_w]
+          height = options.delete(:h) || MogileImageStore.options[:field_h]
+          deletable = options.delete(:deletable)
+          link_options  = options.delete(:link_options) || {}
+          show_image = @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
+        end
         image_options = options.delete(:image_options) || {}
-        link_options  = options.delete(:link_options) || {}
         input_options = options.delete(:input_options) || {}
 
         output = ''.html_safe
-        if @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
+        if show_image
           # 画像を表示
           output += image(@object[method], {:w => width, :h => height}.merge(image_options))
           # 画像削除用のリンク表示
@@ -51,7 +70,11 @@ module ActionView # :nodoc:
           output += tag('br')
         end
         # 画像アップロード用フィールド表示
-        output +=  @template.file_field(@object_name, method, objectify_options(input_options))
+        if confirm
+          output +=  @template.hidden_field(@object_name, method, objectify_options(input_options))
+        else
+          output +=  @template.file_field(@object_name, method, objectify_options(input_options))
+        end
       end
     end
   end

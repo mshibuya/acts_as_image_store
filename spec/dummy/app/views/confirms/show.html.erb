@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @confirm.name %>
+</p>
+
+<p>
+  <b>Image:</b>
+  <%= image @confirm.image %>
+</p>
+
+
+<%= link_to 'Edit', edit_confirm_path(@confirm) %> |
+<%= link_to 'Back', confirms_path %>

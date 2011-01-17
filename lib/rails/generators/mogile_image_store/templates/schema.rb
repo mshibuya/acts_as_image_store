@@ -7,9 +7,11 @@ ActiveRecord::Schema.define(:version => 0) do
       t.integer    :width
       t.integer    :height
       t.integer    :refcount
+      t.datetime   :keep_till
       t.timestamps
     end
 
     add_index :mogile_images, [:name]
+    add_index :mogile_images, [:keep_till]
 
 end
