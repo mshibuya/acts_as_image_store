@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2011-01-13}
+  s.date = %q{2011-01-17}
   s.description = %q{Rails plugin for using MogileFS as image storage}
   s.email = %q{shibuya@lavan7.co.jp}
   s.extra_rdoc_files = [
@@ -35,10 +35,7 @@ Gem::Specification.new do |s|
     "lib/mogile_image_store/active_record.rb",
     "lib/mogile_image_store/engine.rb",
     "lib/mogile_image_store/image_deletable.rb",
-    "lib/mogile_image_store/validators/file_size.rb",
-    "lib/mogile_image_store/validators/height.rb",
-    "lib/mogile_image_store/validators/image_type.rb",
-    "lib/mogile_image_store/validators/width.rb",
+    "lib/mogile_image_store/validates_image_attribute.rb",
     "lib/rails/generators/mogile_image_store/mogile_image_store_generator.rb",
     "lib/rails/generators/mogile_image_store/templates/initializer.rb",
     "lib/rails/generators/mogile_image_store/templates/migration.rb",
@@ -58,6 +55,7 @@ Gem::Specification.new do |s|
     "spec/dummy/app/helpers/multiples_helper.rb",
     "spec/dummy/app/models/image_test.rb",
     "spec/dummy/app/models/multiple.rb",
+    "spec/dummy/app/models/paranoid.rb",
     "spec/dummy/app/views/image_tests/_form.html.erb",
     "spec/dummy/app/views/image_tests/edit.html.erb",
     "spec/dummy/app/views/image_tests/index.html.erb",
@@ -106,6 +104,7 @@ Gem::Specification.new do |s|
     "spec/models/image_test_spec.rb",
     "spec/models/mogile_image_spec.rb",
     "spec/models/multiple_spec.rb",
+    "spec/models/paranoid_spec.rb",
     "spec/mogile_image_store/validators/file_size_spec.rb",
     "spec/mogile_image_store/validators/height_spec.rb",
     "spec/mogile_image_store/validators/image_type_spec.rb",
@@ -119,6 +118,7 @@ Gem::Specification.new do |s|
     "spec/spec_helper.rb",
     "spec/support/factories/image_tests.rb",
     "spec/support/factories/multiples.rb",
+    "spec/support/factories/paranoids.rb",
     "spec/support/models.rb"
   ]
   s.homepage = %q{http://git.dev.ist-corp.jp/mogile_image_store}
@@ -137,6 +137,7 @@ Gem::Specification.new do |s|
     "spec/dummy/app/helpers/multiples_helper.rb",
     "spec/dummy/app/models/image_test.rb",
     "spec/dummy/app/models/multiple.rb",
+    "spec/dummy/app/models/paranoid.rb",
     "spec/dummy/config/application.rb",
     "spec/dummy/config/boot.rb",
     "spec/dummy/config/environment.rb",
@@ -157,6 +158,7 @@ Gem::Specification.new do |s|
     "spec/models/image_test_spec.rb",
     "spec/models/mogile_image_spec.rb",
     "spec/models/multiple_spec.rb",
+    "spec/models/paranoid_spec.rb",
     "spec/mogile_image_store/validators/file_size_spec.rb",
     "spec/mogile_image_store/validators/height_spec.rb",
     "spec/mogile_image_store/validators/image_type_spec.rb",
@@ -166,6 +168,7 @@ Gem::Specification.new do |s|
     "spec/spec_helper.rb",
     "spec/support/factories/image_tests.rb",
     "spec/support/factories/multiples.rb",
+    "spec/support/factories/paranoids.rb",
     "spec/support/models.rb"
   ]
 
@@ -188,6 +191,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<capybara>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, [">= 3.0.0"])
+      s.add_development_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
       s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
     else
       s.add_dependency(%q<activerecord>, [">= 3.0.0"])
@@ -204,6 +208,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<capybara>, [">= 0"])
       s.add_dependency(%q<rdoc>, [">= 3.0.0"])
+      s.add_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
       s.add_dependency(%q<ruby-debug19>, [">= 0"])
     end
   else
@@ -221,6 +226,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<capybara>, [">= 0"])
     s.add_dependency(%q<rdoc>, [">= 3.0.0"])
+    s.add_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
     s.add_dependency(%q<ruby-debug19>, [">= 0"])
   end
 end
