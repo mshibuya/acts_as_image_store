@@ -42,6 +42,7 @@ module MogileImageStore
         after_destroy     :destroy_images
         EOV
       end
+      alias :has_image :has_images
     end
     #
     # 各モデルにincludeされるモジュール

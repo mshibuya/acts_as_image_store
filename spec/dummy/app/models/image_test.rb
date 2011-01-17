@@ -1,3 +1,3 @@
 class ImageTest < ActiveRecord::Base
-  has_images :image
+  has_image :image
 end

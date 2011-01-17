@@ -18,7 +18,7 @@ module MogileImageStore
 
   # config/initializers/mogile_image_store.rbで指定されたオプションを返す
   def self.options
-    MogileImageStore::Engine.config.options
+    MogileImageStore::Engine.config.options rescue {}
   end
 
   # 認証キーを計算する
