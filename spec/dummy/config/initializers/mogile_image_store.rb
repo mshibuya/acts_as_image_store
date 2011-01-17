@@ -10,7 +10,7 @@ module MogileImageStore
       :field_w => 80,
       :field_h => 80,
       # global maximum uploadable filesize in byte
-      :maxsize => 5*1024*1024,
+      :maxsize => 5.megabytes,
       # allowed resizes for image
       :allowed_sizes => [
         # no resizing

@@ -1,5 +1,6 @@
 namespace :mogile_image_store do
   task :prepare do
+    require 'active_support/core_ext/numeric'
     require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
     require 'mogilefs'
     puts "Connecting to #{MogileImageStore.backend['hosts']}..."
