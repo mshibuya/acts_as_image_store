@@ -47,7 +47,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "mogile_image_store #{version}"
   rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+  rdoc.rdoc_files.include(%w[app/**/*.rb lib/**/*.rb])
 end
 
 CoverMe.config do |c|
