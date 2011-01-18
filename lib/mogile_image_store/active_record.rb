@@ -55,10 +55,10 @@ module MogileImageStore
       def validate_images
         @image_attributes = HashWithIndifferentAccess.new
         image_columns.each do |c|
-          if image_options[:confirm] && self[c].is_a?(String) && self.send(c.to_s + '_changed?')
+          if image_options[:confirm] && self[c].is_a?(String) && !self[c].empty? && self.send(c.to_s + '_changed?')
             # 確認経由でセットされたキーがまだ存在するかどうかチェック
             if !MogileImage.key_exist?(self[c])
-              errors[c] << I18n.translate('mogile_image_store.errors.messages.confirm_expired')
+              errors[c] << I18n.translate('mogile_image_store.errors.messages.cache_expired')
               self[c] = nil
             end
           else

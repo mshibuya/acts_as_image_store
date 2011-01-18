@@ -13,10 +13,12 @@ ja:
         height_smaller:     "の高さは%dpixel以下でなければなりません。"
         height_larger:      "の高さは%dpixel以上でなければなりません。"
         height:             "の高さは%dpixelでなければなりません。"
-        confirm_expired:    "は保存期限を過ぎました。再度アップロードしてください。"
+        cache_expired:      "は保存期限を過ぎました。再度アップロードしてください。"
       flashes:
         delete_failed:      "画像の削除に失敗しました。"
 
+    notices:
+      confirm: "画像を削除します。よろしいですか？"
 
     form_helper:
       delete: "削除"

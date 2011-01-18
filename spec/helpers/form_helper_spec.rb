@@ -46,7 +46,13 @@ describe ActionView::Helpers::FormHelper do
 
       it "should show file field with image and delete link" do
         form_for(@image_test) do |f|
-          f.image_field(:image).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/'+@image_test.id.to_s+'/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+          f.image_field(:image).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/'+@image_test.id.to_s+'/image_delete/image" data-confirm="Are you sure?">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+        end
+      end
+
+      it "should show file field with image and delete link without confirm" do
+        form_for(@image_test) do |f|
+          f.image_field(:image, :link_options => {:confirm => false}).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/'+@image_test.id.to_s+'/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
         end
       end
 
@@ -61,7 +67,7 @@ describe ActionView::Helpers::FormHelper do
           f.image_field(:image, :w => 100, :h => 100).should ==
             '<img src="http://'+MogileImageStore.backend['imghost']+'/image/100x100/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/' +
             @image_test.id.to_s +
-            '/image_delete/image">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
+            '/image_delete/image" data-confirm="Are you sure?">delete</a><br /><input id="image_test_image" name="image_test[image]" type="file" />'
         end
       end
 
@@ -73,7 +79,7 @@ describe ActionView::Helpers::FormHelper do
                         :input_options => {:class=>'upload'}).should ==
             '<img alt="alt text" src="http://'+MogileImageStore.backend['imghost']+'/image/100x100/60de57a8f5cd0a10b296b1f553cb41a9.png" /><a href="/test/' +
             @image_test.id.to_s +
-            '/image_delete/image" rel="external">delete</a><br /><input class="upload" id="image_test_image" name="image_test[image]" type="file" />'
+            '/image_delete/image" data-confirm="Are you sure?" rel="external">delete</a><br /><input class="upload" id="image_test_image" name="image_test[image]" type="file" />'
         end
       end
     end

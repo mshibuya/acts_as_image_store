@@ -64,14 +64,16 @@ module ActionView # :nodoc:
                 :action => 'image_delete',
                 :id => @object,
                 :column => method, },
-                link_options,
+                { :confirm => I18n.translate('mogile_image_store.notices.confirm') }.merge(link_options),
             )
           end
           output += tag('br')
         end
         # 画像アップロード用フィールド表示
         if confirm
-          output +=  @template.hidden_field(@object_name, method, objectify_options(input_options))
+          if @object[method]
+            output +=  @template.hidden_field(@object_name, method, objectify_options(input_options))
+          end
         else
           output +=  @template.file_field(@object_name, method, objectify_options(input_options))
         end
