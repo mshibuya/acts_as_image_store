@@ -124,6 +124,11 @@ class MogileImage < ActiveRecord::Base
       end
     end
 
+    def key_exist?(key)
+      name, ext = key.split('.')
+      !!self.find_by_name(name)
+    end
+
     protected
 
     ##

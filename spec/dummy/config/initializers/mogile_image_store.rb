@@ -22,7 +22,9 @@ module MogileImageStore
         # resizing with fill
         '40x40fill1',
         /^80x80fill\d*/,
-      ]
+      ],
+      # temporal image expiry time when confirmation is enabled
+      :upload_cache => 30,
     }
   end
 end

@@ -29,6 +29,7 @@ describe Confirm do
         @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 0
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').keep_till.should_not be_nil
+        sleep(1)
         lambda{ @confirm.save! }.should_not raise_error
         @confirm.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
@@ -47,7 +48,7 @@ describe Confirm do
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
 
-      it "should raise error when upload cache was cleared" do
+      it "should not be valid when upload cache was cleared" do
         @confirm.set_image_data :image, File.open("#{File.dirname(__FILE__)}/../sample.png").read
         @confirm.valid?.should be_true
         @confirm.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
@@ -57,8 +58,9 @@ describe Confirm do
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').keep_till.should_not be_nil
         sleep(1)
         MogileImage.cleanup_temporary_image
-        lambda{ @confirm.save! }.should raise_error
-        @confirm.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
+        @confirm.valid?.should be_false
+        @confirm.errors[:image].should == ["has been expired. Please upload again."]
+        @confirm.image.should be_nil
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
       end

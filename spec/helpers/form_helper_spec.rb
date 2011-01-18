@@ -77,5 +77,19 @@ describe ActionView::Helpers::FormHelper do
         end
       end
     end
+
+    context "confirm" do
+      before do
+        @confirm = Factory.build(:confirm)
+        @confirm.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.png"
+        @confirm.valid?
+      end
+
+      it "should show hidden field when confirm" do
+        form_for(@confirm) do |f|
+          f.image_field(:image, :confirm => true).should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/raw/60de57a8f5cd0a10b296b1f553cb41a9.png" /><br /><input id="confirm_image" name="confirm[image]" type="hidden" value="60de57a8f5cd0a10b296b1f553cb41a9.png" />'
+        end
+      end
+    end
   end
 end
