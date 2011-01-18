@@ -24,7 +24,7 @@ module MogileImageStore
         # /^\d+0x\d+0$/,
       ],
       # temporal image expiry time when confirmation is enabled
-      :upload_cache = 1.day,
+      :upload_cache => 1.day,
     }
   end
 end
