@@ -2,8 +2,7 @@
 $:.unshift(File.dirname(__FILE__))
 
 require 'digest/sha1'
-require 'active_record/base'
-require 'action_controller/base'
+
 ##
 # == 概要
 # 添付画像をMogileFSに格納するプラグイン
@@ -45,9 +44,16 @@ module MogileImageStore
   autoload :ValidatesImageAttribute,    'mogile_image_store/validates_image_attribute'
   autoload :ImageDeletable, 'mogile_image_store/image_deletable'
 end
+## :nodoc:
+# loading action_controller/deprecated to prevent error with jpmobile
+#ActionController::Routing
 
-ActiveRecord::Base.class_eval { include MogileImageStore::ActiveRecord }
-ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
+ActiveSupport.on_load(:active_record) do
+  ActiveRecord::Base.class_eval { include MogileImageStore::ActiveRecord }
+end
+ActiveSupport.on_load(:action_controller) do
+  ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
+end
 require 'tag_helper'
 require 'form_helper'
 

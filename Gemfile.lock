@@ -147,7 +147,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord (>= 3.0.0)
   bundler
   capybara
   cover_me
