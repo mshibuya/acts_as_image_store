@@ -4,6 +4,8 @@ require 'digest/md5'
 require 'net/http'
 
 class MogileImage < ActiveRecord::Base
+  extend MogileImageStore::UrlHelper
+
   CONTENT_TYPES = HashWithIndifferentAccess.new ({
     :jpg => 'image/jpeg',
     :gif => 'image/gif',

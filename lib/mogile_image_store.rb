@@ -44,6 +44,10 @@ module MogileImageStore
   autoload :ActiveRecord, 'mogile_image_store/active_record'
   autoload :ValidatesImageAttribute,    'mogile_image_store/validates_image_attribute'
   autoload :ImageDeletable, 'mogile_image_store/image_deletable'
+  autoload :UrlHelper, 'mogile_image_store/url_helper'
+  autoload :TagHelper, 'mogile_image_store/tag_helper'
+  autoload :FormBuilder, 'mogile_image_store/form_helper'
+
 end
 ## :nodoc:
 # loading action_controller/deprecated to prevent error with jpmobile
@@ -55,9 +59,19 @@ end
 ActiveSupport.on_load(:action_controller) do
   ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
 end
-require 'url_helper'
-require 'tag_helper'
-require 'form_helper'
+ActiveSupport.on_load(:action_view) do
+  module ActionView::Helpers
+    class FormBuilder # :nodoc:
+      include MogileImageStore::FormBuilder
+    end
+    module UrlHelper # :nodoc:
+      include MogileImageStore::UrlHelper
+    end
+    module TagHelper # :nodoc:
+      include MogileImageStore::TagHelper
+    end
+  end
+end
 
 Dir[File.join("#{File.dirname(__FILE__)}/../config/locales/*.yml")].each do |locale|
   I18n.load_path.unshift(locale)
