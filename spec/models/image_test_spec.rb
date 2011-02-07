@@ -242,6 +242,7 @@ describe ImageTest do
         @image_test = ImageTest.find_by_image('5d1e43dfd47173ae1420f061111e0776.gif')
         new_name = @image_test.name + ' new'
         @image_test.name = new_name
+        MogileImage.should_not_receive(:save_image)
         lambda{ @image_test.save }.should_not raise_error
         @image_test.name.should == new_name
         @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'

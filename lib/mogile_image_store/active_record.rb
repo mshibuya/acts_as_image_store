@@ -77,6 +77,7 @@ module MogileImageStore
           next if !self[c]
           if image_options[:confirm]
             # 確認あり経由：すでに画像は保存済み
+            next unless self.send(c.to_s + '_changed?')
             prev_image = self.send(c.to_s+'_was')
             if prev_image.is_a?(String) && !prev_image.empty?
               ::MogileImage.destroy_image(prev_image)

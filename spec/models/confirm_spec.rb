@@ -107,6 +107,7 @@ describe Confirm do
         @confirm.valid?.should be_true
         @confirm.name.should == new_name
         @confirm.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
+        MogileImage.should_not_receive(:commit_image)
         lambda{ @confirm.save }.should_not raise_error
         @confirm.name.should == new_name
         @confirm.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
