@@ -10,7 +10,25 @@ class MogileImage < ActiveRecord::Base
     :png => 'image/png',
   })
 
-  class << MogileImage
+  class << self
+    ##
+    # 画像にメタデータを付加したハッシュを作成
+    #
+    def parse_image(data)
+      begin
+        img = ::Magick::Image.from_blob(data).shift
+      rescue
+        # 画像ではない場合
+        raise ::MogileImageStore::InvalidImage
+      end
+      HashWithIndifferentAccess.new({
+        'content' => data,
+        'size' => data.size,
+        'type' => img.format,
+        'width' => img.columns,
+        'height' => img.rows,
+      })
+    end
     ##
     # 同一ハッシュのレコードが存在するかどうか調べ、
     # なければレコードを作成すると同時にMogileFSに保存する。
@@ -46,6 +64,12 @@ class MogileImage < ActiveRecord::Base
           filename = name+'.'+record['image_type']
         end
       end
+    end
+    ##
+    # 画像を保存し、keyを返します。
+    #
+    def store_image(data)
+      save_image(parse_image(data))
     end
 
     ##

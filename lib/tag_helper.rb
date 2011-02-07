@@ -21,31 +21,15 @@ module ActionView # :nodoc:
       # ====返り値
       # 生成したタグを返します。
       #
-      def image(key, options = {})
-        return if !key || !key.respond_to?(:empty?) || key.empty?
+      def stored_image(key, options = {})
         options = options.symbolize_keys
-        width  = options.delete(:w) || 0
-        height = options.delete(:h) || 0
-        method = options.delete(:method) || ''
-        unless size = options.delete(:size)
-          if width == 0 && height == 0
-            size = 'raw'
-          else
-            size = "#{width.to_s}x#{height.to_s}#{method.to_s}" 
-          end
-        end
-        if (format = options.delete(:format)) != nil
-          name, ext = key.split('.')
-          key = name + '.' + format.to_s
-        end
-        path = MogileImageStore::Engine.config.mount_at + size + '/' + key
-        if MogileImageStore.backend['imghost']
-          options[:src] = 'http://' + MogileImageStore.backend['imghost'] + path
-        else
-          options[:src] = path
-        end
+        return unless url = image_url(key, options)
+        %w[w h method size format].each{|i| options.delete(i.to_sym)}
+        options[:src] = url
         tag("img", options)
       end
+
+      alias :image :stored_image
     end
   end
 end

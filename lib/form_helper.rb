@@ -9,6 +9,7 @@ module ActionView # :nodoc:
     #
     class FormBuilder
       include TagHelper
+      include UrlHelper
       ##
       # ===画像フォーム表示メソッド
       #
@@ -55,7 +56,7 @@ module ActionView # :nodoc:
         output = ''.html_safe
         if show_image
           # 画像を表示
-          output += image(@object[method], {:w => width, :h => height}.merge(image_options))
+          output += stored_image(@object[method], {:w => width, :h => height}.merge(image_options))
           # 画像削除用のリンク表示
           if deletable === nil || deletable
             output += @template.link_to(

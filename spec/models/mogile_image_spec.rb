@@ -2,9 +2,6 @@
 require 'spec_helper'
 
 describe MogileImage do
-  before do
-#    debugger
-  end
   it "test" do
     lambda{ MogileImage.new }.should_not raise_error
   end

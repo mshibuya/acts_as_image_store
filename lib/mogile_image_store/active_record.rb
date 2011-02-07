@@ -55,7 +55,8 @@ module MogileImageStore
       def validate_images
         @image_attributes = HashWithIndifferentAccess.new
         image_columns.each do |c|
-          if image_options[:confirm] && self[c].is_a?(String) && !self[c].empty? && self.send(c.to_s + '_changed?')
+          if image_options[:confirm] && self[c].is_a?(String) &&
+             !self[c].empty? && self.send(c.to_s + '_changed?')
             # 確認経由でセットされたキーがまだ存在するかどうかチェック
             if !MogileImage.key_exist?(self[c])
               errors[c] << I18n.translate('mogile_image_store.errors.messages.cache_expired')
@@ -139,29 +140,23 @@ module MogileImageStore
           )
         end
 
-        content = file.read
         begin
-          img = ::Magick::Image.from_blob(content).shift
-        rescue
+          img_attr = MogileImage.parse_image(file.read)
+        rescue ::MogileImageStore::InvalidImage
           # 画像ではない場合
           errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_image')
           return
         end
 
-        unless ::MogileImageStore::IMAGE_FORMATS.include?(img.format)
+        unless ::MogileImageStore::IMAGE_FORMATS.include?(img_attr[:type])
           # 対応フォーマットではない場合
           errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_valid_type')
           return
         end
 
         # メタデータを設定
-        @image_attributes[column] = HashWithIndifferentAccess.new({
-          'content' => content,
-          'size' => file.size,
-          'type' => img.format,
-          'width' => img.columns,
-          'height' => img.rows,
-        })
+        @image_attributes[column] = img_attr
+
         # 確認ありの時はこの時点で仮保存
         if image_options[:confirm]
           self[column] = ::MogileImage.save_image(@image_attributes[column], :temporary => true)

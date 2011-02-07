@@ -25,9 +25,10 @@ module MogileImageStore
     Digest::SHA1.hexdigest(path + ':' + backend['secret'])
   end
 
-  class ImageNotFound < StandardError; end
+  class ImageNotFound  < StandardError; end
   class SizeNotAllowed < StandardError; end
   class ColumnNotFound < StandardError; end
+  class InvalidImage   < StandardError; end
 
   # 認証キーがセットされるHTTPリクエストヘッダ
   AUTH_HEADER = 'X-MogileImageStore-Auth'
@@ -54,6 +55,7 @@ end
 ActiveSupport.on_load(:action_controller) do
   ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
 end
+require 'url_helper'
 require 'tag_helper'
 require 'form_helper'
 

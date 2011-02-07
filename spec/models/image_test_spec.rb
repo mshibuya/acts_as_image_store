@@ -314,6 +314,23 @@ describe ImageTest do
       end
     end
 
+    context "saving image without model" do
+      it "should save image and return key" do
+        key = MogileImage.store_image(File.open("#{File.dirname(__FILE__)}/../sample.png").read)
+        key.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
+        @mg.list_keys('').shift.should == [
+          '5d1e43dfd47173ae1420f061111e0776.gif',
+          '60de57a8f5cd0a10b296b1f553cb41a9.png'
+        ]
+      end
+
+      it "should raise error with invalid data" do
+        lambda do
+          MogileImage.store_image('abc')
+        end.should raise_error MogileImageStore::InvalidImage
+      end
+    end
+
     after(:all) do
       #cleanup
       MogileImage.destroy_all
