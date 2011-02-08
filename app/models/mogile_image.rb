@@ -70,8 +70,8 @@ class MogileImage < ActiveRecord::Base
     ##
     # 画像を保存し、keyを返します。
     #
-    def store_image(data)
-      save_image(parse_image(data))
+    def store_image(data, options={})
+      save_image(parse_image(data), options)
     end
 
     ##
@@ -267,7 +267,8 @@ class MogileImage < ActiveRecord::Base
         # Request asynchronously
         t = Thread.new(urls.join(' ')) do |body|
           Net::HTTP.start(host, port || 80) do |http|
-            http.post(MogileImageStore::Engine.config.mount_at + 'flush', body, {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
+            http.post(MogileImageStore::Engine.config.mount_at + 'flush', body,
+                      {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
           end
         end
       end
