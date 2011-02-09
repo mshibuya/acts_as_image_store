@@ -1,16 +1,10 @@
 require 'spec_helper'
-require 'mogilefs'
 
 describe Paranoid do
+  include MogilefsHelperMethods
   context "MogileFS backend" do
-    before(:all) do
-      #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
-        @mogadm.create_domain MogileImageStore.backend['domain']
-        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
-      end
-    end
+    before(:all) { mogilefs_prepare }
+    after(:all)  { mogilefs_cleanup }
 
     before do
       @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
@@ -111,15 +105,5 @@ describe Paranoid do
         MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
     end
-
-    after(:all) do
-      #cleanup
-      MogileImage.destroy_all
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
-      @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.backend['domain']
-    end
-
   end
 end

@@ -1,16 +1,17 @@
 require 'spec_helper'
-require 'mogilefs'
 
 describe Confirm do
+  include MogilefsHelperMethods
+
   context "MogileFS backend" do
     before(:all) do
-      #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
-        @mogadm.create_domain MogileImageStore.backend['domain']
-        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
-      end
+      mogilefs_prepare
+      @prev_cache_time = MogileImageStore.options[:upload_cache]
       MogileImageStore.options[:upload_cache] = 1
+    end
+    after(:all) do
+      mogilefs_cleanup
+      MogileImageStore.options[:upload_cache] = @prev_cache_time
     end
 
     before do
@@ -133,15 +134,5 @@ describe Confirm do
         MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').should be_nil
       end
     end
-
-    after(:all) do
-      #cleanup
-      MogileImage.destroy_all
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
-      @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.backend['domain']
-    end
-
   end
 end

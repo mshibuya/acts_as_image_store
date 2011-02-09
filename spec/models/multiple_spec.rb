@@ -1,16 +1,10 @@
 require 'spec_helper'
-require 'mogilefs'
 
 describe Multiple do
+  include MogilefsHelperMethods
   context "MogileFS backend" do
-    before(:all) do
-      #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
-        @mogadm.create_domain MogileImageStore.backend['domain']
-        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
-      end
-    end
+    before(:all) { mogilefs_prepare }
+    after(:all)  { mogilefs_cleanup }
 
     before do
       @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
@@ -61,15 +55,5 @@ describe Multiple do
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
       end
     end
-
-    after(:all) do
-      #cleanup
-      MogileImage.destroy_all
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
-      @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.backend['domain']
-    end
-
   end
 end
