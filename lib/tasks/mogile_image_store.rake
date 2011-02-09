@@ -23,5 +23,28 @@ namespace :mogile_image_store do
       puts "Class #{MogileImageStore.backend['class']} already exists."
     end
   end
+  task :purge => :environment do
+    require 'active_support/core_ext/numeric'
+    require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
+    require 'mogilefs'
+
+    puts "WARNING: ALL STORED IMAGE DATA WILL BE LOST."
+    puts "If you really wish to continue, enter 'yes'"
+    print ":"
+    if STDIN.gets.chop == 'yes'
+      puts "Connecting to #{MogileImageStore.backend['hosts']}..."
+      MogileImage.destroy_all
+      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
+      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'],
+                                   :hosts  => MogileImageStore.backend['hosts'] })
+      puts "Deleting all images..."
+      @mg.each_key('') {|k| @mg.delete k }
+      puts "Deleting domain #{MogileImageStore.backend['domain']}."
+      @mogadm.delete_domain MogileImageStore.backend['domain']
+      puts "Complete."
+    else
+      puts "Operation cancelled."
+    end
+  end
 end
 
