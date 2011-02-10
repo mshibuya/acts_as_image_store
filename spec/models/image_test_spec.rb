@@ -168,11 +168,11 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 80
         img.rows.should == 80
-        dark = ::Magick::Pixel.from_color('#070707')
-        img.pixel_color(40, 0).should < dark
-        img.pixel_color(40,79).should < dark
-        img.pixel_color( 0,40).should > dark
-        img.pixel_color(79,40).should > dark
+        dark = ::Magick::Pixel.from_color('#070707').intensity
+        img.pixel_color(40, 0).intensity.should < dark
+        img.pixel_color(40,79).intensity.should < dark
+        img.pixel_color( 0,40).intensity.should > dark
+        img.pixel_color(79,40).intensity.should > dark
         @mg.list_keys('').shift.sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png',
            'bcadded5ee18bfa7c99834f307332b02.jpg',
@@ -188,15 +188,15 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 80
         img.rows.should == 80
-        dark = ::Magick::Pixel.from_color('#070707')
-        img.pixel_color(40, 0).should < dark
-        img.pixel_color(40,79).should < dark
-        img.pixel_color( 0,40).should < dark
-        img.pixel_color(79,40).should < dark
-        img.pixel_color(40, 2).should < dark
-        img.pixel_color(40,77).should < dark
-        img.pixel_color( 2,40).should > dark
-        img.pixel_color(77,40).should > dark
+        dark = ::Magick::Pixel.from_color('#070707').intensity
+        img.pixel_color(40, 0).intensity.should < dark
+        img.pixel_color(40,79).intensity.should < dark
+        img.pixel_color( 0,40).intensity.should < dark
+        img.pixel_color(79,40).intensity.should < dark
+        img.pixel_color(40, 2).intensity.should < dark
+        img.pixel_color(40,77).intensity.should < dark
+        img.pixel_color( 2,40).intensity.should > dark
+        img.pixel_color(77,40).intensity.should > dark
         @mg.list_keys('').shift.sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png',
            'bcadded5ee18bfa7c99834f307332b02.jpg',
