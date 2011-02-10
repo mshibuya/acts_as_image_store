@@ -211,6 +211,20 @@ describe ImageTest do
         lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x60fill') }.should raise_error MogileImageStore::SizeNotAllowed
         lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x604') }.should raise_error MogileImageStore::SizeNotAllowed
       end
+
+      it "should return existence of keys" do
+        MogileImage.key_exist?('60de57a8f5cd0a10b296b1f553cb41a9.png').should be_true
+        MogileImage.key_exist?('5d1e43dfd47173ae1420f061111e0776.gif').should be_false
+        MogileImage.key_exist?([
+          '60de57a8f5cd0a10b296b1f553cb41a9.png',
+          '60de57a8f5cd0a10b296b1f553cb41a9.png',
+          'bcadded5ee18bfa7c99834f307332b02.jpg',
+        ]).should be_true
+        MogileImage.key_exist?([
+          '60de57a8f5cd0a10b296b1f553cb41a9.png',
+          '5d1e43dfd47173ae1420f061111e0776.gif',
+        ]).should be_false
+      end
     end
 
     context "overwriting" do

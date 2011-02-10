@@ -151,8 +151,9 @@ class MogileImage < ActiveRecord::Base
     end
 
     def key_exist?(key)
-      name, ext = key.split('.')
-      !!self.find_by_name(name)
+      key = Array.wrap(key).uniq
+      names = key.map{|k| k.split('.').first }
+      key.count == where(:name => names).count
     end
 
     protected
