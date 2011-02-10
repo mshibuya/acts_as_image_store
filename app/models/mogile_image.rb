@@ -16,16 +16,27 @@ class MogileImage < ActiveRecord::Base
     ##
     # 画像にメタデータを付加したハッシュを作成
     #
-    def parse_image(data)
+    def parse_image(data, options={})
+      options = options.symbolize_keys
       begin
-        img = ::Magick::Image.from_blob(data).shift
+        imglist = ::Magick::ImageList.new
+        imglist.from_blob(data)
       rescue
         # 画像ではない場合
         raise ::MogileImageStore::InvalidImage
       end
+      if options[:keep_exif] ||
+        imglist.inject([]){|r,i| r.concat(i.get_exif_by_entry()) } == []
+        content = data
+      else
+        # strip exif info
+        imglist.each{|i| i.strip! }
+        content = imglist.to_blob
+      end
+      img = imglist.first
       HashWithIndifferentAccess.new({
-        'content' => data,
-        'size' => data.size,
+        'content' => content,
+        'size' => content.size,
         'type' => img.format,
         'width' => img.columns,
         'height' => img.rows,
@@ -71,7 +82,7 @@ class MogileImage < ActiveRecord::Base
     # 画像を保存し、keyを返します。
     #
     def store_image(data, options={})
-      save_image(parse_image(data), options)
+      save_image(parse_image(data, options), options)
     end
 
     ##

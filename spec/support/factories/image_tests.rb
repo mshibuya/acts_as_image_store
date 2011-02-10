@@ -8,3 +8,7 @@ Factory.define :image_test do |f|
   f.name { Factory.next(:image_test_name) }
 end
 
+Factory.define :keep_exif do |f|
+  f.name { Factory.next(:image_test_name) }
+end
+

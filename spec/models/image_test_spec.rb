@@ -340,5 +340,26 @@ describe ImageTest do
         end.should raise_error MogileImageStore::InvalidImage
       end
     end
+
+    context "jpeg exif" do
+      it "should clear exif data" do
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample_exif.jpg"
+        lambda{ @image_test.save }.should_not raise_error
+        content_type, data = MogileImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
+        imglist = Magick::ImageList.new
+        imglist.from_blob(data)
+        imglist.first.get_exif_by_entry().should == []
+      end
+      it "should keep exif data" do
+        @image_test = Factory.build(:keep_exif)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample_exif.jpg"
+        lambda{ @image_test.save }.should_not raise_error
+        content_type, data = MogileImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
+        imglist = Magick::ImageList.new
+        imglist.from_blob(data)
+        imglist.first.get_exif_by_entry().should_not == []
+      end
+    end
   end
 end

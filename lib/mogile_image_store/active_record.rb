@@ -22,6 +22,15 @@ module MogileImageStore
       # 画像が保存されるカラム名を指定。データ型は :string, :limit=>36を使用。
       # 省略時のカラム名はimageとなる。
       #
+      # ==== options
+      # 以下のオプションがある。
+      # =====:confirm
+      # trueにするとvalidationの時点で画像を仮保存するようになる。
+      # 確認画面を挟む場合に使用。
+      # =====:keep_exif
+      # trueにするとこのモデルに保存される画像はexif情報を残すようになる。
+      # （デフォルトでは消去）
+      #
       # ==== 例:
       #   has_images
       #   has_images :logo
@@ -142,7 +151,8 @@ module MogileImageStore
         end
 
         begin
-          img_attr = MogileImage.parse_image(file.read)
+          img_attr = MogileImage.parse_image(file.read,
+                                             :keep_exif => self.image_options[:keep_exif])
         rescue ::MogileImageStore::InvalidImage
           # 画像ではない場合
           errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_image')

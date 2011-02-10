@@ -169,3 +169,8 @@ class ImageTestWithHeight < ActiveRecord::Base
   has_images
   validates :image, :image_attribute => { :maxheight => 500 }
 end
+
+class KeepExif < ActiveRecord::Base
+  self.table_name = 'image_tests'
+  has_images :image, :keep_exif => true
+end
