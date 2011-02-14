@@ -21,7 +21,12 @@ module MogileImageStore # :nodoc:
     # 画像のURLを返します。
     #
     def image_url(key, options = {})
-      return nil if !key || !key.respond_to?(:empty?) || key.empty?
+      if !key || !key.respond_to?(:empty?) || key.empty?
+        if options[:default]
+          key = MogileImageStore.options[:alternatives][options[:default]]
+        end
+        return nil if !key || !key.respond_to?(:empty?) || key.empty?
+      end
       key = key.to_s
       options = options.symbolize_keys
       width  = options[:w] || 0
@@ -40,7 +45,11 @@ module MogileImageStore # :nodoc:
       end
       path = MogileImageStore::Engine.config.mount_at + size + '/' + key
       if MogileImageStore.backend['imghost']
-        'http://' + MogileImageStore.backend['imghost'] + path
+        if MogileImageStore.backend['imghost'] =~ /^https?:\/\//
+          MogileImageStore.backend['imghost'] + path
+        else
+          'http://' + MogileImageStore.backend['imghost'] + path
+        end
       else
         path
       end

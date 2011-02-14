@@ -16,6 +16,6 @@ production:
   class:   xxx
   reproxy: true
   cache:   86400
-  imghost: img.example.com
+  imghost: 'http://img.example.com'
   secret:  xxx
 

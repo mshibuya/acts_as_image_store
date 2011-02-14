@@ -30,6 +30,10 @@ describe ActionView::Helpers::TagHelper do
     image('01234567890abcdef0123456789abcdef.jpg', :size => '80x80fill5').should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/80x80fill5/01234567890abcdef0123456789abcdef.jpg" />'
   end
 
+  it "should no photo image without key" do
+    image('').should == '<img src="http://'+MogileImageStore.backend['imghost']+'/image/raw/44bd273c0eddca6de148fd717db8653e.jpg" />'
+  end
+
   describe "when imghost is not set" do
     before(:all) do
       @imghost_backup = MogileImageStore.backend['imghost']
@@ -41,6 +45,19 @@ describe ActionView::Helpers::TagHelper do
 
     it "should show image tag with size and alt with hostname" do
       image('01234567890abcdef0123456789abcdef.jpg', :w => 80, :h => 80, :alt => 'alt text').should == '<img alt="alt text" src="/image/80x80/01234567890abcdef0123456789abcdef.jpg" />'
+    end
+  end
+  describe "when imghost begins with scheme " do
+    before(:all) do
+      @imghost_backup = MogileImageStore.backend['imghost']
+      MogileImageStore.backend['imghost'] = 'https://img.example.com'
+    end
+    after(:all) do
+      MogileImageStore.backend['imghost'] = @imghost_backup
+    end
+
+    it "should show image tag with size and alt with hostname" do
+      image('01234567890abcdef0123456789abcdef.jpg', :w => 80, :h => 80, :alt => 'alt text').should == '<img alt="alt text" src="https://img.example.com/image/80x80/01234567890abcdef0123456789abcdef.jpg" />'
     end
   end
 end
