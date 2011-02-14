@@ -8,8 +8,7 @@ module MogileImageStore # :nodoc:
   #
   module FormBuilder
     include ActionView::Helpers::TagHelper
-    include TagHelper
-    include UrlHelper
+    include ActionView::Helpers::UrlHelper
     ##
     # ===画像フォーム表示メソッド
     #
@@ -38,25 +37,27 @@ module MogileImageStore # :nodoc:
     def image_field(method, options = {})
       options = options.symbolize_keys
       confirm   = options.delete(:confirm) || false
+
+      image_options = options.delete(:image_options) || {}
+      input_options = options.delete(:input_options) || {}
       if confirm
-        width  = options.delete(:w) || 0
-        height = options.delete(:h) || 0
+        image_options[:w] ||= 0
+        image_options[:h] ||= 0
+        image_options[:link] = false
         deletable = false
         show_image = @object[method].is_a?(String) && !@object[method].empty?
       else
-        width  = options.delete(:w) || MogileImageStore.options[:field_w]
-        height = options.delete(:h) || MogileImageStore.options[:field_h]
+        image_options[:w] = options[:w] if options[:w]
+        image_options[:h] = options[:h] if options[:h]
         deletable = options.delete(:deletable)
         link_options  = options.delete(:link_options) || {}
         show_image = @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
       end
-      image_options = options.delete(:image_options) || {}
-      input_options = options.delete(:input_options) || {}
 
       output = ''.html_safe
       if show_image
         # 画像を表示
-        output += stored_image(@object[method], {:w => width, :h => height}.merge(image_options))
+        output += thumbnail(@object[method], image_options)
         # 画像削除用のリンク表示
         if deletable === nil || deletable
           output += @template.link_to(

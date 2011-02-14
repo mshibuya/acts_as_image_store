@@ -28,6 +28,7 @@ module MogileImageStore
       # alternative images
       :alternatives => {
         :default => '44bd273c0eddca6de148fd717db8653e.jpg',
+        :another => 'ffffffffffffffffffffffffffffffff.jpg',
       },
     }
   end
