@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{mogile_image_store}
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2011-01-18}
+  s.date = %q{2011-02-15}
   s.description = %q{Rails plugin for using MogileFS as image storage}
   s.email = %q{shibuya@lavan7.co.jp}
   s.extra_rdoc_files = [
@@ -30,18 +30,19 @@ Gem::Specification.new do |s|
     "config/locales/ja.yml",
     "config/routes.rb",
     "init.rb",
-    "lib/form_helper.rb",
     "lib/mogile_image_store.rb",
     "lib/mogile_image_store/active_record.rb",
     "lib/mogile_image_store/engine.rb",
+    "lib/mogile_image_store/form_helper.rb",
     "lib/mogile_image_store/image_deletable.rb",
+    "lib/mogile_image_store/tag_helper.rb",
+    "lib/mogile_image_store/url_helper.rb",
     "lib/mogile_image_store/validates_image_attribute.rb",
     "lib/rails/generators/mogile_image_store/mogile_image_store_generator.rb",
     "lib/rails/generators/mogile_image_store/templates/initializer.rb",
     "lib/rails/generators/mogile_image_store/templates/migration.rb",
     "lib/rails/generators/mogile_image_store/templates/mogile_fs.yml",
     "lib/rails/generators/mogile_image_store/templates/schema.rb",
-    "lib/tag_helper.rb",
     "lib/tasks/mogile_image_store.rake",
     "mogile_image_store.gemspec",
     "spec/controllers/image_tests_controller_spec.rb",
@@ -99,6 +100,7 @@ Gem::Specification.new do |s|
     "spec/dummy/public/422.html",
     "spec/dummy/public/500.html",
     "spec/dummy/public/favicon.ico",
+    "spec/dummy/public/images/no_photo.jpg",
     "spec/dummy/public/javascripts/application.js",
     "spec/dummy/public/javascripts/controls.js",
     "spec/dummy/public/javascripts/dragdrop.js",
@@ -126,12 +128,14 @@ Gem::Specification.new do |s|
     "spec/sample.gif",
     "spec/sample.jpg",
     "spec/sample.png",
+    "spec/sample_exif.jpg",
     "spec/spec_helper.rb",
     "spec/support/factories/confirms.rb",
     "spec/support/factories/image_tests.rb",
     "spec/support/factories/multiples.rb",
     "spec/support/factories/paranoids.rb",
-    "spec/support/models.rb"
+    "spec/support/models.rb",
+    "spec/support/mogilefs_helper_methods.rb"
   ]
   s.homepage = %q{http://git.dev.ist-corp.jp/mogile_image_store}
   s.licenses = ["MIT"]
@@ -186,7 +190,8 @@ Gem::Specification.new do |s|
     "spec/support/factories/image_tests.rb",
     "spec/support/factories/multiples.rb",
     "spec/support/factories/paranoids.rb",
-    "spec/support/models.rb"
+    "spec/support/models.rb",
+    "spec/support/mogilefs_helper_methods.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -194,10 +199,9 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<activerecord>, [">= 3.0.0"])
+      s.add_runtime_dependency(%q<rails>, [">= 3.0.0"])
       s.add_runtime_dependency(%q<rmagick>, [">= 0"])
       s.add_runtime_dependency(%q<mogilefs-client>, [">= 0"])
-      s.add_development_dependency(%q<rails>, [">= 3.0.0"])
       s.add_development_dependency(%q<sqlite3-ruby>, ["= 1.2.5"])
       s.add_development_dependency(%q<mysql2>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 2.0.1"])
@@ -211,10 +215,9 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
       s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
     else
-      s.add_dependency(%q<activerecord>, [">= 3.0.0"])
+      s.add_dependency(%q<rails>, [">= 3.0.0"])
       s.add_dependency(%q<rmagick>, [">= 0"])
       s.add_dependency(%q<mogilefs-client>, [">= 0"])
-      s.add_dependency(%q<rails>, [">= 3.0.0"])
       s.add_dependency(%q<sqlite3-ruby>, ["= 1.2.5"])
       s.add_dependency(%q<mysql2>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 2.0.1"])
@@ -229,10 +232,9 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<ruby-debug19>, [">= 0"])
     end
   else
-    s.add_dependency(%q<activerecord>, [">= 3.0.0"])
+    s.add_dependency(%q<rails>, [">= 3.0.0"])
     s.add_dependency(%q<rmagick>, [">= 0"])
     s.add_dependency(%q<mogilefs-client>, [">= 0"])
-    s.add_dependency(%q<rails>, [">= 3.0.0"])
     s.add_dependency(%q<sqlite3-ruby>, ["= 1.2.5"])
     s.add_dependency(%q<mysql2>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 2.0.1"])
