@@ -65,5 +65,15 @@ namespace :mogile_image_store do
       puts "usage: rake mogile_image_store:remove[<image key name>]"
     end
   end
+  task :list_key => :environment do
+    require 'active_support/core_ext/numeric'
+    require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
+    require 'mogilefs'
+
+    puts "Listing keys in domain #{MogileImageStore.backend['domain']} at #{MogileImageStore.backend['hosts']}:"
+    @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'],
+                                   :hosts  => MogileImageStore.backend['hosts'] })
+    @mg.each_key('') {|k| puts k }
+  end
 end
 
