@@ -1,8 +1,6 @@
 module MogileImageStore
   class Engine < Rails::Engine
 
-    config.mount_at = '/image/'
-
     config.mogile_fs = YAML::load_file("#{Rails.root}/config/initializers/mogile_fs.yml")
 
     config.options = {

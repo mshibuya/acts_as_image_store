@@ -1,21 +1,23 @@
 development:
-  hosts:   [192.168.56.101:7001]
-  domain:  dev
-  class:   image
-  reproxy: false
+  hosts:    [192.168.56.101:7001]
+  domain:   dev
+  class:    image
+  reproxy:  false
+  mount_at: /image/
 test:
-  hosts:   [192.168.56.101:7001]
-  domain:  mogile_image_store_test
-  class:   test
-  reproxy: false
-  imghost: image.example.com
+  hosts:    [192.168.56.101:7001]
+  domain:   mogile_image_store_test
+  class:    test
+  reproxy:  false
+  base_url: 'http://image.example.com/image/'
+  mount_at: /image/
   secret:  xxx
 production:
-  hosts:   [192.168.56.101:7001, 192.168.56.102:7001]
-  domain:  xxx
-  class:   xxx
-  reproxy: true
-  cache:   86400
-  imghost: image.example.com
-  secret:  xxx
+  hosts:    [192.168.56.101:7001, 192.168.56.102:7001]
+  domain:   xxx
+  class:    xxx
+  reproxy:  true
+  cache:    86400
+  base_url: 'http://image.example.com/image/'
+  secret:   xxx
 

@@ -43,16 +43,8 @@ module MogileImageStore # :nodoc:
         name, ext = key.split('.')
         key = name + '.' + format.to_s
       end
-      path = MogileImageStore::Engine.config.mount_at + size + '/' + key
-      if MogileImageStore.backend['imghost']
-        if MogileImageStore.backend['imghost'] =~ /^https?:\/\//
-          MogileImageStore.backend['imghost'] + path
-        else
-          'http://' + MogileImageStore.backend['imghost'] + path
-        end
-      else
-        path
-      end
+      
+      MogileImageStore.backend['base_url'] + size + '/' + key
     end
   end
 end

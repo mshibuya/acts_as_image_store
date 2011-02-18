@@ -223,11 +223,13 @@ class MogileImage < ActiveRecord::Base
     end
     ##
     # MogileFSキーからURLを復元する
+    # (Reproxy Cacheクリア用)
     #
     def parse_key(key)
       name, format, size = key.scan(/([0-9a-f]{32})\.(jpg|gif|png)(?:\/(\d+x\d+[a-z]*\d*))?/).shift
       size ||= 'raw'
-      MogileImageStore::Engine.config.mount_at + size + '/' + name + '.' + format if name && format
+      base = URI.parse(MogileImageStore.backend['base_url'])
+      base.path + size + '/' + name + '.' + format
     end
 
     ##
@@ -275,11 +277,11 @@ class MogileImage < ActiveRecord::Base
         urls.push(url) if url
       end
       if urls.size > 0 && MogileImageStore.backend['reproxy']
-        host, port = MogileImageStore.backend['imghost'].split(':')
+        base = URI.parse(MogileImageStore.backend['base_url'])
         # Request asynchronously
-        t = Thread.new(urls.join(' ')) do |body|
-          Net::HTTP.start(host, port || 80) do |http|
-            http.post(MogileImageStore::Engine.config.mount_at + 'flush', body,
+        t = Thread.new(base, urls.join(' ')) do |perlbal, body|
+          Net::HTTP.start(perlbal.host, perlbal.port) do |http|
+            http.post(perlbal.path + 'flush', body,
                       {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
           end
         end

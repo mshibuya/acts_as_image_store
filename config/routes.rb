@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   begin
-    mount_at = MogileImageStore::Engine.config.mount_at
+    mount_at = MogileImageStore.backend['mount_at']
 
     if mount_at
       match "#{mount_at}:size/:name.:format", :to => "mogile_images#show", :via => 'get', :constraints => {

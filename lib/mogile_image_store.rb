@@ -1,5 +1,4 @@
 # coding: utf-8
-$:.unshift(File.dirname(__FILE__))
 
 require 'digest/sha1'
 
@@ -10,14 +9,27 @@ require 'digest/sha1'
 module MogileImageStore
   require 'mogile_image_store/engine' if defined?(Rails)
 
-  # Rails.envに合わせたMogileFSバックエンド情報を返す
-  def self.backend
-    MogileImageStore::Engine.config.mogile_fs[Rails.env]
-  end
+  mattr_accessor :backend, :options
 
-  # config/initializers/mogile_image_store.rbで指定されたオプションを返す
-  def self.options
-    MogileImageStore::Engine.config.options rescue {}
+  # 設定を読み込む
+  def self.configure
+    begin
+      backend = MogileImageStore::Engine.config.mogile_fs[Rails.env]
+    rescue NoMethodError
+      backend = {}
+    end
+    if backend['mount_at']
+      backend['mount_at'] += '/' if backend['mount_at'].last != '/'
+    end
+    if backend['base_url']
+      backend['base_url'] += '/' if backend['base_url'].last != '/'
+    else
+      backend['base_url'] = '/image/'
+    end
+
+    MogileImageStore.backend = HashWithIndifferentAccess.new(backend)
+    MogileImageStore.options = HashWithIndifferentAccess.
+      new((MogileImageStore::Engine.config.options rescue {}))
   end
 
   # 認証キーを計算する
@@ -55,6 +67,9 @@ ActiveSupport.on_load(:active_record) do
 end
 ActiveSupport.on_load(:action_controller) do
   ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
+end
+ActiveSupport.on_load(:after_initialize) do
+  MogileImageStore.configure
 end
 ActionView::Helpers::UrlHelper.instance_eval   { include MogileImageStore::UrlHelper }
 ActionView::Helpers::TagHelper.instance_eval   { include MogileImageStore::TagHelper }

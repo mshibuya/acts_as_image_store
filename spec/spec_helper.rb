@@ -34,7 +34,9 @@ generator = MogileImageStoreGenerator.new
 generator.create_migration_file
 Dir.chdir cwd
 # Run any available migration
-ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
+ActiveRecord::Migration.suppress_messages do
+  ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
+end
 # Load initializer
 require "#{File.dirname(__FILE__)}/dummy/config/initializers/mogile_image_store.rb"
 
