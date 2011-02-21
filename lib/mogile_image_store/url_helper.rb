@@ -6,6 +6,7 @@ module MogileImageStore # :nodoc:
   # 画像URL用ヘルパー
   #
   module UrlHelper
+    extend ActiveSupport::Concern
     ##
     # ===画像URL取得メソッド
     #

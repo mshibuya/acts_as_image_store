@@ -1,7 +1,7 @@
 # coding: utf-8
 require 'spec_helper'
 
-describe ActionView::Helpers::FormHelper do
+describe MogileImageStore::FormBuilder do
   context "MogileFS backend" do
     before(:all) do
       #prepare mogilefs

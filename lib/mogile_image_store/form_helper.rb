@@ -7,8 +7,9 @@ module MogileImageStore # :nodoc:
   # 入力フォームの作成支援用。
   #
   module FormBuilder
-    include ActionView::Helpers::TagHelper
     include ActionView::Helpers::UrlHelper
+    include ActionView::Helpers::TagHelper
+    include MogileImageStore::TagHelper
     ##
     # ===画像フォーム表示メソッド
     #

@@ -68,12 +68,13 @@ end
 ActiveSupport.on_load(:action_controller) do
   ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
 end
+ActiveSupport.on_load(:action_view) do
+  ActionView::Base.send(:include, MogileImageStore::TagHelper)
+  ActionView::Helpers::FormBuilder.send(:include, MogileImageStore::FormBuilder)
+end
 ActiveSupport.on_load(:after_initialize) do
   MogileImageStore.configure
 end
-ActionView::Helpers::UrlHelper.instance_eval   { include MogileImageStore::UrlHelper }
-ActionView::Helpers::TagHelper.instance_eval   { include MogileImageStore::TagHelper }
-ActionView::Helpers::FormBuilder.instance_eval { include MogileImageStore::FormBuilder }
 
 Dir[File.join("#{File.dirname(__FILE__)}/../config/locales/*.yml")].each do |locale|
   I18n.load_path.unshift(locale)

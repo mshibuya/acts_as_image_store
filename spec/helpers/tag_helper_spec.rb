@@ -1,7 +1,7 @@
 # coding: utf-8
 require 'spec_helper'
 
-describe ActionView::Helpers::TagHelper do
+describe MogileImageStore::TagHelper do
   it "should show image tag" do
     image('0123456789abcdef0123456789abcdef.jpg').should == '<img src="'+MogileImageStore.backend['base_url']+'raw/0123456789abcdef0123456789abcdef.jpg" />'
   end

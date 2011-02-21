@@ -6,6 +6,8 @@ module MogileImageStore # :nodoc:
   # 画像タグ作成用ヘルパー
   #
   module TagHelper
+    extend ActiveSupport::Concern
+    include MogileImageStore::UrlHelper
     ##
     # ===画像タグ表示メソッド
     #
