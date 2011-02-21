@@ -19,10 +19,10 @@ module MogileImageStore
       backend = {}
     end
     if backend['mount_at']
-      backend['mount_at'] += '/' if backend['mount_at'].last != '/'
+      backend['mount_at'] += '/' if backend['mount_at'][-1] != '/'
     end
     if backend['base_url']
-      backend['base_url'] += '/' if backend['base_url'].last != '/'
+      backend['base_url'] += '/' if backend['base_url'][-1] != '/'
     else
       backend['base_url'] = '/image/'
     end

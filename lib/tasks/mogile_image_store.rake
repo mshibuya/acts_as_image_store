@@ -1,8 +1,9 @@
 namespace :mogile_image_store do
   task :prepare do
     require 'active_support/core_ext/numeric'
-    require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
     require 'mogilefs'
+    require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
+    MogileImageStore.configure
     puts "Connecting to #{MogileImageStore.backend['hosts']}..."
     mogadm = MogileFS::Admin.new :hosts => MogileImageStore.backend['hosts']
     #create domain
@@ -25,7 +26,6 @@ namespace :mogile_image_store do
   end
   task :purge => :environment do
     require 'active_support/core_ext/numeric'
-    require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
     require 'mogilefs'
 
     puts "WARNING: ALL STORED IMAGE DATA WILL BE LOST."
@@ -67,7 +67,6 @@ namespace :mogile_image_store do
   end
   task :list_key => :environment do
     require 'active_support/core_ext/numeric'
-    require File.expand_path('config/initializers/mogile_image_store.rb', Rails.root)
     require 'mogilefs'
 
     puts "Listing keys in domain #{MogileImageStore.backend['domain']} at #{MogileImageStore.backend['hosts']}:"
