@@ -25,12 +25,23 @@ class MogileImage < ActiveRecord::Base
         # 画像ではない場合
         raise ::MogileImageStore::InvalidImage
       end
-      if options[:keep_exif] ||
-        imglist.inject([]){|r,i| r.concat(i.get_exif_by_entry()) } == []
+      noresize = (imglist.first.columns <= ::MogileImageStore.options[:maxwidth] &&
+                  imglist.first.rows <= ::MogileImageStore.options[:maxheight])
+      nostrip = (options[:keep_exif] ||
+                  imglist.inject([]){|r,i| r.concat(i.get_exif_by_entry()) } == [])
+      if noresize && nostrip
         content = data
       else
-        # strip exif info
-        imglist.each{|i| i.strip! }
+        unless noresize
+          imglist.each do |i|
+            i.resize_to_fit!(MogileImageStore.options[:maxwidth],
+                             MogileImageStore.options[:maxheight])
+          end
+        end
+        unless nostrip
+          # strip exif info
+          imglist.each{|i| i.strip! }
+        end
         content = imglist.to_blob
       end
       img = imglist.first
@@ -111,7 +122,8 @@ class MogileImage < ActiveRecord::Base
       name, ext = key.split('.')
       self.transaction do
         record = find_by_name name
-        raise MogileImageStore::ImageNotFound unless record
+        # 指定された画像キーを持つレコードが見つからなかったら何もせず戻る
+        return unless record
         if record.refcount > 1
           record.refcount -= 1
           record.save

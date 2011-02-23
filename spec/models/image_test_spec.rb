@@ -361,5 +361,18 @@ describe ImageTest do
         imglist.first.get_exif_by_entry().should_not == []
       end
     end
+
+    context "huge image" do
+      it "should be shrinked to fit within limit" do
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample_huge.gif"
+        lambda{ @image_test.save }.should_not raise_error
+        content_type, data = MogileImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
+        imglist = Magick::ImageList.new
+        imglist.from_blob(data)
+        imglist.first.columns.should == 2048
+        imglist.first.rows.should == 1536
+      end
+    end
   end
 end
