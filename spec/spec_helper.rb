@@ -51,4 +51,30 @@ RSpec.configure do |config|
 
   # == Mock Framework
   config.mock_with :rspec
+
+  require "database_cleaner"
+  include MogilefsHelperMethods
+  config.before(:each) do
+    if example.metadata[:mogilefs]
+      mogilefs_prepare
+      @mg = MogileFS::MogileFS.new({
+        :domain => MogileImageStore.backend['domain'],
+        :hosts  => MogileImageStore.backend['hosts']
+      })
+    end
+    if example.metadata[:truncation]
+      DatabaseCleaner.strategy = :truncation
+    else
+      DatabaseCleaner.strategy = :transaction
+    end
+    DatabaseCleaner.start
+  end
+  config.after(:each) do
+    mogilefs_cleanup if example.metadata[:mogilefs]
+    DatabaseCleaner.clean
+  end
+
+  # filtering
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
 end

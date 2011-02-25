@@ -1,109 +1,61 @@
 require 'spec_helper'
 
-describe Paranoid do
-  include MogilefsHelperMethods
-  context "MogileFS backend" do
-    before(:all) { mogilefs_prepare }
-    after(:all)  { mogilefs_cleanup }
+describe Paranoid, :mogilefs => true do
+  before do
+    @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+  end
 
+  context "saving" do
     before do
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+      @paranoid = Factory.build(:paranoid)
     end
 
-    context "saving" do
-      before do
-        @paranoid = Factory.build(:paranoid)
-      end
-
-      it "should return hash value when saved" do
-        @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
-        lambda{ @paranoid.save }.should_not raise_error
-        @paranoid.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-        @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
-      end
-
-      it "should increase refcount when saving the same image" do
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
-        @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
-        lambda{ @paranoid.save }.should_not raise_error
-        @paranoid.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-        @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-      end
-
-      it "should accept another image using set_image_data" do
-        @paranoid.set_image_data :image, File.open("#{File.dirname(__FILE__)}/../sample.png").read
-        lambda{ @paranoid.save }.should_not raise_error
-        @paranoid.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
-      end
+    it "should return hash value when saved" do
+      @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+      lambda{ @paranoid.save }.should_not raise_error
+      @paranoid.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+      @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
     end
 
-    context "overwriting" do
-      it "should delete old image when overwritten" do
-        @paranoid = Paranoid.find_by_image('60de57a8f5cd0a10b296b1f553cb41a9.png')
-        @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.gif"
-        lambda{ @paranoid.save }.should_not raise_error
-        @paranoid.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
-      end
+    it "should accept another image using set_image_data" do
+      @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+      @paranoid.save!
+      @paranoid = Factory.build(:paranoid)
+      @paranoid.set_image_data :image, File.open("#{File.dirname(__FILE__)}/../sample.png").read
+      lambda{ @paranoid.save }.should_not raise_error
+      @paranoid.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
+      @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+      MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
+      MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
+    end
+  end
+
+  context "deletion" do
+    before do
+      @paranoid = Factory.build(:paranoid)
+      @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+      @paranoid.save!
     end
 
-    context "saving without uploading image" do
-      it "should preserve image name" do
-        @paranoid = Paranoid.find_by_image('5d1e43dfd47173ae1420f061111e0776.gif')
-        new_name = @paranoid.name + ' new'
-        @paranoid.name = new_name
-        lambda{ @paranoid.save }.should_not raise_error
-        @paranoid.name.should == new_name
-        @paranoid.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
-      end
+    it "should affect nothing on soft removal" do
+      lambda{ @paranoid.destroy }.should_not raise_error
+      @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+      MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
     end
 
-    context "deletion" do
-      it "should affect nothing on soft removal" do
-        @paranoid = Paranoid.find_by_image('bcadded5ee18bfa7c99834f307332b02.jpg')
-        lambda{ @paranoid.destroy }.should_not raise_error
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
-      end
+    it "should decrease refcount when deleting duplicated image" do
+      lambda do
+        @paranoid.destroy
+        @paranoid.reload.destroy
+      end.should_not raise_error
+      @mg.list_keys('').should be_nil
+      MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
+    end
 
-      it "should decrease refcount when deleting duplicated image" do
-        @paranoid = Paranoid.unscoped.find_by_image('bcadded5ee18bfa7c99834f307332b02.jpg')
-        lambda{ @paranoid.destroy }.should_not raise_error
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
-      end
-
-      it "should delete image data when deleting image" do
-        @paranoid = Paranoid.find_by_image('bcadded5ee18bfa7c99834f307332b02.jpg')
-        lambda{ @paranoid.destroy! }.should_not raise_error
-        @mg.list_keys('').shift.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
-      end
+    it "should delete image data on real removal" do
+      lambda{ @paranoid.destroy! }.should_not raise_error
+      @mg.list_keys('').should be_nil
+      MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
     end
   end
 end

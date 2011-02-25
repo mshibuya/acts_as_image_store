@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe ImageTest do
-  include MogilefsHelperMethods
-
   it "should not accept file larger than maxsize" do
     image_test = ImageTest.new
     t = Tempfile.new('mogileimagetest')
@@ -60,10 +58,7 @@ describe ImageTest do
     end
   end
 
-  context "MogileFS backend" do
-    before(:all) { mogilefs_prepare }
-    after(:all)  { mogilefs_cleanup }
-
+  context "MogileFS backend", :mogilefs => true do
     before do
       @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
     end
@@ -81,6 +76,9 @@ describe ImageTest do
       end
 
       it "should increase refcount when saving the same image" do
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test.save!
+        @image_test = Factory.build(:image_test)
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
         lambda{ @image_test.save }.should_not raise_error
@@ -88,22 +86,21 @@ describe ImageTest do
         @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
-
-      it "should accept another image using set_image_data" do
-        @image_test.set_image_data :image, File.open("#{File.dirname(__FILE__)}/../sample.png").read
-        lambda{ @image_test.save }.should_not raise_error
-        @image_test.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
-      end
     end
 
     context "retrieval" do
+      before do
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test.save!
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.png"
+        @image_test.save!
+      end
+
       it "should return 2 urls" do
         sleep(3) # wait until replication becomes ready
         MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg').pop.should have(2).items
-        MogileImage.fetch_urls('60de57a8f5cd0a10b296b1f553cb41a9', 'png').pop.should have(2).items
       end
 
       it "should return raw jpeg image" do
@@ -113,7 +110,6 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 725
         img.rows.should == 544
-        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
       end
 
       it "should return raw png image" do
@@ -123,7 +119,6 @@ describe ImageTest do
         img.format.should == 'PNG'
         img.columns.should == 460
         img.rows.should == 445
-        @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
       end
 
       it "should return jpeg=>png converted image" do
@@ -146,7 +141,7 @@ describe ImageTest do
         img.rows.should == 450
         @mg.list_keys('').shift.sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450']
       end
 
       it "should return raw jpeg image when requested larger size" do
@@ -157,8 +152,7 @@ describe ImageTest do
         img.columns.should == 725
         img.rows.should == 544
         @mg.list_keys('').shift.sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450', 'bcadded5ee18bfa7c99834f307332b02.png']
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
       end
 
       it "should return filled jpeg image" do
@@ -174,11 +168,8 @@ describe ImageTest do
         img.pixel_color( 0,40).intensity.should > dark
         img.pixel_color(79,40).intensity.should > dark
         @mg.list_keys('').shift.sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
-           'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
-           'bcadded5ee18bfa7c99834f307332b02.png']
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill']
       end
 
       it "should return filled jpeg image" do
@@ -198,12 +189,8 @@ describe ImageTest do
         img.pixel_color( 2,40).intensity.should > dark
         img.pixel_color(77,40).intensity.should > dark
         @mg.list_keys('').shift.sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
-           'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
-           'bcadded5ee18bfa7c99834f307332b02.png']
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2']
       end
 
       it "should return filled jpeg image with white background" do
@@ -219,13 +206,8 @@ describe ImageTest do
         img.pixel_color( 0,40).intensity.should < bright
         img.pixel_color(79,40).intensity.should < bright
         @mg.list_keys('').shift.sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
-           'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
-           'bcadded5ee18bfa7c99834f307332b02.png']
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw']
       end
 
       it "should raise error when size is not allowed" do
@@ -250,45 +232,38 @@ describe ImageTest do
     end
 
     context "overwriting" do
+      before do
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.png"
+        @image_test.save!
+      end
+
       it "should delete old image when overwritten" do
-        @image_test = ImageTest.find_by_image('60de57a8f5cd0a10b296b1f553cb41a9.png')
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.gif"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
-           'bcadded5ee18bfa7c99834f307332b02.png']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
+        @mg.list_keys('').shift.sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
         MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
     end
 
     context "saving without uploading image" do
+      before do
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test.save!
+      end
+
       it "should preserve image name" do
-        @image_test = ImageTest.find_by_image('5d1e43dfd47173ae1420f061111e0776.gif')
         new_name = @image_test.name + ' new'
         @image_test.name = new_name
         MogileImage.should_not_receive(:save_image)
         lambda{ @image_test.save }.should_not raise_error
         @image_test.name.should == new_name
-        @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
-           'bcadded5ee18bfa7c99834f307332b02.png']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
+        @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+        @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       end
 
       it "should preserve image name with image_type validation" do
@@ -322,30 +297,26 @@ describe ImageTest do
 
     context "deletion" do
       before do
-        @image_test = ImageTest.first
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test.save!
+        @image_test = Factory.build(:image_test)
+        @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test.save!
       end
 
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').shift.sort.should ==
-          ['5d1e43dfd47173ae1420f061111e0776.gif',
-           'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
-           'bcadded5ee18bfa7c99834f307332b02.png']
+        @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
 
       it "should delete image data when deleting image" do
+        @image_test.destroy
+        @image_test = ImageTest.first
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').shift.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
+        @mg.list_keys('').should be_nil
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
     end
 
@@ -353,10 +324,7 @@ describe ImageTest do
       it "should save image and return key" do
         key = MogileImage.store_image(File.open("#{File.dirname(__FILE__)}/../sample.png").read)
         key.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-        @mg.list_keys('').shift.should == [
-          '5d1e43dfd47173ae1420f061111e0776.gif',
-          '60de57a8f5cd0a10b296b1f553cb41a9.png'
-        ]
+        @mg.list_keys('').shift.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
       end
 
       it "should raise error with invalid data" do
