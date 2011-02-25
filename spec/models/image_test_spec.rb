@@ -206,6 +206,28 @@ describe ImageTest do
            'bcadded5ee18bfa7c99834f307332b02.png']
       end
 
+      it "should return filled jpeg image with white background" do
+        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fillw')
+        content_type.should == 'image/jpeg'
+        img = ::Magick::Image.from_blob(data).shift
+        img.format.should == 'JPEG'
+        img.columns.should == 80
+        img.rows.should == 80
+        bright = ::Magick::Pixel.from_color('#F9F9F9').intensity
+        img.pixel_color(40, 0).intensity.should > bright
+        img.pixel_color(40,79).intensity.should > bright
+        img.pixel_color( 0,40).intensity.should < bright
+        img.pixel_color(79,40).intensity.should < bright
+        @mg.list_keys('').shift.sort.should ==
+          ['60de57a8f5cd0a10b296b1f553cb41a9.png',
+           'bcadded5ee18bfa7c99834f307332b02.jpg',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
+           'bcadded5ee18bfa7c99834f307332b02.png']
+      end
+
       it "should raise error when size is not allowed" do
         lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '83x60') }.should raise_error MogileImageStore::SizeNotAllowed
         lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x60fill') }.should raise_error MogileImageStore::SizeNotAllowed
@@ -239,6 +261,7 @@ describe ImageTest do
            'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
            'bcadded5ee18bfa7c99834f307332b02.png']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
@@ -261,6 +284,7 @@ describe ImageTest do
            'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
            'bcadded5ee18bfa7c99834f307332b02.png']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
@@ -309,6 +333,7 @@ describe ImageTest do
            'bcadded5ee18bfa7c99834f307332b02.jpg/600x450',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2',
+           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw',
            'bcadded5ee18bfa7c99834f307332b02.png']
         MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
         MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil

@@ -220,10 +220,9 @@ class MogileImage < ActiveRecord::Base
       w, h, n = [w, h, n].map {|i| i.to_i if i }
       case method
       when 'fill'
-        n ||= 0
-        img.resize_to_fit! w-n*2, h-n*2
-        background = ::Magick::Image.new(w, h) { self.background_color = "black" }
-        img = background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)
+        img = resize_with_fill(img, w, h, n, 'black')
+      when 'fillw'
+        img = resize_with_fill(img, w, h, n, 'white')
       else
         if size != 'raw' && (img.columns > w || img.rows > h)
           img.resize_to_fit! w, h
@@ -232,6 +231,15 @@ class MogileImage < ActiveRecord::Base
       new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
       img.format = new_format if img.format != new_format
       img
+    end
+    ##
+    # 画像を背景色つきでリサイズ
+    #
+    def resize_with_fill(img, w, h, n, color)
+      n ||= 0
+      img.resize_to_fit! w-n*2, h-n*2
+      background = ::Magick::Image.new(w, h) { self.background_color = color }
+      background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)
     end
     ##
     # MogileFSキーからURLを復元する
