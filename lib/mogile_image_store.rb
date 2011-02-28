@@ -42,8 +42,6 @@ module MogileImageStore
   class ColumnNotFound < StandardError; end
   class InvalidImage   < StandardError; end
 
-  # Reproxy cache clear時にホスト名を指定するための拡張ヘッダ
-  HOST_HEADER = 'X-Reproxy-Host'
   # 認証キーがセットされるHTTPリクエストヘッダ
   AUTH_HEADER = 'X-MogileImageStore-Auth'
   # 認証キーがセットされるHTTPリクエストヘッダに対応する環境変数名

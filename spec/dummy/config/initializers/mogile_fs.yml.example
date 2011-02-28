@@ -1,9 +1,13 @@
 development:
-  hosts:    [192.168.56.101:7001]
+  hosts:    [192.168.11.72:7001, 192.168.11.73:7001]
   domain:   dev
   class:    image
-  reproxy:  false
+  reproxy:  true
+  cache:    604800
+  base_url: 'http://mogile.test:9080/image/'
+  perlbal:  192.168.11.69:9080
   mount_at: /image/
+  secret:   AbcDEf
 test:
   hosts:    [192.168.56.101:7001]
   domain:   mogile_image_store_test

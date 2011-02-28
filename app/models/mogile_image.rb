@@ -309,7 +309,7 @@ class MogileImage < ActiveRecord::Base
           Net::HTTP.start(conn_host, conn_port) do |http|
             http.post(perlbal.path + 'flush', body, {
               MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body),
-              MogileImageStore::HOST_HEADER => perlbal.host,
+              'Host' => perlbal.host + (perlbal.port != 80 ? ':' + perlbal.port.to_s : ''),
             })
           end
         end
