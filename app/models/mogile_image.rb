@@ -305,10 +305,12 @@ class MogileImage < ActiveRecord::Base
           host, port = [base.host, base.port]
         end
         # Request asynchronously
-        t = Thread.new(host, port, base.path, urls.join(' ')) do |perlbal_host, perlbal_port, perlbal_path, body|
-          Net::HTTP.start(perlbal_host, perlbal_port) do |http|
-            http.post(perlbal_path + 'flush', body,
-                      {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
+        t = Thread.new(host, port, base, urls.join(' ')) do |conn_host, conn_port, perlbal, body|
+          Net::HTTP.start(conn_host, conn_port) do |http|
+            http.post(perlbal.path + 'flush', body, {
+              MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body),
+              MogileImageStore::HOST_HEADER => perlbal.host,
+            })
           end
         end
       end
