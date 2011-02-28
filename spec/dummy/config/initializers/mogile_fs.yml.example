@@ -19,5 +19,6 @@ production:
   reproxy:  true
   cache:    86400
   base_url: 'http://image.example.com/image/'
+  perlbal:  192.168.11.69
   secret:   xxx
 

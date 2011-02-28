@@ -298,10 +298,16 @@ class MogileImage < ActiveRecord::Base
       end
       if urls.size > 0 && MogileImageStore.backend['reproxy']
         base = URI.parse(MogileImageStore.backend['base_url'])
+        if MogileImageStore.backend['perlbal']
+          host, port = MogileImageStore.backend['perlbal'].split(':')
+          port ||= 80
+        else
+          host, port = [base.host, base.port]
+        end
         # Request asynchronously
-        t = Thread.new(base, urls.join(' ')) do |perlbal, body|
-          Net::HTTP.start(perlbal.host, perlbal.port) do |http|
-            http.post(perlbal.path + 'flush', body,
+        t = Thread.new(host, port, base.path, urls.join(' ')) do |perlbal_host, perlbal_port, perlbal_path, body|
+          Net::HTTP.start(perlbal_host, perlbal_port) do |http|
+            http.post(perlbal_path + 'flush', body,
                       {MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body)})
           end
         end
