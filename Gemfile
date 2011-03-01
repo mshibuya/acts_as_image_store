@@ -5,7 +5,7 @@ gem "rmagick"
 gem "mogilefs-client"
 
 group :development do
-  gem "sqlite3-ruby", "1.2.5"
+  gem "sqlite3-ruby"
   gem "mysql2"
   gem "rspec", ">= 2.0.1"
   gem "rspec-rails"

@@ -56,11 +56,11 @@ module MogileImageStore
             end
           end
         rescue ::ActiveRecord::RecordInvalid, ::MogileImageStore::ImageNotFound
-          redirect_to({ :action => 'edit', :id => @record },
+          redirect_to({ :action => 'edit' },
                       :alert => I18n.translate('mogile_image_store.errors.flashes.delete_failed'))
           return
         end
-        redirect_to @record
+        redirect_to :action => 'edit'
       end
     end
   end
