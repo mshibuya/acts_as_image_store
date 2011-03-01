@@ -7,6 +7,10 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
+  <ul>
+    <li style="display:inline"><%= link_to('ImageTest', image_tests_path) %></li>
+    <li style="display:inline"><%= link_to('Confirm', confirms_path) %></li>
+  </ul>
 
 <%= yield %>
 

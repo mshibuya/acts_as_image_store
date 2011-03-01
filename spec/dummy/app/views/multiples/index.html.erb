@@ -15,13 +15,13 @@
     <td><%= multiple.title %></td>
     <td><%= multiple.banner1 %></td>
     <td><%= multiple.banner2 %></td>
-    <td><%= link_to 'Show', multiple %></td>
-    <td><%= link_to 'Edit', edit_multiple_path(multiple) %></td>
-    <td><%= link_to 'Destroy', multiple, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Show', confirm_multiple_path(@confirm, multiple) %></td>
+    <td><%= link_to 'Edit', edit_confirm_multiple_path(@confirm, multiple) %></td>
+    <td><%= link_to 'Destroy', confirm_multiple_path(@confirm, multiple), :confirm => 'Are you sure?', :method => :delete %></td>
   </tr>
 <% end %>
 </table>
 
 <br />
 
-<%= link_to 'New Multiple', new_multiple_path %>
+<%= link_to 'New Multiple', new_confirm_multiple_path %>

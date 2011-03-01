@@ -13,6 +13,7 @@
   <tr>
     <td><%= confirm.name %></td>
     <td><%= confirm.image %></td>
+    <td><%= link_to 'Multiples', confirm_multiples_path(confirm) %></td>
     <td><%= link_to 'Show', confirm %></td>
     <td><%= link_to 'Edit', edit_confirm_path(confirm) %></td>
     <td><%= link_to 'Destroy', confirm, :confirm => 'Are you sure?', :method => :delete %></td>

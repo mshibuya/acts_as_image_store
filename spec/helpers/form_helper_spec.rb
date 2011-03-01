@@ -2,25 +2,7 @@
 require 'spec_helper'
 
 describe MogileImageStore::FormBuilder do
-  context "MogileFS backend" do
-    before(:all) do
-      #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
-        @mogadm.create_domain MogileImageStore.backend['domain']
-        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
-      end
-    end
-
-    after(:all) do
-      #cleanup
-      MogileImage.destroy_all
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
-      @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.backend['domain']
-    end
-
+  context "MogileFS backend", :mogilefs => true do
     before do
       @image_test = Factory.build(:image_test)
     end

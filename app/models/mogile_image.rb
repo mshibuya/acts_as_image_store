@@ -25,8 +25,14 @@ class MogileImage < ActiveRecord::Base
         # 画像ではない場合
         raise ::MogileImageStore::InvalidImage
       end
-      noresize = (imglist.first.columns <= ::MogileImageStore.options[:maxwidth] &&
-                  imglist.first.rows <= ::MogileImageStore.options[:maxheight])
+      # 保存時リサイズを行うかどうか判定
+      noresize = true
+      noresize = false if ::MogileImageStore.options[:maxwidth] &&
+          imglist.first.columns > ::MogileImageStore.options[:maxwidth].to_i
+      noresize = false if ::MogileImageStore.options[:maxheight] &&
+          imglist.first.columns > ::MogileImageStore.options[:maxheight].to_i
+
+      # stripするかどうか判定
       nostrip = (options[:keep_exif] ||
                   imglist.inject([]){|r,i| r.concat(i.get_exif_by_entry()) } == [])
       if noresize && nostrip

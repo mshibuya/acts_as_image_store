@@ -1,5 +1,10 @@
 Dummy::Application.routes.draw do
   resources :confirms do
+    resources :multiples do
+      member do
+        get :image_delete
+      end
+    end
     collection do
       post :confirm
     end
@@ -7,8 +12,6 @@ Dummy::Application.routes.draw do
       put :confirm
     end
   end
-
-  resources :multiples
 
   resources :image_tests
 

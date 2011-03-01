@@ -56,6 +56,26 @@ describe ImageTest do
       @image_test.valid?.should be_false
       @image_test.errors[:image].shift.should == "must be image file."
     end
+    
+    describe "when maxwidth and maxheight is nil" do
+      before do
+        @maxwidth_bak = MogileImageStore.options[:maxwidth]
+        @maxheight_bak = MogileImageStore.options[:maxheight]
+        MogileImageStore.options[:maxwidth] = nil
+        MogileImageStore.options[:maxwidth] = nil
+      end
+      after do
+        MogileImageStore.options[:maxwidth] = @maxwidth_bak
+        MogileImageStore.options[:maxheight] = @maxheight_bak
+      end
+      it "should not raise error" do
+        @image_test.image = ActionDispatch::Http::UploadedFile.new({
+          :filename => 'sample.jpg',
+          :tempfile => File.open("#{File.dirname(__FILE__)}/../sample.jpg")
+        })
+        lambda{ @image_test.valid? }.should_not raise_error
+      end
+    end
   end
 
   context "MogileFS backend", :mogilefs => true do

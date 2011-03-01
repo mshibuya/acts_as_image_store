@@ -6,6 +6,11 @@
 </p>
 
 <p>
+  <b>Confirm:</b>
+  <%= @multiple.confirm.try(:name) %>
+</p>
+
+<p>
   <b>Banner1:</b>
   <%= @multiple.banner1 %>
 </p>
@@ -16,5 +21,5 @@
 </p>
 
 
-<%= link_to 'Edit', edit_multiple_path(@multiple) %> |
-<%= link_to 'Back', multiples_path %>
+<%= link_to 'Edit', edit_confirm_multiple_path(@confirm, @multiple) %> |
+<%= link_to 'Back', confirm_multiples_path %>
