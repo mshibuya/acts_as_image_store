@@ -2,7 +2,7 @@
 
 require 'RMagick'
 
-module MogileImageStore
+module ActsAsImageStore
   ##
   # == 概要
   # ActiveRecord::Baseを拡張するモジュール
@@ -44,8 +44,8 @@ module MogileImageStore
         self.image_options = options.symbolize_keys
 
         class_eval <<-EOV
-        include MogileImageStore::ActiveRecord::InstanceMethods
-        include MogileImageStore::ValidatesImageAttribute
+        include ActsAsImageStore::ActiveRecord::InstanceMethods
+        include ActsAsImageStore::ValidatesImageAttribute
 
         before_validation :validate_images
         before_save       :save_images
@@ -67,8 +67,8 @@ module MogileImageStore
           if image_options[:confirm] && self[c].is_a?(String) &&
              !self[c].empty? && self.send(c.to_s + '_changed?')
             # 確認経由でセットされたキーがまだ存在するかどうかチェック
-            if !MogileImage.key_exist?(self[c])
-              errors[c] << I18n.translate('mogile_image_store.errors.messages.cache_expired')
+            if !StoredImage.key_exist?(self[c])
+              errors[c] << I18n.translate('acts_as_image_store.errors.messages.cache_expired')
               self[c] = nil
             end
           else
@@ -89,9 +89,9 @@ module MogileImageStore
             next unless self.send(c.to_s + '_changed?')
             prev_image = self.send(c.to_s+'_was')
             if prev_image.is_a?(String) && !prev_image.empty?
-              ::MogileImage.destroy_image(prev_image)
+              ::StoredImage.destroy_image(prev_image)
             end
-            ::MogileImage.commit_image(self[c])
+            ::StoredImage.commit_image(self[c])
           else
             # 通常時
             set_image_attributes(c) unless @image_attributes[c]
@@ -102,9 +102,9 @@ module MogileImageStore
             end
             prev_image = self.send(c.to_s+'_was')
             if prev_image.is_a?(String) && !prev_image.empty?
-              ::MogileImage.destroy_image(prev_image)
+              ::StoredImage.destroy_image(prev_image)
             end
-            self[c] = ::MogileImage.save_image(@image_attributes[c])
+            self[c] = ::StoredImage.save_image(@image_attributes[c])
           end
         end
       end
@@ -113,7 +113,7 @@ module MogileImageStore
       #
       def destroy_images
         image_columns.each do |c|
-          ::MogileImage.destroy_image(self[c]) if self[c] && destroyed?
+          ::StoredImage.destroy_image(self[c]) if self[c] && destroyed?
         end
       end
 
@@ -143,25 +143,25 @@ module MogileImageStore
         return unless file.is_a?(ActionDispatch::Http::UploadedFile)
 
         # ファイルサイズの判定
-        if file.size > ::MogileImageStore::options[:maxsize]
+        if file.size > ::ActsAsImageStore::options[:maxsize]
           errors[column] << (
-            I18n.translate('mogile_image_store.errors.messages.size_smaller')
-            % [::MogileImageStore::options[:maxsize]/1024]
+            I18n.translate('acts_as_image_store.errors.messages.size_smaller')
+            % [::ActsAsImageStore::options[:maxsize]/1024]
           )
         end
 
         begin
-          img_attr = MogileImage.parse_image(file.read,
+          img_attr = StoredImage.parse_image(file.read,
                                              :keep_exif => self.image_options[:keep_exif])
-        rescue ::MogileImageStore::InvalidImage
+        rescue ::ActsAsImageStore::InvalidImage
           # 画像ではない場合
-          errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_image')
+          errors[column] << I18n.translate('acts_as_image_store.errors.messages.must_be_image')
           return
         end
 
-        unless ::MogileImageStore::IMAGE_FORMATS.include?(img_attr[:type])
+        unless ::ActsAsImageStore::IMAGE_FORMATS.include?(img_attr[:type])
           # 対応フォーマットではない場合
-          errors[column] << I18n.translate('mogile_image_store.errors.messages.must_be_valid_type')
+          errors[column] << I18n.translate('acts_as_image_store.errors.messages.must_be_valid_type')
           return
         end
 
@@ -170,7 +170,7 @@ module MogileImageStore
 
         # 確認ありの時はこの時点で仮保存
         if image_options[:confirm]
-          self[column] = ::MogileImage.save_image(@image_attributes[column], :temporary => true)
+          self[column] = ::StoredImage.save_image(@image_attributes[column], :temporary => true)
         end
       end
     end

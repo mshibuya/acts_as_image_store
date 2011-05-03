@@ -1,3 +1,3 @@
-require 'mogile_image_store'
-#ActiveRecord::Base.class_eval { include MogileImageStore }
+require 'acts_as_image_store'
+#ActiveRecord::Base.class_eval { include ActsAsImageStore }
 

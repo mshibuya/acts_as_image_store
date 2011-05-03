@@ -26,7 +26,7 @@ describe MultiplesController do
       get 'image_delete', :confirm_id => @confirm.id, :id => @multiple.id, :column => 'banner1'
       response.status.should == 302
       response.header['Location'].should == "http://test.host/confirms/2/multiples/#{@multiple.id}/edit"
-      MogileImage.count.should == 0
+      StoredImage.count.should == 0
       @mg.list_keys('').should be_nil
       @multiple.reload[:banner1].should be_nil
     end

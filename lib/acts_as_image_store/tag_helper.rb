@@ -1,13 +1,13 @@
 # coding: utf-8
 
-module MogileImageStore # :nodoc:
+module ActsAsImageStore # :nodoc:
   ##
   # == 概要
   # 画像タグ作成用ヘルパー
   #
   module TagHelper
     extend ActiveSupport::Concern
-    include MogileImageStore::UrlHelper
+    include ActsAsImageStore::UrlHelper
     ##
     # ===画像タグ表示メソッド
     #
@@ -51,8 +51,8 @@ module MogileImageStore # :nodoc:
       options = options.symbolize_keys
       is_link = options.key?(:link) ? options.delete(:link) : true
       thumb_tag = stored_image(key,
-        { :w => MogileImageStore.options[:field_w],
-          :h => MogileImageStore.options[:field_h], }.merge(options)
+        { :w => ActsAsImageStore.options[:field_w],
+          :h => ActsAsImageStore.options[:field_h], }.merge(options)
       )
       if is_link && key && key.respond_to?(:empty?) && !key.empty?
         %w[w h].each{|i| options[i.to_sym] = 0}

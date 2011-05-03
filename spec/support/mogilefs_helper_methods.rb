@@ -3,22 +3,22 @@ require 'mogilefs'
 
 module MogilefsHelperMethods
   def mogilefs_prepare
-    @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-    unless @mogadm.get_domains[MogileImageStore.backend['domain']]
-      @mogadm.create_domain MogileImageStore.backend['domain']
-      @mogadm.create_class  MogileImageStore.backend['domain'],
-        MogileImageStore.backend['class'], 2 rescue nil
+    @mogadm = MogileFS::Admin.new :hosts  => ActsAsImageStore.backend['hosts']
+    unless @mogadm.get_domains[ActsAsImageStore.backend['domain']]
+      @mogadm.create_domain ActsAsImageStore.backend['domain']
+      @mogadm.create_class  ActsAsImageStore.backend['domain'],
+        ActsAsImageStore.backend['class'], 2 rescue nil
     end
 
   end
 
   def mogilefs_cleanup
-    MogileImage.destroy_all
-    @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-    @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'],
-                                 :hosts  => MogileImageStore.backend['hosts'] })
+    StoredImage.destroy_all
+    @mogadm = MogileFS::Admin.new :hosts  => ActsAsImageStore.backend['hosts']
+    @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'],
+                                 :hosts  => ActsAsImageStore.backend['hosts'] })
     @mg.each_key('') {|k| @mg.delete k }
-    @mogadm.delete_domain MogileImageStore.backend['domain']
+    @mogadm.delete_domain ActsAsImageStore.backend['domain']
   end
 end
 

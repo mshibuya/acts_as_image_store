@@ -1,5 +1,5 @@
 ja:
-  mogile_image_store:
+  acts_as_image_store:
     errors:
       messages:
         must_be_image_type: "は%sファイルでなければなりません。"

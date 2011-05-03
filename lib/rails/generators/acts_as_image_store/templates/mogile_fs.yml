@@ -7,7 +7,7 @@ development:
 
 test:
   hosts:    [192.168.56.101:7001]
-  domain:   mogile_image_store_test
+  domain:   acts_as_image_store_test
   class:    test
   reproxy:  false
   mount_at: /image/

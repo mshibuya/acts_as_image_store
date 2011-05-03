@@ -1,7 +1,7 @@
 source :rubygems
 
 gem "rails", ">= 3.0.0"
-gem "rmagick"
+gem "rmagick", :require => nil
 gem "mogilefs-client"
 
 group :development do
@@ -17,10 +17,7 @@ group :development do
   gem "rdoc", ">= 3.0.0"
   gem "database_cleaner"
   gem 'rails3_acts_as_paranoid', :git => 'git://github.com/mshibuya/rails3_acts_as_paranoid.git', :ref => '5578dc5'
-  if RUBY_VERSION >= '1.9'
-    gem "ruby-debug19"
-  else
-    gem "ruby-debug"
-  end
+  gem "ruby-debug19", :platforms => :ruby_19
+  gem "ruby-debug", :platforms => :ruby_18
 end
 

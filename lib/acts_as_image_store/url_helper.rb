@@ -1,6 +1,6 @@
 # coding: utf-8
 
-module MogileImageStore # :nodoc:
+module ActsAsImageStore # :nodoc:
   ##
   # == 概要
   # 画像URL用ヘルパー
@@ -24,7 +24,7 @@ module MogileImageStore # :nodoc:
     def image_url(key, options = {})
       if !key || !key.respond_to?(:empty?) || key.empty?
         if options[:default]
-          key = MogileImageStore.options[:alternatives][options[:default]]
+          key = ActsAsImageStore.options[:alternatives][options[:default]]
         end
         return nil if !key || !key.respond_to?(:empty?) || key.empty?
       end
@@ -45,7 +45,7 @@ module MogileImageStore # :nodoc:
         key = name + '.' + format.to_s
       end
       
-      MogileImageStore.backend['base_url'] + size + '/' + key
+      ActsAsImageStore.backend['base_url'] + size + '/' + key
     end
   end
 end

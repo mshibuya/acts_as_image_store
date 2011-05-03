@@ -1,4 +1,4 @@
-module MogileImageStore
+module ActsAsImageStore
   class Engine < Rails::Engine
 
     config.mogile_fs = YAML::load_file("#{Rails.root}/config/initializers/mogile_fs.yml")
@@ -20,16 +20,17 @@ module MogileImageStore
         # resizing
         '80x80',
         '88x31',
+        /^\d+0x\d+0$/,
         # resizing with fill
         '40x40fill1',
-        # regexp can also be used
-        # /^\d+0x\d+0$/,
+        /^80x80fill\d*/,
       ],
       # temporal image expiry time when confirmation is enabled
-      :upload_cache => 1.day,
+      :upload_cache => 30,
       # alternative images
       :alternatives => {
-      #  :default => '',
+        :default => '44bd273c0eddca6de148fd717db8653e.jpg',
+        :another => 'ffffffffffffffffffffffffffffffff.jpg',
       },
     }
   end

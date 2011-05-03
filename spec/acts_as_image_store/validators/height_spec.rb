@@ -1,7 +1,7 @@
 # coding: utf-8
 require 'spec_helper'
 
-describe MogileImageStore do
+describe ActsAsImageStore do
   context "Validators" do
     context "Height" do
       describe "with <=500 validation" do

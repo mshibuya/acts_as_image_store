@@ -1,7 +1,7 @@
 # coding: utf-8
 require 'spec_helper'
 
-describe MogileImageStore do
+describe ActsAsImageStore do
   context "Validators" do
     context "ImageType" do
       describe "with jpeg validation" do

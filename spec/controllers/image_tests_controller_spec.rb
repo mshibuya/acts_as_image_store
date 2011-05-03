@@ -24,7 +24,7 @@ describe ImageTestsController do
       get 'image_delete', :id => @image_test.id, :column => 'image'
       response.status.should == 302
       response.header['Location'].should == "http://test.host/image_tests/#{@image_test.id}/edit"
-      MogileImage.count.should == 0
+      StoredImage.count.should == 0
       @mg.list_keys('').should be_nil
       @image_test.reload[:image].should be_nil
     end

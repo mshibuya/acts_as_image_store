@@ -2,34 +2,34 @@
 require 'spec_helper'
 require 'net/http'
 
-describe MogileImagesController do
-  it "should use MogileImagesController" do
-    controller.should be_an_instance_of(MogileImagesController)
+describe StoredImagesController do
+  it "should use StoredImagesController" do
+    controller.should be_an_instance_of(StoredImagesController)
   end
 
   context "With MogileFS Backend" do
     before(:all) do
       #prepare mogilefs
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      unless @mogadm.get_domains[MogileImageStore.backend['domain']]
-        @mogadm.create_domain MogileImageStore.backend['domain']
-        @mogadm.create_class  MogileImageStore.backend['domain'], MogileImageStore.backend['class'], 2 rescue nil
+      @mogadm = MogileFS::Admin.new :hosts  => ActsAsImageStore.backend['hosts']
+      unless @mogadm.get_domains[ActsAsImageStore.backend['domain']]
+        @mogadm.create_domain ActsAsImageStore.backend['domain']
+        @mogadm.create_class  ActsAsImageStore.backend['domain'], ActsAsImageStore.backend['class'], 2 rescue nil
       end
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+      @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'], :hosts  => ActsAsImageStore.backend['hosts'] })
       @image_test = Factory.build(:image_test)
       @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
       @image_test.save
     end
     before do
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+      @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'], :hosts  => ActsAsImageStore.backend['hosts'] })
     end
     after(:all) do
       #cleanup
-      MogileImage.destroy_all
-      @mogadm = MogileFS::Admin.new :hosts  => MogileImageStore.backend['hosts']
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+      StoredImage.destroy_all
+      @mogadm = MogileFS::Admin.new :hosts  => ActsAsImageStore.backend['hosts']
+      @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'], :hosts  => ActsAsImageStore.backend['hosts'] })
       @mg.each_key('') {|k| @mg.delete k }
-      @mogadm.delete_domain MogileImageStore.backend['domain']
+      @mogadm.delete_domain ActsAsImageStore.backend['domain']
     end
 
     it "should return raw jpeg image" do
@@ -54,10 +54,10 @@ describe MogileImagesController do
 
     context "Reproxing" do
       before(:all) do
-        MogileImageStore.backend['reproxy'] = true
-        MogileImageStore.backend['cache']   = 7.days
+        ActsAsImageStore.backend['reproxy'] = true
+        ActsAsImageStore.backend['cache']   = 7.days
       end
-      after (:all){ MogileImageStore.backend['reproxy'] = false }
+      after (:all){ ActsAsImageStore.backend['reproxy'] = false }
 
       it "should return url for jpeg image" do
         get 'show', :name => 'bcadded5ee18bfa7c99834f307332b02', :format => 'jpg', :size => 'raw'
@@ -73,14 +73,14 @@ describe MogileImagesController do
       end
 
       it "should respond 401 with authorization failure" do
-        request.env[MogileImageStore::AUTH_HEADER_ENV] = 'abc'
+        request.env[ActsAsImageStore::AUTH_HEADER_ENV] = 'abc'
         request.env['RAW_POST_DATA'] = '/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg'
         post 'flush'
         response.status.should == 401
       end
 
       it "should respond reproxy cache clear header" do
-        request.env[MogileImageStore::AUTH_HEADER_ENV] = MogileImageStore.auth_key('/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg')
+        request.env[ActsAsImageStore::AUTH_HEADER_ENV] = ActsAsImageStore.auth_key('/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg')
         request.env['RAW_POST_DATA'] = '/image/raw/bcadded5ee18bfa7c99834f307332b02.jpg'
         post 'flush'
         response.should be_success

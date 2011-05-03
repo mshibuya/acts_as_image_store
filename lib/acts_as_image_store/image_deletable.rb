@@ -1,6 +1,6 @@
 # coding: utf-8
 
-module MogileImageStore
+module ActsAsImageStore
   #
   # ActionControllerにincludeするモジュール
   #
@@ -31,8 +31,8 @@ module MogileImageStore
         self.image_model  = model || eval(self.name[/(.+)Controller/,1].singularize)
 
         class_eval <<-EOV
-        include MogileImageStore::ImageDeletable::InstanceMethods
-        rescue_from MogileImageStore::ColumnNotFound do |e| render ({:nothing => true, :status => "404 Not Found"}) end
+        include ActsAsImageStore::ImageDeletable::InstanceMethods
+        rescue_from ActsAsImageStore::ColumnNotFound do |e| render ({:nothing => true, :status => "404 Not Found"}) end
         EOV
       end
     end
@@ -46,18 +46,18 @@ module MogileImageStore
           image_model.transaction do
             @record = image_model.lock(true).find(params[:id])
             column = params[:column].to_sym
-            raise MogileImageStore::ColumnNotFound unless @record.image_columns.include?(column)
+            raise ActsAsImageStore::ColumnNotFound unless @record.image_columns.include?(column)
             key = @record[column]
-            raise MogileImageStore::ImageNotFound if !key || key.empty?
+            raise ActsAsImageStore::ImageNotFound if !key || key.empty?
             @record[column] = nil
             if @record.save!
-              MogileImage.destroy_image(key)
+              StoredImage.destroy_image(key)
               deleted = true
             end
           end
-        rescue ::ActiveRecord::RecordInvalid, ::MogileImageStore::ImageNotFound
+        rescue ::ActiveRecord::RecordInvalid, ::ActsAsImageStore::ImageNotFound
           redirect_to({ :action => 'edit' },
-                      :alert => I18n.translate('mogile_image_store.errors.flashes.delete_failed'))
+                      :alert => I18n.translate('acts_as_image_store.errors.flashes.delete_failed'))
           return
         end
         redirect_to :action => 'edit'

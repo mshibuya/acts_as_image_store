@@ -10,7 +10,7 @@ development:
   secret:   AbcDEf
 test:
   hosts:    [192.168.56.101:7001]
-  domain:   mogile_image_store_test
+  domain:   acts_as_image_store_test
   class:    test
   reproxy:  false
   base_url: 'http://image.example.com/image/'

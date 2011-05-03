@@ -1,6 +1,6 @@
 # coding: utf-8
 
-module MogileImageStore # :nodoc:
+module ActsAsImageStore # :nodoc:
   ##
   # == 概要
   # FormBuilderを拡張する。
@@ -9,7 +9,7 @@ module MogileImageStore # :nodoc:
   module FormBuilder
     include ActionView::Helpers::UrlHelper
     include ActionView::Helpers::TagHelper
-    include MogileImageStore::TagHelper
+    include ActsAsImageStore::TagHelper
     ##
     # ===画像フォーム表示メソッド
     #
@@ -62,12 +62,12 @@ module MogileImageStore # :nodoc:
         # 画像削除用のリンク表示
         if deletable === nil || deletable
           output += @template.link_to(
-            (I18n.translate!('mogile_image_store.form_helper.delete') rescue 'delete'),
+            (I18n.translate!('acts_as_image_store.form_helper.delete') rescue 'delete'),
             { :controller => @template.controller.controller_name,
               :action => 'image_delete',
               :id => @object,
               :column => method, },
-              { :confirm => I18n.translate('mogile_image_store.notices.confirm') }.merge(link_options),
+              { :confirm => I18n.translate('acts_as_image_store.notices.confirm') }.merge(link_options),
           )
         end
         output += tag('br')

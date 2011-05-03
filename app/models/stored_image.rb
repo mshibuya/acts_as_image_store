@@ -3,8 +3,8 @@ require 'mogilefs'
 require 'digest/md5'
 require 'net/http'
 
-class MogileImage < ActiveRecord::Base
-  extend MogileImageStore::UrlHelper
+class StoredImage < ActiveRecord::Base
+  extend ActsAsImageStore::UrlHelper
 
   CONTENT_TYPES = HashWithIndifferentAccess.new ({
     :jpg => 'image/jpeg',
@@ -23,14 +23,14 @@ class MogileImage < ActiveRecord::Base
         imglist.from_blob(data)
       rescue
         # 画像ではない場合
-        raise ::MogileImageStore::InvalidImage
+        raise ::ActsAsImageStore::InvalidImage
       end
       # 保存時リサイズを行うかどうか判定
       noresize = true
-      noresize = false if ::MogileImageStore.options[:maxwidth] &&
-          imglist.first.columns > ::MogileImageStore.options[:maxwidth].to_i
-      noresize = false if ::MogileImageStore.options[:maxheight] &&
-          imglist.first.columns > ::MogileImageStore.options[:maxheight].to_i
+      noresize = false if ::ActsAsImageStore.options[:maxwidth] &&
+          imglist.first.columns > ::ActsAsImageStore.options[:maxwidth].to_i
+      noresize = false if ::ActsAsImageStore.options[:maxheight] &&
+          imglist.first.columns > ::ActsAsImageStore.options[:maxheight].to_i
 
       # stripするかどうか判定
       nostrip = (options[:keep_exif] ||
@@ -40,8 +40,8 @@ class MogileImage < ActiveRecord::Base
       else
         unless noresize
           imglist.each do |i|
-            i.resize_to_fit!(MogileImageStore.options[:maxwidth],
-                             MogileImageStore.options[:maxheight])
+            i.resize_to_fit!(ActsAsImageStore.options[:maxwidth],
+                             ActsAsImageStore.options[:maxheight])
           end
         end
         unless nostrip
@@ -72,21 +72,21 @@ class MogileImage < ActiveRecord::Base
         record = find_or_initialize_by_name name
         unless record.persisted?
           image_attrs.map{ |k,v| record[k] = v if %w[size width height].include? k }
-          record.image_type = ::MogileImageStore::TYPE_TO_EXT[image_attrs['type'].to_sym.upcase]
+          record.image_type = ::ActsAsImageStore::TYPE_TO_EXT[image_attrs['type'].to_sym.upcase]
           if temporary
             record.refcount = 0
-            record.keep_till = Time.now + (MogileImageStore.options[:upload_cache] || 3600)
+            record.keep_till = Time.now + (ActsAsImageStore.options[:upload_cache] || 3600)
           else
             record.refcount = 1
           end
           record.save!
           filename = name+'.'+record['image_type']
           mg = mogilefs_connect
-          mg.store_content filename, MogileImageStore.backend['class'], content
+          mg.store_content filename, ActsAsImageStore.backend['class'], content
           filename
         else
           if temporary
-            record.keep_till = Time.now + (MogileImageStore.options[:upload_cache] || 3600)
+            record.keep_till = Time.now + (ActsAsImageStore.options[:upload_cache] || 3600)
           else
             record.refcount += 1
           end
@@ -110,7 +110,7 @@ class MogileImage < ActiveRecord::Base
       name, ext = key.split('.')
       self.transaction do
         record = find_by_name name
-        raise MogileImageStore::ImageNotFound unless record
+        raise ActsAsImageStore::ImageNotFound unless record
         record.refcount += 1
         if record.keep_till && record.keep_till < Time.now
           record.keep_till = nil
@@ -192,10 +192,10 @@ class MogileImage < ActiveRecord::Base
     #
     def retrieve_image(name, format, size, &block)
       record = find_by_name(name)
-      raise MogileImageStore::ImageNotFound unless record
+      raise ActsAsImageStore::ImageNotFound unless record
 
       # check whether size is allowd
-      raise MogileImageStore::SizeNotAllowed unless size_allowed?(size)
+      raise ActsAsImageStore::SizeNotAllowed unless size_allowed?(size)
 
       if resize_needed? record, format, size
         key = "#{name}.#{format}/#{size}"
@@ -211,9 +211,9 @@ class MogileImage < ActiveRecord::Base
         begin
           img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
         rescue MogileFS::Backend::UnknownKeyError
-          raise MogileImageStore::ImageNotFound
+          raise ActsAsImageStore::ImageNotFound
         end
-        mg.store_content key, MogileImageStore.backend['class'], resize_image(img, format, size).to_blob
+        mg.store_content key, ActsAsImageStore.backend['class'], resize_image(img, format, size).to_blob
       end
       return block.call(mg, key)
     end
@@ -234,7 +234,7 @@ class MogileImage < ActiveRecord::Base
           img.resize_to_fit! w, h
         end
       end
-      new_format = ::MogileImageStore::EXT_TO_TYPE[format.to_sym]
+      new_format = ::ActsAsImageStore::EXT_TO_TYPE[format.to_sym]
       img.format = new_format if img.format != new_format
       img
     end
@@ -254,7 +254,7 @@ class MogileImage < ActiveRecord::Base
     def parse_key(key)
       name, format, size = key.scan(/([0-9a-f]{32})\.(jpg|gif|png)(?:\/(\d+x\d+[a-z]*\d*))?/).shift
       size ||= 'raw'
-      base = URI.parse(MogileImageStore.backend['base_url'])
+      base = URI.parse(ActsAsImageStore.backend['base_url'])
       base.path + size + '/' + name + '.' + format
     end
 
@@ -281,7 +281,7 @@ class MogileImage < ActiveRecord::Base
     # 画像サイズが許可されているかどうか判定
     #
     def size_allowed?(size)
-      MogileImageStore.options[:allowed_sizes].each do |item|
+      ActsAsImageStore.options[:allowed_sizes].each do |item|
         if item.is_a? Regexp
           return true if size.match(item)
         else
@@ -302,10 +302,10 @@ class MogileImage < ActiveRecord::Base
         url = parse_key k
         urls.push(url) if url
       end
-      if urls.size > 0 && MogileImageStore.backend['reproxy']
-        base = URI.parse(MogileImageStore.backend['base_url'])
-        if MogileImageStore.backend['perlbal']
-          host, port = MogileImageStore.backend['perlbal'].split(':')
+      if urls.size > 0 && ActsAsImageStore.backend['reproxy']
+        base = URI.parse(ActsAsImageStore.backend['base_url'])
+        if ActsAsImageStore.backend['perlbal']
+          host, port = ActsAsImageStore.backend['perlbal'].split(':')
           port ||= 80
         else
           host, port = [base.host, base.port]
@@ -314,7 +314,7 @@ class MogileImage < ActiveRecord::Base
         t = Thread.new(host, port, base, urls.join(' ')) do |conn_host, conn_port, perlbal, body|
           Net::HTTP.start(conn_host, conn_port) do |http|
             http.post(perlbal.path + 'flush', body, {
-              MogileImageStore::AUTH_HEADER => MogileImageStore.auth_key(body),
+              ActsAsImageStore::AUTH_HEADER => ActsAsImageStore.auth_key(body),
               'Host' => perlbal.host + (perlbal.port != 80 ? ':' + perlbal.port.to_s : ''),
             })
           end
@@ -329,8 +329,8 @@ class MogileImage < ActiveRecord::Base
         return @@mogilefs
       rescue
         @@mogilefs = MogileFS::MogileFS.new({
-          :domain => MogileImageStore.backend['domain'],
-          :hosts  => MogileImageStore.backend['hosts'],
+          :domain => ActsAsImageStore.backend['domain'],
+          :hosts  => ActsAsImageStore.backend['hosts'],
         })
       end
     end

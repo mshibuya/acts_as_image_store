@@ -6,15 +6,15 @@ require 'digest/sha1'
 # == 概要
 # 添付画像をMogileFSに格納するプラグイン
 #
-module MogileImageStore
-  require 'mogile_image_store/engine' if defined?(Rails)
+module ActsAsImageStore
+  require 'acts_as_image_store/engine' if defined?(Rails)
 
   mattr_accessor :backend, :options
 
   # 設定を読み込む
   def self.configure
     begin
-      backend = MogileImageStore::Engine.config.mogile_fs[Rails.env]
+      backend = ActsAsImageStore::Engine.config.mogile_fs[Rails.env]
     rescue NoMethodError
       backend = {}
     end
@@ -27,9 +27,9 @@ module MogileImageStore
       backend['base_url'] = '/image/'
     end
 
-    MogileImageStore.backend = HashWithIndifferentAccess.new(backend)
-    MogileImageStore.options = HashWithIndifferentAccess.
-      new((MogileImageStore::Engine.config.options rescue {}))
+    ActsAsImageStore.backend = HashWithIndifferentAccess.new(backend)
+    ActsAsImageStore.options = HashWithIndifferentAccess.
+      new((ActsAsImageStore::Engine.config.options rescue {}))
   end
 
   # 認証キーを計算する
@@ -43,7 +43,7 @@ module MogileImageStore
   class InvalidImage   < StandardError; end
 
   # 認証キーがセットされるHTTPリクエストヘッダ
-  AUTH_HEADER = 'X-MogileImageStore-Auth'
+  AUTH_HEADER = 'X-ActsAsImageStore-Auth'
   # 認証キーがセットされるHTTPリクエストヘッダに対応する環境変数名
   AUTH_HEADER_ENV = 'HTTP_X_MOGILEIMAGESTORE_AUTH'
   # 対応画像フォーマット(RMagick準拠の文字列)
@@ -53,27 +53,27 @@ module MogileImageStore
   # 拡張子を画像フォーマットに変換するハッシュ
   EXT_TO_TYPE = { :jpg => 'JPEG', :gif => 'GIF', :png => 'PNG'}
 
-  autoload :ActiveRecord, 'mogile_image_store/active_record'
-  autoload :ValidatesImageAttribute,    'mogile_image_store/validates_image_attribute'
-  autoload :ImageDeletable, 'mogile_image_store/image_deletable'
-  autoload :UrlHelper, 'mogile_image_store/url_helper'
-  autoload :TagHelper, 'mogile_image_store/tag_helper'
-  autoload :FormBuilder, 'mogile_image_store/form_helper'
+  autoload :ActiveRecord, 'acts_as_image_store/active_record'
+  autoload :ValidatesImageAttribute,    'acts_as_image_store/validates_image_attribute'
+  autoload :ImageDeletable, 'acts_as_image_store/image_deletable'
+  autoload :UrlHelper, 'acts_as_image_store/url_helper'
+  autoload :TagHelper, 'acts_as_image_store/tag_helper'
+  autoload :FormBuilder, 'acts_as_image_store/form_helper'
 
 end
 
 ActiveSupport.on_load(:active_record) do
-  ActiveRecord::Base.class_eval { include MogileImageStore::ActiveRecord }
+  ActiveRecord::Base.class_eval { include ActsAsImageStore::ActiveRecord }
 end
 ActiveSupport.on_load(:action_controller) do
-  ActionController::Base.class_eval { include MogileImageStore::ImageDeletable }
+  ActionController::Base.class_eval { include ActsAsImageStore::ImageDeletable }
 end
 ActiveSupport.on_load(:action_view) do
-  ActionView::Base.send(:include, MogileImageStore::TagHelper)
-  ActionView::Helpers::FormBuilder.send(:include, MogileImageStore::FormBuilder)
+  ActionView::Base.send(:include, ActsAsImageStore::TagHelper)
+  ActionView::Helpers::FormBuilder.send(:include, ActsAsImageStore::FormBuilder)
 end
 ActiveSupport.on_load(:after_initialize) do
-  MogileImageStore.configure
+  ActsAsImageStore.configure
 end
 
 Dir[File.join("#{File.dirname(__FILE__)}/../config/locales/*.yml")].each do |locale|

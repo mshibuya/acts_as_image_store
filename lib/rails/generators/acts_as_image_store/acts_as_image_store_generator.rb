@@ -1,7 +1,7 @@
 require 'rails/generators'
 require 'rails/generators/migration'
 
-class MogileImageStoreGenerator < Rails::Generators::Base
+class ActsAsImageStoreGenerator < Rails::Generators::Base
   include Rails::Generators::Migration
 
   def self.source_root
@@ -35,12 +35,12 @@ class MogileImageStoreGenerator < Rails::Generators::Base
     tmp.close
 
     migration_template  File.expand_path(tmp.path),
-                        'db/migrate/create_mogile_image_tables.rb'
+                        'db/migrate/create_stored_image_tables.rb'
     remove_file 'tmp/~migration_ready.rb'
   end
 
   def copy_initializer_file
-    copy_file 'initializer.rb', 'config/initializers/mogile_image_store.rb'
+    copy_file 'initializer.rb', 'config/initializers/acts_as_image_store.rb'
     copy_file 'mogile_fs.yml', 'config/initializers/mogile_fs.yml'
   end
 

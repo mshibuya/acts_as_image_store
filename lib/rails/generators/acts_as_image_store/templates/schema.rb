@@ -1,6 +1,6 @@
 ActiveRecord::Schema.define(:version => 0) do
 
-    create_table :mogile_images do |t|
+    create_table :stored_images do |t|
       t.string     :name,       :limit => 32
       t.string     :image_type, :limit => 3
       t.integer    :size
@@ -11,7 +11,7 @@ ActiveRecord::Schema.define(:version => 0) do
       t.timestamps
     end
 
-    add_index :mogile_images, [:name]
-    add_index :mogile_images, [:keep_till]
+    add_index :stored_images, [:name]
+    add_index :stored_images, [:keep_till]
 
 end

@@ -59,14 +59,14 @@ describe ImageTest do
     
     describe "when maxwidth and maxheight is nil" do
       before do
-        @maxwidth_bak = MogileImageStore.options[:maxwidth]
-        @maxheight_bak = MogileImageStore.options[:maxheight]
-        MogileImageStore.options[:maxwidth] = nil
-        MogileImageStore.options[:maxwidth] = nil
+        @maxwidth_bak = ActsAsImageStore.options[:maxwidth]
+        @maxheight_bak = ActsAsImageStore.options[:maxheight]
+        ActsAsImageStore.options[:maxwidth] = nil
+        ActsAsImageStore.options[:maxwidth] = nil
       end
       after do
-        MogileImageStore.options[:maxwidth] = @maxwidth_bak
-        MogileImageStore.options[:maxheight] = @maxheight_bak
+        ActsAsImageStore.options[:maxwidth] = @maxwidth_bak
+        ActsAsImageStore.options[:maxheight] = @maxheight_bak
       end
       it "should not raise error" do
         @image_test.image = ActionDispatch::Http::UploadedFile.new({
@@ -80,7 +80,7 @@ describe ImageTest do
 
   context "MogileFS backend", :mogilefs => true do
     before do
-      @mg = MogileFS::MogileFS.new({ :domain => MogileImageStore.backend['domain'], :hosts  => MogileImageStore.backend['hosts'] })
+      @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'], :hosts  => ActsAsImageStore.backend['hosts'] })
     end
 
     context "saving" do
@@ -99,12 +99,12 @@ describe ImageTest do
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
         @image_test.save!
         @image_test = Factory.build(:image_test)
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
+        StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
         @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
+        StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
     end
 
@@ -120,11 +120,11 @@ describe ImageTest do
 
       it "should return 2 urls" do
         sleep(3) # wait until replication becomes ready
-        MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg').pop.should have(2).items
+        StoredImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg').pop.should have(2).items
       end
 
       it "should return raw jpeg image" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -133,7 +133,7 @@ describe ImageTest do
       end
 
       it "should return raw png image" do
-        content_type, data = MogileImage.fetch_data('60de57a8f5cd0a10b296b1f553cb41a9', 'png')
+        content_type, data = StoredImage.fetch_data('60de57a8f5cd0a10b296b1f553cb41a9', 'png')
         content_type.should == 'image/png'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'PNG'
@@ -142,7 +142,7 @@ describe ImageTest do
       end
 
       it "should return jpeg=>png converted image" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'png')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'png')
         content_type.should == 'image/png'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'PNG'
@@ -153,7 +153,7 @@ describe ImageTest do
       end
 
       it "should return resized jpeg image" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '600x450')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '600x450')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -165,7 +165,7 @@ describe ImageTest do
       end
 
       it "should return raw jpeg image when requested larger size" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x600')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x600')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -176,7 +176,7 @@ describe ImageTest do
       end
 
       it "should return filled jpeg image" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -193,7 +193,7 @@ describe ImageTest do
       end
 
       it "should return filled jpeg image" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill2')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fill2')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -214,7 +214,7 @@ describe ImageTest do
       end
 
       it "should return filled jpeg image with white background" do
-        content_type, data = MogileImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fillw')
+        content_type, data = StoredImage.fetch_data('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x80fillw')
         content_type.should == 'image/jpeg'
         img = ::Magick::Image.from_blob(data).shift
         img.format.should == 'JPEG'
@@ -231,20 +231,20 @@ describe ImageTest do
       end
 
       it "should raise error when size is not allowed" do
-        lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '83x60') }.should raise_error MogileImageStore::SizeNotAllowed
-        lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x60fill') }.should raise_error MogileImageStore::SizeNotAllowed
-        lambda{ MogileImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x604') }.should raise_error MogileImageStore::SizeNotAllowed
+        lambda{ StoredImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '83x60') }.should raise_error ActsAsImageStore::SizeNotAllowed
+        lambda{ StoredImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '80x60fill') }.should raise_error ActsAsImageStore::SizeNotAllowed
+        lambda{ StoredImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg', '800x604') }.should raise_error ActsAsImageStore::SizeNotAllowed
       end
 
       it "should return existence of keys" do
-        MogileImage.key_exist?('60de57a8f5cd0a10b296b1f553cb41a9.png').should be_true
-        MogileImage.key_exist?('5d1e43dfd47173ae1420f061111e0776.gif').should be_false
-        MogileImage.key_exist?([
+        StoredImage.key_exist?('60de57a8f5cd0a10b296b1f553cb41a9.png').should be_true
+        StoredImage.key_exist?('5d1e43dfd47173ae1420f061111e0776.gif').should be_false
+        StoredImage.key_exist?([
           '60de57a8f5cd0a10b296b1f553cb41a9.png',
           '60de57a8f5cd0a10b296b1f553cb41a9.png',
           'bcadded5ee18bfa7c99834f307332b02.jpg',
         ]).should be_true
-        MogileImage.key_exist?([
+        StoredImage.key_exist?([
           '60de57a8f5cd0a10b296b1f553cb41a9.png',
           '5d1e43dfd47173ae1420f061111e0776.gif',
         ]).should be_false
@@ -263,8 +263,8 @@ describe ImageTest do
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
         @mg.list_keys('').shift.sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
-        MogileImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
-        MogileImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
+        StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
+        StoredImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
     end
 
@@ -278,12 +278,12 @@ describe ImageTest do
       it "should preserve image name" do
         new_name = @image_test.name + ' new'
         @image_test.name = new_name
-        MogileImage.should_not_receive(:save_image)
+        StoredImage.should_not_receive(:save_image)
         lambda{ @image_test.save }.should_not raise_error
         @image_test.name.should == new_name
         @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
         @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
+        StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       end
 
       it "should preserve image name with image_type validation" do
@@ -328,7 +328,7 @@ describe ImageTest do
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
         @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
+        StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       end
 
       it "should delete image data when deleting image" do
@@ -336,21 +336,21 @@ describe ImageTest do
         @image_test = ImageTest.first
         lambda{ @image_test.destroy }.should_not raise_error
         @mg.list_keys('').should be_nil
-        MogileImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
+        StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
       end
     end
 
     context "saving image without model" do
       it "should save image and return key" do
-        key = MogileImage.store_image(File.open("#{File.dirname(__FILE__)}/../sample.png").read)
+        key = StoredImage.store_image(File.open("#{File.dirname(__FILE__)}/../sample.png").read)
         key.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
         @mg.list_keys('').shift.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
       end
 
       it "should raise error with invalid data" do
         lambda do
-          MogileImage.store_image('abc')
-        end.should raise_error MogileImageStore::InvalidImage
+          StoredImage.store_image('abc')
+        end.should raise_error ActsAsImageStore::InvalidImage
       end
     end
 
@@ -359,7 +359,7 @@ describe ImageTest do
         @image_test = Factory.build(:image_test)
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample_exif.jpg"
         lambda{ @image_test.save }.should_not raise_error
-        content_type, data = MogileImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
+        content_type, data = StoredImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
         imglist = Magick::ImageList.new
         imglist.from_blob(data)
         imglist.first.get_exif_by_entry().should == []
@@ -368,7 +368,7 @@ describe ImageTest do
         @image_test = Factory.build(:keep_exif)
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample_exif.jpg"
         lambda{ @image_test.save }.should_not raise_error
-        content_type, data = MogileImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
+        content_type, data = StoredImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
         imglist = Magick::ImageList.new
         imglist.from_blob(data)
         imglist.first.get_exif_by_entry().should_not == []
@@ -380,7 +380,7 @@ describe ImageTest do
         @image_test = Factory.build(:image_test)
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample_huge.gif"
         lambda{ @image_test.save }.should_not raise_error
-        content_type, data = MogileImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
+        content_type, data = StoredImage.fetch_data(@image_test.image.split('.').first, 'jpg', 'raw')
         imglist = Magick::ImageList.new
         imglist.from_blob(data)
         imglist.first.columns.should == 2048

@@ -25,12 +25,12 @@ Capybara.default_driver   = :rack_test
 Capybara.default_selector = :css
 
 # generate migration files
-require "#{File.dirname(__FILE__)}/../lib/rails/generators/mogile_image_store/mogile_image_store_generator"
-Dir["#{File.dirname(__FILE__)}/dummy/db/migrate/*_create_mogile_image_tables.rb"].each { |f| File.unlink f }
+require "#{File.dirname(__FILE__)}/../lib/rails/generators/acts_as_image_store/acts_as_image_store_generator"
+Dir["#{File.dirname(__FILE__)}/dummy/db/migrate/*_create_stored_image_tables.rb"].each { |f| File.unlink f }
 #save current directory
 cwd = Dir.pwd
 Dir.chdir File.expand_path("../dummy/", __FILE__)
-generator = MogileImageStoreGenerator.new
+generator = ActsAsImageStoreGenerator.new
 generator.create_migration_file
 Dir.chdir cwd
 # Run any available migration
@@ -38,7 +38,7 @@ ActiveRecord::Migration.suppress_messages do
   ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
 end
 # Load initializer
-require "#{File.dirname(__FILE__)}/dummy/config/initializers/mogile_image_store.rb"
+require "#{File.dirname(__FILE__)}/dummy/config/initializers/acts_as_image_store.rb"
 
 # Load support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
@@ -58,8 +58,8 @@ RSpec.configure do |config|
     if example.metadata[:mogilefs]
       mogilefs_prepare
       @mg = MogileFS::MogileFS.new({
-        :domain => MogileImageStore.backend['domain'],
-        :hosts  => MogileImageStore.backend['hosts']
+        :domain => ActsAsImageStore.backend['domain'],
+        :hosts  => ActsAsImageStore.backend['hosts']
       })
     end
     if example.metadata[:truncation]

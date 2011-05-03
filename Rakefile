@@ -13,12 +13,12 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "mogile_image_store"
-  gem.homepage = "http://git.dev.ist-corp.jp/mogile_image_store"
+  gem.name = "acts_as_image_store"
+  gem.homepage = "http://github.com/mshibuya/acts_as_image_store"
   gem.license = "MIT"
-  gem.summary = %Q{Rails plugin for using MogileFS as image storage}
-  gem.description = %Q{Rails plugin for using MogileFS as image storage}
-  gem.email = "shibuya@lavan7.co.jp"
+  gem.summary = %Q{Rails plugin for image storage}
+  gem.description = %Q{Rails plugin for image storage}
+  gem.email = "mit.shibuya@gmail.com"
   gem.authors = ["Mitsuhiro Shibuya"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
@@ -45,7 +45,7 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "mogile_image_store #{version}"
+  rdoc.title = "acts_as_image_store #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include(%w[app/**/*.rb lib/**/*.rb])
 end
