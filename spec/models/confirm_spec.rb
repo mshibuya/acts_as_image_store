@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Confirm, :mogilefs => true do
+describe Confirm, :backend => true do
   before(:all) do
     @prev_cache_time = ActsAsImageStore.options[:upload_cache]
     ActsAsImageStore.options[:upload_cache] = 1
@@ -10,7 +10,6 @@ describe Confirm, :mogilefs => true do
   end
 
   before do
-    @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'], :hosts  => ActsAsImageStore.backend['hosts'] })
     @confirm = Factory.build(:confirm)
   end
 
@@ -19,7 +18,7 @@ describe Confirm, :mogilefs => true do
       @confirm.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
       @confirm.valid?.should be_true
       @confirm.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-      @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys('').should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 0
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').keep_till.should_not be_nil
       sleep(1)
@@ -35,7 +34,7 @@ describe Confirm, :mogilefs => true do
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       @confirm.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
       @confirm.valid?.should be_true
-      @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys('').should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').keep_till.should_not be_nil
       lambda{ @confirm.save! }.should_not raise_error
@@ -64,7 +63,7 @@ describe Confirm, :mogilefs => true do
       @confirm.set_image_data :image, File.open("#{File.dirname(__FILE__)}/../sample.png").read
       @confirm.valid?.should be_true
       @confirm.image.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-      @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
+      StoredImage.storage.list_keys('').sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 0
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').keep_till.should_not be_nil
       lambda{ @confirm.save! }.should_not raise_error
@@ -87,7 +86,7 @@ describe Confirm, :mogilefs => true do
       @confirm.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
       StoredImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
-      @mg.list_keys('').shift.sort.should ==
+      StoredImage.storage.list_keys('').sort.should ==
         ['5d1e43dfd47173ae1420f061111e0776.gif']
     end
   end
@@ -105,7 +104,7 @@ describe Confirm, :mogilefs => true do
       lambda{ @confirm.save }.should_not raise_error
       @confirm.name.should == new_name
       @confirm.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
-      @mg.list_keys('').shift.sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
+      StoredImage.storage.list_keys('').sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
       StoredImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
     end
   end
@@ -115,7 +114,7 @@ describe Confirm, :mogilefs => true do
       @confirm.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.gif"
       @confirm.save
       lambda{ @confirm.destroy }.should_not raise_error
-      @mg.list_keys('').shift.sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
+      StoredImage.storage.list_keys('').sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
       StoredImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 0
     end
 
@@ -125,7 +124,7 @@ describe Confirm, :mogilefs => true do
       @confirm.destroy
       sleep(1)
       StoredImage.cleanup_temporary_image
-      @mg.list_keys('').should be_nil
+      StoredImage.storage.list_keys('').should be_nil
       StoredImage.all.should == []
     end
   end

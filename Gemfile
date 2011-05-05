@@ -1,6 +1,7 @@
 source :rubygems
 
 gem "rails", ">= 3.0.0"
+gem "nokogiri"
 gem "rmagick", :require => nil
 gem "mogilefs-client"
 

@@ -78,11 +78,7 @@ describe ImageTest do
     end
   end
 
-  context "MogileFS backend", :mogilefs => true do
-    before do
-      @mg = MogileFS::MogileFS.new({ :domain => ActsAsImageStore.backend['domain'], :hosts  => ActsAsImageStore.backend['hosts'] })
-    end
-
+  context "with backend", :backend => true do
     context "saving" do
       before do
         @image_test = Factory.build(:image_test)
@@ -92,7 +88,7 @@ describe ImageTest do
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-        @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.storage.list_keys('').should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
       end
 
       it "should increase refcount when saving the same image" do
@@ -103,7 +99,7 @@ describe ImageTest do
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-        @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.storage.list_keys('').should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
     end
@@ -148,7 +144,7 @@ describe ImageTest do
         img.format.should == 'PNG'
         img.columns.should == 725
         img.rows.should == 544
-        @mg.list_keys('').shift.sort.should ==
+        StoredImage.storage.list_keys('').sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg', 'bcadded5ee18bfa7c99834f307332b02.png']
       end
 
@@ -159,7 +155,7 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 600
         img.rows.should == 450
-        @mg.list_keys('').shift.sort.should ==
+        StoredImage.storage.list_keys('').sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
            'bcadded5ee18bfa7c99834f307332b02.jpg/600x450']
       end
@@ -171,7 +167,7 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 725
         img.rows.should == 544
-        @mg.list_keys('').shift.sort.should ==
+        StoredImage.storage.list_keys('').sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
       end
 
@@ -187,7 +183,7 @@ describe ImageTest do
         img.pixel_color(40,79).intensity.should < dark
         img.pixel_color( 0,40).intensity.should > dark
         img.pixel_color(79,40).intensity.should > dark
-        @mg.list_keys('').shift.sort.should ==
+        StoredImage.storage.list_keys('').sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill']
       end
@@ -208,7 +204,7 @@ describe ImageTest do
         img.pixel_color(40,77).intensity.should < dark
         img.pixel_color( 2,40).intensity.should > dark
         img.pixel_color(77,40).intensity.should > dark
-        @mg.list_keys('').shift.sort.should ==
+        StoredImage.storage.list_keys('').sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2']
       end
@@ -225,7 +221,7 @@ describe ImageTest do
         img.pixel_color(40,79).intensity.should > bright
         img.pixel_color( 0,40).intensity.should < bright
         img.pixel_color(79,40).intensity.should < bright
-        @mg.list_keys('').shift.sort.should ==
+        StoredImage.storage.list_keys('').sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
            'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw']
       end
@@ -262,7 +258,7 @@ describe ImageTest do
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.gif"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == '5d1e43dfd47173ae1420f061111e0776.gif'
-        @mg.list_keys('').shift.sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
+        StoredImage.storage.list_keys('').sort.should == ['5d1e43dfd47173ae1420f061111e0776.gif']
         StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
         StoredImage.find_by_name('5d1e43dfd47173ae1420f061111e0776').refcount.should == 1
       end
@@ -282,7 +278,7 @@ describe ImageTest do
         lambda{ @image_test.save }.should_not raise_error
         @image_test.name.should == new_name
         @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-        @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.storage.list_keys('').sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       end
 
@@ -327,7 +323,7 @@ describe ImageTest do
 
       it "should decrease refcount when deleting duplicated image" do
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.storage.list_keys('').sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       end
 
@@ -335,7 +331,7 @@ describe ImageTest do
         @image_test.destroy
         @image_test = ImageTest.first
         lambda{ @image_test.destroy }.should_not raise_error
-        @mg.list_keys('').should be_nil
+        StoredImage.storage.list_keys('').should be_nil
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
       end
     end
@@ -344,7 +340,7 @@ describe ImageTest do
       it "should save image and return key" do
         key = StoredImage.store_image(File.open("#{File.dirname(__FILE__)}/../sample.png").read)
         key.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-        @mg.list_keys('').shift.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
+        StoredImage.storage.list_keys('').should == ['60de57a8f5cd0a10b296b1f553cb41a9.png']
       end
 
       it "should raise error with invalid data" do

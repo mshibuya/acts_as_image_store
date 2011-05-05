@@ -164,6 +164,7 @@ DEPENDENCIES
   jeweler
   mogilefs-client
   mysql2
+  nokogiri
   rails (>= 3.0.0)
   rails3_acts_as_paranoid!
   rdoc (>= 3.0.0)

@@ -14,17 +14,9 @@ module ActsAsImageStore
   # 設定を読み込む
   def self.configure
     begin
-      backend = ActsAsImageStore::Engine.config.mogile_fs[Rails.env]
+      backend = ActsAsImageStore::Engine.config.backend[Rails.env]
     rescue NoMethodError
       backend = {}
-    end
-    if backend['mount_at']
-      backend['mount_at'] += '/' if backend['mount_at'][-1] != '/'
-    end
-    if backend['base_url']
-      backend['base_url'] += '/' if backend['base_url'][-1] != '/'
-    else
-      backend['base_url'] = '/image/'
     end
 
     ActsAsImageStore.backend = HashWithIndifferentAccess.new(backend)
@@ -37,10 +29,11 @@ module ActsAsImageStore
     Digest::SHA1.hexdigest(path + ':' + backend['secret'])
   end
 
-  class ImageNotFound  < StandardError; end
-  class SizeNotAllowed < StandardError; end
-  class ColumnNotFound < StandardError; end
-  class InvalidImage   < StandardError; end
+  class ImageNotFound      < StandardError; end
+  class SizeNotAllowed     < StandardError; end
+  class ColumnNotFound     < StandardError; end
+  class InvalidImage       < StandardError; end
+  class UnsupportedAdapter < StandardError; end
 
   # 認証キーがセットされるHTTPリクエストヘッダ
   AUTH_HEADER = 'X-ActsAsImageStore-Auth'
@@ -59,6 +52,9 @@ module ActsAsImageStore
   autoload :UrlHelper, 'acts_as_image_store/url_helper'
   autoload :TagHelper, 'acts_as_image_store/tag_helper'
   autoload :FormBuilder, 'acts_as_image_store/form_helper'
+  module StorageAdapters
+    autoload :Abstract, 'acts_as_image_store/storage_adapters/abstract'
+  end
 
 end
 

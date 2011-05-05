@@ -1,4 +1,5 @@
 development:
+  adapter:  mogile_fs
   hosts:    [192.168.56.101:7001]
   domain:   dev
   class:    image
@@ -6,6 +7,7 @@ development:
   mount_at: /image/
 
 test:
+  adapter:  file_system
   hosts:    [192.168.56.101:7001]
   domain:   acts_as_image_store_test
   class:    test

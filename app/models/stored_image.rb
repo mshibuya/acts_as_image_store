@@ -13,8 +13,20 @@ class StoredImage < ActiveRecord::Base
   })
 
   class << self
+    def storage
+      @storage ||= begin
+        adapter_name = ActsAsImageStore.backend[:storage][:adapter].downcase
+        require File.join(File.dirname(__FILE__), '..', '..',
+                          'lib', 'acts_as_image_store',  'storage_adapters', adapter_name)
+        klass = ::ActsAsImageStore::StorageAdapters.const_get(adapter_name.camelcase)
+        klass.load(self) unless klass.loaded
+        klass.new(ActsAsImageStore.backend[:storage])
+      rescue LoadError
+        raise ActsAsImageStore::UnsupportedAdapter, "`#{adapter_name}` is not a supported adapter."
+      end
+    end
     ##
-    # 画像にメタデータを付加したハッシュを作成
+    # returns metadatas of image
     #
     def parse_image(data, options={})
       options = options.symbolize_keys
@@ -22,17 +34,16 @@ class StoredImage < ActiveRecord::Base
         imglist = ::Magick::ImageList.new
         imglist.from_blob(data)
       rescue
-        # 画像ではない場合
         raise ::ActsAsImageStore::InvalidImage
       end
-      # 保存時リサイズを行うかどうか判定
+      # check if pre-resize is needed
       noresize = true
       noresize = false if ::ActsAsImageStore.options[:maxwidth] &&
           imglist.first.columns > ::ActsAsImageStore.options[:maxwidth].to_i
       noresize = false if ::ActsAsImageStore.options[:maxheight] &&
           imglist.first.columns > ::ActsAsImageStore.options[:maxheight].to_i
 
-      # stripするかどうか判定
+      # check if strip is needed
       nostrip = (options[:keep_exif] ||
                   imglist.inject([]){|r,i| r.concat(i.get_exif_by_entry()) } == [])
       if noresize && nostrip
@@ -60,9 +71,8 @@ class StoredImage < ActiveRecord::Base
       })
     end
     ##
-    # 同一ハッシュのレコードが存在するかどうか調べ、
-    # なければレコードを作成すると同時にMogileFSに保存する。
-    # あれば参照カウントを1増やす。
+    # send image to storage.
+    # if image already exists in storage, then increment refcount.
     #
     def save_image(image_attrs, options = {})
       temporary = options.delete(:temporary) || false
@@ -81,8 +91,7 @@ class StoredImage < ActiveRecord::Base
           end
           record.save!
           filename = name+'.'+record['image_type']
-          mg = mogilefs_connect
-          mg.store_content filename, ActsAsImageStore.backend['class'], content
+          storage.store filename, content
           filename
         else
           if temporary
@@ -190,7 +199,7 @@ class StoredImage < ActiveRecord::Base
     ##
     # パラメータからMogileFSのキーを生成し、引数で受け取ったブロックに渡す
     #
-    def retrieve_image(name, format, size, &block)
+    def retrieve_image(name, format, size)
       record = find_by_name(name)
       raise ActsAsImageStore::ImageNotFound unless record
 
@@ -203,19 +212,19 @@ class StoredImage < ActiveRecord::Base
         #needs no resizing
         key = "#{name}.#{format}"
       end
-      mg = mogilefs_connect
       begin
-        return block.call(mg, key)
-      rescue MogileFS::Backend::UnknownKeyError
-        # 画像がまだ生成されていないので生成する
+        return storage.fetch(key)
+      rescue NotFoundError
+=begin
+        # pending
         begin
           img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
         rescue MogileFS::Backend::UnknownKeyError
           raise ActsAsImageStore::ImageNotFound
         end
         mg.store_content key, ActsAsImageStore.backend['class'], resize_image(img, format, size).to_blob
+=end
       end
-      return block.call(mg, key)
     end
 
     ##
@@ -292,10 +301,11 @@ class StoredImage < ActiveRecord::Base
     end
 
     ##
-    # MogileFS上の指定されたハッシュ値を持つ画像データを消去
+    # deletes image
     #
     def purge_image_data(name)
-      mg = mogilefs_connect
+      storage.remove(name)
+=begin
       urls = []
       mg.each_key(name) do |k|
         mg.delete k
@@ -320,19 +330,7 @@ class StoredImage < ActiveRecord::Base
           end
         end
       end
-    end
-
-    ##
-    # :nodoc:
-    def mogilefs_connect
-      begin
-        return @@mogilefs
-      rescue
-        @@mogilefs = MogileFS::MogileFS.new({
-          :domain => ActsAsImageStore.backend['domain'],
-          :hosts  => ActsAsImageStore.backend['hosts'],
-        })
-      end
+=end
     end
   end
 end

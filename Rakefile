@@ -16,8 +16,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "acts_as_image_store"
   gem.homepage = "http://github.com/mshibuya/acts_as_image_store"
   gem.license = "MIT"
-  gem.summary = %Q{Rails plugin for image storage}
-  gem.description = %Q{Rails plugin for image storage}
+  gem.summary = %Q{Rails image storage plugin with multiple backend support}
+  gem.description = %Q{Rails image storage plugin with multiple backend support}
   gem.email = "mit.shibuya@gmail.com"
   gem.authors = ["Mitsuhiro Shibuya"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,

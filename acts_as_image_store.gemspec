@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2011-02-15}
-  s.description = %q{Rails plugin for using MogileFS as image storage}
-  s.email = %q{shibuya@lavan7.co.jp}
+  s.date = %q{2011-05-06}
+  s.description = %q{Rails image storage plugin with multiple backend support}
+  s.email = %q{mit.shibuya@gmail.com}
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "acts_as_image_store.gemspec",
     "app/controllers/stored_images_controller.rb",
     "app/models/stored_image.rb",
     "config/locales/en.yml",
@@ -35,17 +36,25 @@ Gem::Specification.new do |s|
     "lib/acts_as_image_store/engine.rb",
     "lib/acts_as_image_store/form_helper.rb",
     "lib/acts_as_image_store/image_deletable.rb",
+    "lib/acts_as_image_store/storage_adapters/abstract.rb",
+    "lib/acts_as_image_store/storage_adapters/file_system.rb",
+    "lib/acts_as_image_store/storage_adapters/mogile_fs.rb",
     "lib/acts_as_image_store/tag_helper.rb",
     "lib/acts_as_image_store/url_helper.rb",
     "lib/acts_as_image_store/validates_image_attribute.rb",
     "lib/rails/generators/acts_as_image_store/acts_as_image_store_generator.rb",
+    "lib/rails/generators/acts_as_image_store/templates/image_store.yml",
     "lib/rails/generators/acts_as_image_store/templates/initializer.rb",
     "lib/rails/generators/acts_as_image_store/templates/migration.rb",
-    "lib/rails/generators/acts_as_image_store/templates/mogile_fs.yml",
     "lib/rails/generators/acts_as_image_store/templates/schema.rb",
     "lib/tasks/acts_as_image_store.rake",
-    "acts_as_image_store.gemspec",
+    "spec/acts_as_image_store/validators/file_size_spec.rb",
+    "spec/acts_as_image_store/validators/height_spec.rb",
+    "spec/acts_as_image_store/validators/image_type_spec.rb",
+    "spec/acts_as_image_store/validators/width_spec.rb",
+    "spec/acts_as_image_store_spec.rb",
     "spec/controllers/image_tests_controller_spec.rb",
+    "spec/controllers/multiples_controller_spec.rb",
     "spec/controllers/stored_images_controller_spec.rb",
     "spec/dummy/Rakefile",
     "spec/dummy/app/controllers/application_controller.rb",
@@ -86,16 +95,19 @@ Gem::Specification.new do |s|
     "spec/dummy/config/environments/development.rb",
     "spec/dummy/config/environments/production.rb",
     "spec/dummy/config/environments/test.rb",
+    "spec/dummy/config/initializers/acts_as_image_store.rb",
     "spec/dummy/config/initializers/backtrace_silencers.rb",
     "spec/dummy/config/initializers/inflections.rb",
     "spec/dummy/config/initializers/mime_types.rb",
     "spec/dummy/config/initializers/mogile_fs.yml.example",
-    "spec/dummy/config/initializers/acts_as_image_store.rb",
     "spec/dummy/config/initializers/secret_token.rb",
     "spec/dummy/config/initializers/session_store.rb",
     "spec/dummy/config/locales/en.yml",
     "spec/dummy/config/routes.rb",
     "spec/dummy/db/migrate/20101224074948_create_image_tests.rb",
+    "spec/dummy/db/migrate/20110106105927_create_multiples.rb",
+    "spec/dummy/db/migrate/20110114060025_create_paranoids.rb",
+    "spec/dummy/db/migrate/20110117045843_create_confirms.rb",
     "spec/dummy/public/404.html",
     "spec/dummy/public/422.html",
     "spec/dummy/public/500.html",
@@ -115,35 +127,37 @@ Gem::Specification.new do |s|
     "spec/integration/navigation_spec.rb",
     "spec/models/confirm_spec.rb",
     "spec/models/image_test_spec.rb",
-    "spec/models/stored_image_spec.rb",
     "spec/models/multiple_spec.rb",
     "spec/models/paranoid_spec.rb",
-    "spec/acts_as_image_store/validators/file_size_spec.rb",
-    "spec/acts_as_image_store/validators/height_spec.rb",
-    "spec/acts_as_image_store/validators/image_type_spec.rb",
-    "spec/acts_as_image_store/validators/width_spec.rb",
-    "spec/acts_as_image_store_spec.rb",
+    "spec/models/stored_image_spec.rb",
     "spec/routing_spec.rb",
     "spec/sample.bmp",
     "spec/sample.gif",
     "spec/sample.jpg",
     "spec/sample.png",
     "spec/sample_exif.jpg",
+    "spec/sample_huge.gif",
     "spec/spec_helper.rb",
+    "spec/support/backend_helper_methods.rb",
     "spec/support/factories/confirms.rb",
     "spec/support/factories/image_tests.rb",
     "spec/support/factories/multiples.rb",
     "spec/support/factories/paranoids.rb",
-    "spec/support/models.rb",
-    "spec/support/mogilefs_helper_methods.rb"
+    "spec/support/models.rb"
   ]
-  s.homepage = %q{http://git.dev.ist-corp.jp/acts_as_image_store}
+  s.homepage = %q{http://github.com/mshibuya/acts_as_image_store}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
-  s.summary = %q{Rails plugin for using MogileFS as image storage}
+  s.rubygems_version = %q{1.5.0}
+  s.summary = %q{Rails image storage plugin with multiple backend support}
   s.test_files = [
+    "spec/acts_as_image_store/validators/file_size_spec.rb",
+    "spec/acts_as_image_store/validators/height_spec.rb",
+    "spec/acts_as_image_store/validators/image_type_spec.rb",
+    "spec/acts_as_image_store/validators/width_spec.rb",
+    "spec/acts_as_image_store_spec.rb",
     "spec/controllers/image_tests_controller_spec.rb",
+    "spec/controllers/multiples_controller_spec.rb",
     "spec/controllers/stored_images_controller_spec.rb",
     "spec/dummy/app/controllers/application_controller.rb",
     "spec/dummy/app/controllers/confirms_controller.rb",
@@ -163,46 +177,44 @@ Gem::Specification.new do |s|
     "spec/dummy/config/environments/development.rb",
     "spec/dummy/config/environments/production.rb",
     "spec/dummy/config/environments/test.rb",
+    "spec/dummy/config/initializers/acts_as_image_store.rb",
     "spec/dummy/config/initializers/backtrace_silencers.rb",
     "spec/dummy/config/initializers/inflections.rb",
     "spec/dummy/config/initializers/mime_types.rb",
-    "spec/dummy/config/initializers/acts_as_image_store.rb",
     "spec/dummy/config/initializers/secret_token.rb",
     "spec/dummy/config/initializers/session_store.rb",
     "spec/dummy/config/routes.rb",
     "spec/dummy/db/migrate/20101224074948_create_image_tests.rb",
+    "spec/dummy/db/migrate/20110106105927_create_multiples.rb",
+    "spec/dummy/db/migrate/20110114060025_create_paranoids.rb",
+    "spec/dummy/db/migrate/20110117045843_create_confirms.rb",
     "spec/helpers/form_helper_spec.rb",
     "spec/helpers/tag_helper_spec.rb",
     "spec/integration/navigation_spec.rb",
     "spec/models/confirm_spec.rb",
     "spec/models/image_test_spec.rb",
-    "spec/models/stored_image_spec.rb",
     "spec/models/multiple_spec.rb",
     "spec/models/paranoid_spec.rb",
-    "spec/acts_as_image_store/validators/file_size_spec.rb",
-    "spec/acts_as_image_store/validators/height_spec.rb",
-    "spec/acts_as_image_store/validators/image_type_spec.rb",
-    "spec/acts_as_image_store/validators/width_spec.rb",
-    "spec/acts_as_image_store_spec.rb",
+    "spec/models/stored_image_spec.rb",
     "spec/routing_spec.rb",
     "spec/spec_helper.rb",
+    "spec/support/backend_helper_methods.rb",
     "spec/support/factories/confirms.rb",
     "spec/support/factories/image_tests.rb",
     "spec/support/factories/multiples.rb",
     "spec/support/factories/paranoids.rb",
-    "spec/support/models.rb",
-    "spec/support/mogilefs_helper_methods.rb"
+    "spec/support/models.rb"
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rails>, [">= 3.0.0"])
+      s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<rmagick>, [">= 0"])
       s.add_runtime_dependency(%q<mogilefs-client>, [">= 0"])
-      s.add_development_dependency(%q<sqlite3-ruby>, ["= 1.2.5"])
+      s.add_development_dependency(%q<sqlite3-ruby>, [">= 0"])
       s.add_development_dependency(%q<mysql2>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 2.0.1"])
       s.add_development_dependency(%q<rspec-rails>, [">= 0"])
@@ -212,13 +224,16 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<capybara>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, [">= 3.0.0"])
+      s.add_development_dependency(%q<database_cleaner>, [">= 0"])
       s.add_development_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
       s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
     else
       s.add_dependency(%q<rails>, [">= 3.0.0"])
+      s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<rmagick>, [">= 0"])
       s.add_dependency(%q<mogilefs-client>, [">= 0"])
-      s.add_dependency(%q<sqlite3-ruby>, ["= 1.2.5"])
+      s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
       s.add_dependency(%q<mysql2>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 2.0.1"])
       s.add_dependency(%q<rspec-rails>, [">= 0"])
@@ -228,14 +243,17 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<capybara>, [">= 0"])
       s.add_dependency(%q<rdoc>, [">= 3.0.0"])
+      s.add_dependency(%q<database_cleaner>, [">= 0"])
       s.add_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
       s.add_dependency(%q<ruby-debug19>, [">= 0"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
     end
   else
     s.add_dependency(%q<rails>, [">= 3.0.0"])
+    s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<rmagick>, [">= 0"])
     s.add_dependency(%q<mogilefs-client>, [">= 0"])
-    s.add_dependency(%q<sqlite3-ruby>, ["= 1.2.5"])
+    s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
     s.add_dependency(%q<mysql2>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 2.0.1"])
     s.add_dependency(%q<rspec-rails>, [">= 0"])
@@ -245,8 +263,10 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<capybara>, [">= 0"])
     s.add_dependency(%q<rdoc>, [">= 3.0.0"])
+    s.add_dependency(%q<database_cleaner>, [">= 0"])
     s.add_dependency(%q<rails3_acts_as_paranoid>, [">= 0"])
     s.add_dependency(%q<ruby-debug19>, [">= 0"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
   end
 end
 

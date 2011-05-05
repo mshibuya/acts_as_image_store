@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Multiple, :mogilefs => true do
+describe Multiple, :backend => true do
   context "saving" do
     before do
       @multiple = Factory.build(:multiple)
@@ -12,7 +12,7 @@ describe Multiple, :mogilefs => true do
       lambda{ @multiple.save! }.should_not raise_error
       @multiple.banner1.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
       @multiple.banner2.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
-      @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys('').sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
     end
 
     it "should increase refcount when saving the same image" do
@@ -24,7 +24,7 @@ describe Multiple, :mogilefs => true do
       @multiple.set_image_file :banner2, "#{File.dirname(__FILE__)}/../sample.jpg"
       lambda{ @multiple.save }.should_not raise_error
       @multiple.banner2.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-      @mg.list_keys('').shift.sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys('').sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').refcount.should == 1
     end
@@ -43,7 +43,7 @@ describe Multiple, :mogilefs => true do
 
     it "should decrease refcount when deleting duplicated image" do
       lambda{ @multiple1.destroy }.should_not raise_error
-      @mg.list_keys('').shift.sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg',]
+      StoredImage.storage.list_keys('').sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg',]
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
     end
@@ -51,7 +51,7 @@ describe Multiple, :mogilefs => true do
     it "should delete image data when deleting image" do
       @multiple1.destroy
       lambda{ @multiple2.destroy }.should_not raise_error
-      @mg.list_keys('').should be_nil
+      StoredImage.storage.list_keys('').should be_nil
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
     end
