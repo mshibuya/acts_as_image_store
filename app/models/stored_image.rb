@@ -223,8 +223,13 @@ class StoredImage < ActiveRecord::Base
         rescue MogileFS::Backend::UnknownKeyError
           raise ActsAsImageStore::ImageNotFound
         end
-        cache.store name, format, size, resize_image(img, format, size).to_blob
-        return cache.send(method, name, format, size)
+        content = resize_image(img, format, size).to_blob
+        cache.store name, format, size, content
+        if method == :fetch
+          return content
+        else
+          return cache.send(method, name, format, size)
+        end
       end
     end
 

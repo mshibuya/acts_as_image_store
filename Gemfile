@@ -3,11 +3,12 @@ source :rubygems
 gem "rails", ">= 3.0.0"
 gem "nokogiri"
 gem "rmagick", :require => nil
-gem "mogilefs-client"
 
 group :development do
   gem "sqlite3-ruby"
   gem "mysql2"
+  gem "mogilefs-client"
+  gem "sauberia-aws-s3"
   gem "rspec", ">= 2.0.1"
   gem "rspec-rails"
   gem "factory_girl"
