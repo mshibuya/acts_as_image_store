@@ -51,7 +51,7 @@ describe Multiple, :backend => true do
     it "should delete image data when deleting image" do
       @multiple1.destroy
       lambda{ @multiple2.destroy }.should_not raise_error
-      StoredImage.storage.list_keys('').should be_nil
+      StoredImage.storage.list_keys.should be_empty
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
       StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
     end

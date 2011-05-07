@@ -55,6 +55,9 @@ module ActsAsImageStore
   module StorageAdapters
     autoload :Abstract, 'acts_as_image_store/storage_adapters/abstract'
   end
+  module CacheAdapters
+    autoload :Abstract, 'acts_as_image_store/cache_adapters/abstract'
+  end
 
 end
 

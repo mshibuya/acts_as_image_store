@@ -124,7 +124,7 @@ describe Confirm, :backend => true do
       @confirm.destroy
       sleep(1)
       StoredImage.cleanup_temporary_image
-      StoredImage.storage.list_keys('').should be_nil
+      StoredImage.storage.list_keys.should be_empty
       StoredImage.all.should == []
     end
   end

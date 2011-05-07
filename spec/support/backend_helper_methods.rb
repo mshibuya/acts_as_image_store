@@ -7,6 +7,7 @@ module BackendHelperMethods
 
   def backend_purge
     StoredImage.storage.purge
+    StoredImage.cache.purge
   end
 end
 

@@ -99,7 +99,7 @@ describe ImageTest do
         @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
         lambda{ @image_test.save }.should_not raise_error
         @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-        StoredImage.storage.list_keys('').should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.storage.list_keys.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
     end
@@ -114,9 +114,8 @@ describe ImageTest do
         @image_test.save!
       end
 
-      it "should return 2 urls" do
-        sleep(3) # wait until replication becomes ready
-        StoredImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg').pop.should have(2).items
+      it "should return urls" do
+        StoredImage.fetch_urls('bcadded5ee18bfa7c99834f307332b02', 'jpg').pop.should have(1).items
       end
 
       it "should return raw jpeg image" do
@@ -144,7 +143,7 @@ describe ImageTest do
         img.format.should == 'PNG'
         img.columns.should == 725
         img.rows.should == 544
-        StoredImage.storage.list_keys('').sort.should ==
+        StoredImage.storage.list_keys.sort.should ==
           ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg', 'bcadded5ee18bfa7c99834f307332b02.png']
       end
 
@@ -155,9 +154,8 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 600
         img.rows.should == 450
-        StoredImage.storage.list_keys('').sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/600x450']
+        StoredImage.cache.list('bcadded5ee18bfa7c99834f307332b02').sort.should ==
+           [['jpg', '600x450'], ['jpg', 'raw']]
       end
 
       it "should return raw jpeg image when requested larger size" do
@@ -167,8 +165,7 @@ describe ImageTest do
         img.format.should == 'JPEG'
         img.columns.should == 725
         img.rows.should == 544
-        StoredImage.storage.list_keys('').sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.cache.list('bcadded5ee18bfa7c99834f307332b02').sort.should == [['jpg', 'raw']]
       end
 
       it "should return filled jpeg image" do
@@ -183,9 +180,8 @@ describe ImageTest do
         img.pixel_color(40,79).intensity.should < dark
         img.pixel_color( 0,40).intensity.should > dark
         img.pixel_color(79,40).intensity.should > dark
-        StoredImage.storage.list_keys('').sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill']
+        StoredImage.cache.list('bcadded5ee18bfa7c99834f307332b02').sort.should ==
+           [['jpg', '80x80fill'], ['jpg', 'raw']]
       end
 
       it "should return filled jpeg image" do
@@ -204,9 +200,8 @@ describe ImageTest do
         img.pixel_color(40,77).intensity.should < dark
         img.pixel_color( 2,40).intensity.should > dark
         img.pixel_color(77,40).intensity.should > dark
-        StoredImage.storage.list_keys('').sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fill2']
+        StoredImage.cache.list('bcadded5ee18bfa7c99834f307332b02').sort.should ==
+           [['jpg', '80x80fill2'], ['jpg', 'raw']]
       end
 
       it "should return filled jpeg image with white background" do
@@ -221,9 +216,8 @@ describe ImageTest do
         img.pixel_color(40,79).intensity.should > bright
         img.pixel_color( 0,40).intensity.should < bright
         img.pixel_color(79,40).intensity.should < bright
-        StoredImage.storage.list_keys('').sort.should ==
-          ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg',
-           'bcadded5ee18bfa7c99834f307332b02.jpg/80x80fillw']
+        StoredImage.cache.list('bcadded5ee18bfa7c99834f307332b02').sort.should ==
+           [['jpg', '80x80fillw'], ['jpg', 'raw']]
       end
 
       it "should raise error when size is not allowed" do
@@ -331,7 +325,7 @@ describe ImageTest do
         @image_test.destroy
         @image_test = ImageTest.first
         lambda{ @image_test.destroy }.should_not raise_error
-        StoredImage.storage.list_keys('').should be_nil
+        StoredImage.storage.list_keys.should be_empty
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
       end
     end

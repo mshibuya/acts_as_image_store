@@ -10,7 +10,7 @@ describe Paranoid, :backend => true do
       @paranoid.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
       lambda{ @paranoid.save }.should_not raise_error
       @paranoid.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
-      StoredImage.storage.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
     end
 
     it "should accept another image using set_image_data" do
@@ -44,13 +44,13 @@ describe Paranoid, :backend => true do
         @paranoid.destroy
         @paranoid.reload.destroy
       end.should_not raise_error
-      StoredImage.storage.list_keys('').should be_nil
+      StoredImage.storage.list_keys.should be_empty
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
     end
 
     it "should delete image data on real removal" do
       lambda{ @paranoid.destroy! }.should_not raise_error
-      StoredImage.storage.list_keys('').should be_nil
+      StoredImage.storage.list_keys.should be_empty
       StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
     end
   end

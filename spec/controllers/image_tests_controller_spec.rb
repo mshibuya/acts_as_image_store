@@ -7,7 +7,7 @@ describe ImageTestsController do
     controller.should be_an_instance_of(ImageTestsController)
   end
 
-  context "With MogileFS Backend", :mogilefs => true do
+  context "With Backend", :backend => true do
     before do
       @image_test = Factory.build(:image_test)
       @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
@@ -20,12 +20,12 @@ describe ImageTestsController do
     end
 
     it "should be deleted" do
-      @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
       get 'image_delete', :id => @image_test.id, :column => 'image'
       response.status.should == 302
       response.header['Location'].should == "http://test.host/image_tests/#{@image_test.id}/edit"
       StoredImage.count.should == 0
-      @mg.list_keys('').should be_nil
+      StoredImage.storage.list_keys.should be_empty
       @image_test.reload[:image].should be_nil
     end
 

@@ -13,17 +13,26 @@ class StoredImage < ActiveRecord::Base
   })
 
   class << self
-    def storage
-      @storage ||= begin
+    def load_adapter(kind)
+      begin
         adapter_name = ActsAsImageStore.backend[:storage][:adapter].downcase
+        adapters_module = ::ActsAsImageStore.const_get("#{kind}_adapters".camelcase)
         require File.join(File.dirname(__FILE__), '..', '..',
-                          'lib', 'acts_as_image_store',  'storage_adapters', adapter_name)
-        klass = ::ActsAsImageStore::StorageAdapters.const_get(adapter_name.camelcase)
+                          'lib', 'acts_as_image_store',  "#{kind}_adapters", adapter_name)
+        klass = adapters_module.const_get(adapter_name.camelcase)
         klass.load(self) unless klass.loaded
-        klass.new(ActsAsImageStore.backend[:storage])
+        klass.new(ActsAsImageStore.backend[kind])
       rescue LoadError
-        raise ActsAsImageStore::UnsupportedAdapter, "`#{adapter_name}` is not a supported adapter."
+        raise ActsAsImageStore::UnsupportedAdapter, "`#{adapter_name}` is not a supported #{kind} adapter."
       end
+    end
+
+    def storage
+      @storage ||= load_adapter(:storage)
+    end
+
+    def cache
+      @cache ||= load_adapter(:cache)
     end
     ##
     # returns metadatas of image
@@ -159,16 +168,14 @@ class StoredImage < ActiveRecord::Base
     # X-REPROXY-FORヘッダでの出力に使う。
     #
     def fetch_urls(name, format, size='raw')
-      [self::CONTENT_TYPES[format.to_sym],
-        retrieve_image(name, format, size) {|mg,key| mg.get_paths key }]
+      [self::CONTENT_TYPES[format.to_sym], retrieve_image(name, format, size, :url)]
     end
 
     ##
     # 指定されたキーを持つ画像のデータを取得して返す。
     #
     def fetch_data(name, format, size='raw')
-      [self::CONTENT_TYPES[format.to_sym],
-        retrieve_image(name, format, size) {|mg,key| mg.get_file_data key }]
+      [self::CONTENT_TYPES[format.to_sym], retrieve_image(name, format, size, :fetch)]
     end
 
     ##
@@ -197,38 +204,32 @@ class StoredImage < ActiveRecord::Base
     protected
 
     ##
-    # パラメータからMogileFSのキーを生成し、引数で受け取ったブロックに渡す
+    # Store resized image and passes parameters to given block
     #
-    def retrieve_image(name, format, size)
+    def retrieve_image(name, format, size, method)
       record = find_by_name(name)
       raise ActsAsImageStore::ImageNotFound unless record
 
       # check whether size is allowd
       raise ActsAsImageStore::SizeNotAllowed unless size_allowed?(size)
 
-      if resize_needed? record, format, size
-        key = "#{name}.#{format}/#{size}"
-      else
-        #needs no resizing
-        key = "#{name}.#{format}"
-      end
+      size = 'raw' unless resize_needed? record, format, size
+
       begin
-        return storage.fetch(key)
-      rescue NotFoundError
-=begin
-        # pending
+        return cache.send(method, name, format, size)
+      rescue ActsAsImageStore::CacheAdapters::Abstract::NotFoundError
         begin
-          img = ::Magick::Image.from_blob(mg.get_file_data("#{name}.#{record.image_type}")).shift
+          img = ::Magick::Image.from_blob(storage.fetch("#{name}.#{record.image_type}")).shift
         rescue MogileFS::Backend::UnknownKeyError
           raise ActsAsImageStore::ImageNotFound
         end
-        mg.store_content key, ActsAsImageStore.backend['class'], resize_image(img, format, size).to_blob
-=end
+        cache.store name, format, size, resize_image(img, format, size).to_blob
+        return cache.send(method, name, format, size)
       end
     end
 
     ##
-    # 画像をリサイズ・変換
+    # Resizes image
     #
     def resize_image(img, format, size)
       w, h, method, n = size.scan(/(\d+)x(\d+)([a-z]*)(\d*)/).shift
@@ -248,7 +249,7 @@ class StoredImage < ActiveRecord::Base
       img
     end
     ##
-    # 画像を背景色つきでリサイズ
+    # Resizes image with background color
     #
     def resize_with_fill(img, w, h, n, color)
       n ||= 0
@@ -257,27 +258,16 @@ class StoredImage < ActiveRecord::Base
       background.composite(img, Magick::CenterGravity, Magick::OverCompositeOp)
     end
     ##
-    # MogileFSキーからURLを復元する
-    # (Reproxy Cacheクリア用)
-    #
-    def parse_key(key)
-      name, format, size = key.scan(/([0-9a-f]{32})\.(jpg|gif|png)(?:\/(\d+x\d+[a-z]*\d*))?/).shift
-      size ||= 'raw'
-      base = URI.parse(ActsAsImageStore.backend['base_url'])
-      base.path + size + '/' + name + '.' + format
-    end
-
-    ##
-    # 画像リサイズが必要かどうか判定
+    # Check if resize is needed with given size/format
     #
     def resize_needed?(record, format, size)
       return false if size == 'raw'
 
-      # 加工が指定されているなら必要
+      # needed if size given
       w, h, method = size.scan(/(\d+)x(\d+)([a-z]*\d*)/).shift
       return true if method && !method.empty?
 
-      # オリジナルの画像サイズと比較
+      # compare given format with original format
       w, h =  [w, h].map{|i| i.to_i}
       if w > record.width && h > record.height
         false
@@ -304,15 +294,19 @@ class StoredImage < ActiveRecord::Base
     # deletes image
     #
     def purge_image_data(name)
-      storage.remove(name)
-=begin
-      urls = []
-      mg.each_key(name) do |k|
-        mg.delete k
-        url = parse_key k
-        urls.push(url) if url
-      end
-      if urls.size > 0 && ActsAsImageStore.backend['reproxy']
+      if ActsAsImageStore.backend['reproxy']
+        urls = []
+        storage.list(name).each do |k|
+          key, format = k.split('.')
+          urls.push(cache.url(key, format, 'raw'))
+        end
+        cache.list(name).each do |k|
+          urls.push(cache.url(name, k.first, k.last))
+        end
+        urls.unique
+
+        return if urls.size <= 0
+
         base = URI.parse(ActsAsImageStore.backend['base_url'])
         if ActsAsImageStore.backend['perlbal']
           host, port = ActsAsImageStore.backend['perlbal'].split(':')
@@ -330,7 +324,8 @@ class StoredImage < ActiveRecord::Base
           end
         end
       end
-=end
+      storage.remove(name)
+      cache.remove(name)
     end
   end
 end

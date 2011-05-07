@@ -22,12 +22,12 @@ describe MultiplesController do
     end
 
     it "should be deleted" do
-      @mg.list_keys('').shift.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+      StoredImage.storage.list_keys.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
       get 'image_delete', :confirm_id => @confirm.id, :id => @multiple.id, :column => 'banner1'
       response.status.should == 302
       response.header['Location'].should == "http://test.host/confirms/2/multiples/#{@multiple.id}/edit"
       StoredImage.count.should == 0
-      @mg.list_keys('').should be_nil
+      StoredImage.storage.list_keys.should be_empty
       @multiple.reload[:banner1].should be_nil
     end
 
