@@ -5,6 +5,8 @@ module ActsAsImageStore
     class FileSystem < Abstract
       def initialize(backend)
         super
+        @backend['path'] ||= ActsAsImageStore.backend[:mount_at].
+          gsub(/(?:^\/|\/$)/, '')
       end
 
       def exist?(key)

@@ -15,7 +15,7 @@ class StoredImage < ActiveRecord::Base
   class << self
     def load_adapter(kind)
       begin
-        adapter_name = ActsAsImageStore.backend[:storage][:adapter].downcase
+        adapter_name = ActsAsImageStore.backend[kind][:adapter].downcase
         adapters_module = ::ActsAsImageStore.const_get("#{kind}_adapters".camelcase)
         require File.join(File.dirname(__FILE__), '..', '..',
                           'lib', 'acts_as_image_store',  "#{kind}_adapters", adapter_name)

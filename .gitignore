@@ -7,6 +7,7 @@
 /spec/dummy/config/initializers/image_store.yml
 /spec/dummy/log/*.log
 /spec/dummy/tmp/
+/spec/dummy/public/images/
 /coverage*
 /rdoc/
 *.swp

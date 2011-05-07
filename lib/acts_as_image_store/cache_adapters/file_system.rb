@@ -4,9 +4,9 @@ module ActsAsImageStore
   module CacheAdapters
     class FileSystem < Abstract
       def initialize(backend)
-        backend[:path] ||= ActsAsImageStore.backend[:mount_at].
-          gsub(/(?:^\/|\/$)/, '')
         super
+        @backend['path'] ||= ActsAsImageStore.backend[:mount_at].
+          gsub(/(?:^\/|\/$)/, '')
       end
 
       def exist?(key, format, size)
@@ -55,7 +55,7 @@ module ActsAsImageStore
       private
 
       def path(key, format, size)
-        if key || format
+        if key && format
           File.join(Rails.public_path, @backend['path'], size, "#{key}.#{format}")
         else
           File.join(Rails.public_path, @backend['path'], size)

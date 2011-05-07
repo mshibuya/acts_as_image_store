@@ -8,9 +8,10 @@ adapters = [:file_system, :s3]
 adapters.each do |a|
   klass = ::ActsAsImageStore::StorageAdapters.const_get(a.to_s.camelcase)
   klass.load(self)
-  storage = klass.new(ActsAsImageStore.backend[:storage][a])
+  storage = klass.new(ActsAsImageStore.backend[a])
 
   describe klass do
+    after{ storage.purge }
 
     it "should accept single item" do
       s = storage

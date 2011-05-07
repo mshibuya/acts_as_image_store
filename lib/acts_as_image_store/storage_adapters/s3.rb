@@ -8,7 +8,7 @@ module ActsAsImageStore
         AWS::S3::Base.establish_connection!(
           :access_key_id     => backend['access_key_id'],
           :secret_access_key => backend['secret_access_key'],
-          :server => "s3-ap-northeast-1.amazonaws.com",
+          :server => backend['server'] || "s3.amazonaws.com",
         )
         @bucket = AWS::S3::Bucket.find(backend['bucket'])
         super

@@ -12,8 +12,8 @@ module ActsAsImageStore
         def load(klass) ; end
       end
 
-      def initialize(backend)
-        @backend = backend
+      def initialize(backend=nil)
+        @backend = backend || {}
       end
 
       def exist?(key)

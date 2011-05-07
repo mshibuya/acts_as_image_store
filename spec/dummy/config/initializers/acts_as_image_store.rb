@@ -1,7 +1,8 @@
 module ActsAsImageStore
   class Engine < Rails::Engine
 
-    config.backend = YAML::load_file("#{Rails.root}/config/initializers/image_store.yml")
+    config.backend = YAML::load(ERB.new(IO.read(
+      "#{Rails.root}/config/initializers/image_store.yml")).result)
 
     config.options = {
       # default image size for FormBuilder#image_field
