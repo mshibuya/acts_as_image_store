@@ -41,7 +41,7 @@ class ActsAsImageStoreGenerator < Rails::Generators::Base
 
   def copy_initializer_file
     copy_file 'initializer.rb', 'config/initializers/acts_as_image_store.rb'
-    copy_file 'image_store.yml', 'config/initializers/mogile_fs.yml'
+    copy_file 'image_store.yml', 'config/initializers/image_store.yml'
   end
 
 end
