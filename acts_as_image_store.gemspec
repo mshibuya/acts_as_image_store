@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2011-05-06}
+  s.date = %q{2011-05-09}
   s.description = %q{Rails image storage plugin with multiple backend support}
   s.email = %q{mit.shibuya@gmail.com}
   s.extra_rdoc_files = [
@@ -33,12 +33,18 @@ Gem::Specification.new do |s|
     "init.rb",
     "lib/acts_as_image_store.rb",
     "lib/acts_as_image_store/active_record.rb",
+    "lib/acts_as_image_store/cache_adapters/abstract.rb",
+    "lib/acts_as_image_store/cache_adapters/external.rb",
+    "lib/acts_as_image_store/cache_adapters/file_system.rb",
+    "lib/acts_as_image_store/cache_adapters/mogile_fs.rb",
+    "lib/acts_as_image_store/cache_adapters/s3.rb",
     "lib/acts_as_image_store/engine.rb",
     "lib/acts_as_image_store/form_helper.rb",
     "lib/acts_as_image_store/image_deletable.rb",
     "lib/acts_as_image_store/storage_adapters/abstract.rb",
     "lib/acts_as_image_store/storage_adapters/file_system.rb",
     "lib/acts_as_image_store/storage_adapters/mogile_fs.rb",
+    "lib/acts_as_image_store/storage_adapters/s3.rb",
     "lib/acts_as_image_store/tag_helper.rb",
     "lib/acts_as_image_store/url_helper.rb",
     "lib/acts_as_image_store/validates_image_attribute.rb",
@@ -53,6 +59,7 @@ Gem::Specification.new do |s|
     "spec/acts_as_image_store/validators/image_type_spec.rb",
     "spec/acts_as_image_store/validators/width_spec.rb",
     "spec/acts_as_image_store_spec.rb",
+    "spec/cache_adapters_spec.rb",
     "spec/controllers/image_tests_controller_spec.rb",
     "spec/controllers/multiples_controller_spec.rb",
     "spec/controllers/stored_images_controller_spec.rb",
@@ -97,9 +104,9 @@ Gem::Specification.new do |s|
     "spec/dummy/config/environments/test.rb",
     "spec/dummy/config/initializers/acts_as_image_store.rb",
     "spec/dummy/config/initializers/backtrace_silencers.rb",
+    "spec/dummy/config/initializers/image_store.yml.example",
     "spec/dummy/config/initializers/inflections.rb",
     "spec/dummy/config/initializers/mime_types.rb",
-    "spec/dummy/config/initializers/mogile_fs.yml.example",
     "spec/dummy/config/initializers/secret_token.rb",
     "spec/dummy/config/initializers/session_store.rb",
     "spec/dummy/config/locales/en.yml",
@@ -112,7 +119,6 @@ Gem::Specification.new do |s|
     "spec/dummy/public/422.html",
     "spec/dummy/public/500.html",
     "spec/dummy/public/favicon.ico",
-    "spec/dummy/public/images/no_photo.jpg",
     "spec/dummy/public/javascripts/application.js",
     "spec/dummy/public/javascripts/controls.js",
     "spec/dummy/public/javascripts/dragdrop.js",
@@ -138,6 +144,7 @@ Gem::Specification.new do |s|
     "spec/sample_exif.jpg",
     "spec/sample_huge.gif",
     "spec/spec_helper.rb",
+    "spec/storage_adapters_spec.rb",
     "spec/support/backend_helper_methods.rb",
     "spec/support/factories/confirms.rb",
     "spec/support/factories/image_tests.rb",
@@ -156,6 +163,7 @@ Gem::Specification.new do |s|
     "spec/acts_as_image_store/validators/image_type_spec.rb",
     "spec/acts_as_image_store/validators/width_spec.rb",
     "spec/acts_as_image_store_spec.rb",
+    "spec/cache_adapters_spec.rb",
     "spec/controllers/image_tests_controller_spec.rb",
     "spec/controllers/multiples_controller_spec.rb",
     "spec/controllers/stored_images_controller_spec.rb",
@@ -198,6 +206,7 @@ Gem::Specification.new do |s|
     "spec/models/stored_image_spec.rb",
     "spec/routing_spec.rb",
     "spec/spec_helper.rb",
+    "spec/storage_adapters_spec.rb",
     "spec/support/backend_helper_methods.rb",
     "spec/support/factories/confirms.rb",
     "spec/support/factories/image_tests.rb",
@@ -213,9 +222,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rails>, [">= 3.0.0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<rmagick>, [">= 0"])
-      s.add_runtime_dependency(%q<mogilefs-client>, [">= 0"])
       s.add_development_dependency(%q<sqlite3-ruby>, [">= 0"])
       s.add_development_dependency(%q<mysql2>, [">= 0"])
+      s.add_development_dependency(%q<mogilefs-client>, [">= 0"])
+      s.add_development_dependency(%q<sauberia-aws-s3>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 2.0.1"])
       s.add_development_dependency(%q<rspec-rails>, [">= 0"])
       s.add_development_dependency(%q<factory_girl>, [">= 0"])
@@ -232,9 +242,10 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rails>, [">= 3.0.0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<rmagick>, [">= 0"])
-      s.add_dependency(%q<mogilefs-client>, [">= 0"])
       s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
       s.add_dependency(%q<mysql2>, [">= 0"])
+      s.add_dependency(%q<mogilefs-client>, [">= 0"])
+      s.add_dependency(%q<sauberia-aws-s3>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 2.0.1"])
       s.add_dependency(%q<rspec-rails>, [">= 0"])
       s.add_dependency(%q<factory_girl>, [">= 0"])
@@ -252,9 +263,10 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rails>, [">= 3.0.0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<rmagick>, [">= 0"])
-    s.add_dependency(%q<mogilefs-client>, [">= 0"])
     s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
     s.add_dependency(%q<mysql2>, [">= 0"])
+    s.add_dependency(%q<mogilefs-client>, [">= 0"])
+    s.add_dependency(%q<sauberia-aws-s3>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 2.0.1"])
     s.add_dependency(%q<rspec-rails>, [">= 0"])
     s.add_dependency(%q<factory_girl>, [">= 0"])
