@@ -1,8 +1,8 @@
 source :rubygems
 
 gem "rails", ">= 3.0.0"
-gem "nokogiri"
-gem "rmagick", :require => nil
+gem "nokogiri" # so as not nokogiri to complain about libxml2 version
+gem "rmagick", :require => 'RMagick'
 
 group :development do
   gem "sqlite3-ruby"

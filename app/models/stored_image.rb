@@ -1,5 +1,4 @@
 # coding: utf-8
-require 'mogilefs'
 require 'digest/md5'
 require 'net/http'
 

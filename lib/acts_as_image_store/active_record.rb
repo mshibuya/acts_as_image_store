@@ -1,7 +1,5 @@
 # coding: utf-8
 
-require 'RMagick'
-
 module ActsAsImageStore
   ##
   # == 概要
