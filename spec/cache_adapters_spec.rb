@@ -33,7 +33,7 @@ adapters.each do |a|
       when :file_system
         s.url('123', 'png', '60x60').should == ['/images/60x60/123.png']
       when :s3
-        s.url('123', 'png', '60x60').should == ['http://imagestore.test.s3.amazonaws.com/60x60/123.png']
+        s.url('123', 'png', '60x60').should == ['http://actsasimagestore.test.s3-website-ap-northeast-1.amazonaws.com/60x60/123.png']
       end
       s.list('123').sort.should == [['jpg', '80x80'], ['jpg', 'raw'], ['png', '60x60']]
       s.list('456').sort.should == [['gif', '100x100']]

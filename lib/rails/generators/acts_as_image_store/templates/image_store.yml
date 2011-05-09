@@ -32,8 +32,9 @@ test:
   s3:
     access_key_id:     <%= ENV['AMAZON_ACCESS_KEY_ID'] %>
     secret_access_key: <%= ENV['AMAZON_SECRET_ACCESS_KEY'] %>
-    bucket:            imagestore.test
-    web:               'http://imagestore.test.s3.amazonaws.com/'
+    bucket: actsasimagestore.test
+    server: s3-ap-northeast-1.amazonaws.com
+    web:    'http://actsasimagestore.test.s3-website-ap-northeast-1.amazonaws.com/'
   mogile_fs:
     hosts:    [192.168.56.101:7001, 192.168.56.102:7001]
     domain:   xxx
@@ -47,7 +48,6 @@ production:
     adapter:  s3
     access_key_id:     <%= ENV['AMAZON_ACCESS_KEY_ID'] %>
     secret_access_key: <%= ENV['AMAZON_SECRET_ACCESS_KEY'] %>
-    bucket: actsasimagestore
-    server: s3-ap-northeast-1.amazonaws.com
+    bucket:            imagestore.test
   cache: *s3config
 
