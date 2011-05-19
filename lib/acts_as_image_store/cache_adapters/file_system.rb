@@ -31,7 +31,7 @@ module ActsAsImageStore
       def store(key, format, size, content)
         dir = path(nil, nil, size)
         FileUtils.mkdir_p(dir) unless File.directory?(dir)
-        file = File.open(path(key, format, size), 'w:ASCII-8BIT')
+        file = File.open(path(key, format, size), 'wb:ASCII-8BIT')
         file.write(content)
         file.close
       end

@@ -21,7 +21,9 @@ module ActsAsImageStore
 
       def fetch(key)
         begin
-          File.read(path(key))
+          File.open(path(key), 'rb:ASCII-8BIT') do |file|
+            file.read
+          end
         rescue
           raise NotFoundError
         end
@@ -30,9 +32,9 @@ module ActsAsImageStore
       def store(key, content)
         dir = path('')
         FileUtils.mkdir_p(dir) unless File.directory?(dir)
-        file = File.open(path(key), 'w:ASCII-8BIT')
-        file.write(content)
-        file.close
+        File.open(path(key), 'wb:ASCII-8BIT') do |file|
+          file.write(content)
+        end
       end
 
       def remove(key)

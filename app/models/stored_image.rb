@@ -137,15 +137,15 @@ class StoredImage < ActiveRecord::Base
     end
 
     ##
-    # 指定されたハッシュ値を持つレコードを削除し、
-    # 同時にMogileFSからリサイズ分も含めその画像を削除する。
+    # Remove image with given key from
+    # the storage and the cache backends
     #
     def destroy_image(key)
       return unless key.is_a?(String) && !key.empty?
       name, ext = key.split('.')
       self.transaction do
         record = find_by_name name
-        # 指定された画像キーを持つレコードが見つからなかったら何もせず戻る
+        # do nothing if not found
         return unless record
         if record.refcount > 1
           record.refcount -= 1
@@ -163,22 +163,22 @@ class StoredImage < ActiveRecord::Base
       cleanup_temporary_image
     end
     ##
-    # 指定されたキーを持つ画像のURLをMogileFSより取得して返す。
-    # X-REPROXY-FORヘッダでの出力に使う。
+    # Retrieve image url with given key from the storage
+    # used with perlbal as X-REPROXY-FOR.
     #
     def fetch_urls(name, format, size='raw')
       [self::CONTENT_TYPES[format.to_sym], retrieve_image(name, format, size, :url)]
     end
 
     ##
-    # 指定されたキーを持つ画像のデータを取得して返す。
+    # Retrieve image with given key from the storage
     #
     def fetch_data(name, format, size='raw')
       [self::CONTENT_TYPES[format.to_sym], retrieve_image(name, format, size, :fetch)]
     end
 
     ##
-    # 保存期限を過ぎた一時データを消去する
+    # Delete images that was uploaded but not used
     #
     def cleanup_temporary_image
       self.transaction do
@@ -219,7 +219,7 @@ class StoredImage < ActiveRecord::Base
       rescue ActsAsImageStore::CacheAdapters::Abstract::NotFoundError
         begin
           img = ::Magick::Image.from_blob(storage.fetch("#{name}.#{record.image_type}")).shift
-        rescue MogileFS::Backend::UnknownKeyError
+        rescue ActsAsImageStore::StorageAdapters::Abstract::NotFoundError
           raise ActsAsImageStore::ImageNotFound
         end
         content = resize_image(img, format, size).to_blob
@@ -281,7 +281,7 @@ class StoredImage < ActiveRecord::Base
     end
 
     ##
-    # 画像サイズが許可されているかどうか判定
+    # check if size is allowd
     #
     def size_allowed?(size)
       ActsAsImageStore.options[:allowed_sizes].each do |item|
