@@ -38,10 +38,10 @@ class StoredImage < ActiveRecord::Base
     #
     def parse_image(data, options={})
       options = options.symbolize_keys
+      imglist = ::Magick::ImageList.new
       begin
-        imglist = ::Magick::ImageList.new
         imglist.from_blob(data)
-      rescue
+      rescue ::Magick::ImageMagickError
         raise ::ActsAsImageStore::InvalidImage
       end
       # check if pre-resize is needed
@@ -333,3 +333,4 @@ class StoredImage < ActiveRecord::Base
     end
   end
 end
+
