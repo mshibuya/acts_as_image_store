@@ -27,11 +27,11 @@ class StoredImage < ActiveRecord::Base
     end
 
     def storage
-      @storage ||= load_adapter(:storage)
+      @@storage ||= load_adapter(:storage)
     end
 
     def cache
-      @cache ||= load_adapter(:cache)
+      @@cache ||= load_adapter(:cache)
     end
     ##
     # returns metadatas of image
@@ -97,10 +97,9 @@ class StoredImage < ActiveRecord::Base
           else
             record.refcount = 1
           end
+          storage.store record, content
           record.save!
-          filename = name+'.'+record['image_type']
-          storage.store filename, content
-          filename
+          record.to_key
         else
           if temporary
             record.keep_till = Time.now + (ActsAsImageStore.options[:upload_cache] || 3600)
@@ -108,7 +107,7 @@ class StoredImage < ActiveRecord::Base
             record.refcount += 1
           end
           record.save
-          filename = name+'.'+record['image_type']
+          record.to_key
         end
       end
     end
@@ -155,8 +154,8 @@ class StoredImage < ActiveRecord::Base
             record.refcount = 0
             record.save
           else
+            record.purge_image_data
             record.delete
-            purge_image_data(name)
           end
         end
       end
@@ -187,8 +186,8 @@ class StoredImage < ActiveRecord::Base
             record.keep_till = nil
             record.save
           else
+            record.purge_image_data
             record.delete
-            purge_image_data(record.name)
           end
         end
       end
@@ -218,7 +217,7 @@ class StoredImage < ActiveRecord::Base
         return cache.send(method, name, format, size)
       rescue ActsAsImageStore::CacheAdapters::Abstract::NotFoundError
         begin
-          img = ::Magick::Image.from_blob(storage.fetch("#{name}.#{record.image_type}")).shift
+          img = ::Magick::Image.from_blob(storage.fetch(record)).shift
         rescue ActsAsImageStore::StorageAdapters::Abstract::NotFoundError
           raise ActsAsImageStore::ImageNotFound
         end
@@ -293,44 +292,51 @@ class StoredImage < ActiveRecord::Base
       end
       return false
     end
+  end
 
-    ##
-    # deletes image
-    #
-    def purge_image_data(name)
-      if ActsAsImageStore.backend['reproxy']
-        urls = []
-        storage.list(name).each do |k|
-          key, format = k.split('.')
-          urls.push(cache.url(key, format, 'raw'))
-        end
-        cache.list(name).each do |k|
-          urls.push(cache.url(name, k.first, k.last))
-        end
-        urls.unique
+  ##
+  # deletes image
+  #
+  def purge_image_data
+    if ActsAsImageStore.backend['reproxy']
+      urls = []
+      @@storage.list(name).each do |k|
+        key, format = k.split('.')
+        urls.push(cache.url(key, format, 'raw'))
+      end
+      @@cache.list(name).each do |k|
+        urls.push(cache.url(name, k.first, k.last))
+      end
+      urls.unique
 
-        return if urls.size <= 0
+      return if urls.size <= 0
 
-        base = URI.parse(ActsAsImageStore.backend['base_url'])
-        if ActsAsImageStore.backend['perlbal']
-          host, port = ActsAsImageStore.backend['perlbal'].split(':')
-          port ||= 80
-        else
-          host, port = [base.host, base.port]
-        end
-        # Request asynchronously
-        t = Thread.new(host, port, base, urls.join(' ')) do |conn_host, conn_port, perlbal, body|
-          Net::HTTP.start(conn_host, conn_port) do |http|
-            http.post(perlbal.path + 'flush', body, {
-              ActsAsImageStore::AUTH_HEADER => ActsAsImageStore.auth_key(body),
-              'Host' => perlbal.host + (perlbal.port != 80 ? ':' + perlbal.port.to_s : ''),
-            })
-          end
+      base = URI.parse(ActsAsImageStore.backend['base_url'])
+      if ActsAsImageStore.backend['perlbal']
+        host, port = ActsAsImageStore.backend['perlbal'].split(':')
+        port ||= 80
+      else
+        host, port = [base.host, base.port]
+      end
+      # Request asynchronously
+      t = Thread.new(host, port, base, urls.join(' ')) do |conn_host, conn_port, perlbal, body|
+        Net::HTTP.start(conn_host, conn_port) do |http|
+          http.post(perlbal.path + 'flush', body, {
+            ActsAsImageStore::AUTH_HEADER => ActsAsImageStore.auth_key(body),
+            'Host' => perlbal.host + (perlbal.port != 80 ? ':' + perlbal.port.to_s : ''),
+          })
         end
       end
-      storage.remove(name)
-      cache.remove(name)
     end
+    @@storage.remove(self)
+    @@cache.remove(name)
+  end
+
+  #
+  # generate store key
+  #
+  def to_key
+    name + '.' + image_type
   end
 end
 

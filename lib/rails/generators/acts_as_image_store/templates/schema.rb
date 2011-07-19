@@ -8,6 +8,7 @@ ActiveRecord::Schema.define(:version => 0) do
       t.integer    :height
       t.integer    :refcount
       t.datetime   :keep_till
+      t.binary     :data,       :limit => 16777215
       t.timestamps
     end
 

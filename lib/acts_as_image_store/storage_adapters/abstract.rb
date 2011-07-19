@@ -24,15 +24,15 @@ module ActsAsImageStore
         raise NotImplementedError, '#list_keys is not implemented'
       end
 
-      def fetch(key)
+      def fetch(record)
         raise NotImplementedError, '#fetch is not implemented'
       end
 
-      def store(key, content)
+      def store(record, content)
         raise NotImplementedError, '#store is not implemented'
       end
 
-      def remove(key)
+      def remove(record)
         raise NotImplementedError, '#remove is not implemented'
       end
 

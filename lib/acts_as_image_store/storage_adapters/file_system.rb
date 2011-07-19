@@ -19,9 +19,9 @@ module ActsAsImageStore
         end
       end
 
-      def fetch(key)
+      def fetch(record)
         begin
-          File.open(path(key), 'rb:ASCII-8BIT') do |file|
+          File.open(path(record.to_key), 'rb:ASCII-8BIT') do |file|
             file.read
           end
         rescue
@@ -29,22 +29,24 @@ module ActsAsImageStore
         end
       end
 
-      def store(key, content)
+      def store(record, content)
         dir = path('')
         FileUtils.mkdir_p(dir) unless File.directory?(dir)
-        File.open(path(key), 'wb:ASCII-8BIT') do |file|
+        File.open(path(record.to_key), 'wb:ASCII-8BIT') do |file|
           file.write(content)
         end
       end
 
-      def remove(key)
-        Dir.glob(path(key)) do |f|
+      def remove(record)
+        Dir.glob(path(record.to_key)) do |f|
           File.unlink f
         end
       end
 
       def purge
-        remove('*')
+        Dir.glob(path('*')) do |f|
+          File.unlink f
+        end
       end
 
       private

@@ -24,24 +24,23 @@ module ActsAsImageStore
         end.map{|i| i.key }
       end
 
-      def fetch(key)
+      def fetch(record)
         begin
-          AWS::S3::S3Object.find(key, @backend['bucket']).value
+          AWS::S3::S3Object.find(record.to_key, @backend['bucket']).value
         rescue AWS::S3::NoSuchKey
           raise NotFoundError
         end
       end
 
-      def store(key, content)
-        name, ext = key.split('.')
+      def store(record, content)
         AWS::S3::S3Object.store(
-          key, content, @backend['bucket'],
-          :content_type => ::StoredImage::CONTENT_TYPES[ext]
+          record.to_key, content, @backend['bucket'],
+          :content_type => ::StoredImage::CONTENT_TYPES[record.image_type]
         )
       end
 
-      def remove(key)
-        AWS::S3::S3Object.delete key, @backend['bucket']
+      def remove(record)
+        AWS::S3::S3Object.delete record.to_key, @backend['bucket']
       end
 
       def purge

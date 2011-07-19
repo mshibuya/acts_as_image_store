@@ -3,35 +3,46 @@
 require 'spec_helper'
 Dir["#{File.dirname(__FILE__)}/../lib/acts_as_image_store/storage_adapters/*.rb"].each { |f| require f }
 
-adapters = [:file_system, :s3]
+adapters = [:file_system, :s3, :database]
 
 adapters.each do |a|
   klass = ::ActsAsImageStore::StorageAdapters.const_get(a.to_s.camelcase)
   klass.load(self)
   storage = klass.new(ActsAsImageStore.backend[a])
 
-  describe klass do
-    after{ storage.purge }
+  describe klass, :truncation => true do
+    before do
+      @s = storage
+      @r = StoredImage.new :name => '123', :image_type => 'jpg'
+      @t = StoredImage.new :name => '456', :image_type => 'jpg'
+      @u = StoredImage.new :name => '156', :image_type => 'jpg'
+    end
+    after do
+      @s.purge
+    end
 
     it "should accept single item" do
-      s = storage
-      s.store('123', 'abc')
-      s.fetch('123').should == 'abc'
-      s.exist?('123').should be_true
-      s.exist?('456').should be_false
-      s.remove('123')
-      s.exist?('123').should be_false
+      @s.store(@r, 'abc')
+      @r.save # should be done because saving of record is done outside of adapter
+      @s.fetch(@r).should == 'abc'
+      @s.exist?('123.jpg').should be_true
+      @s.exist?('456.jpg').should be_false
+      @s.remove(@r)
+      @r.save
+      @s.exist?('123.jpg').should be_false
     end
 
     it "should accept multiple items" do
-      s = storage
-      s.store('123', 'abc')
-      s.store('456', 'def')
-      s.store('156', 'ghi')
-      s.list_keys.sort.should == ['123', '156', '456']
-      s.list_keys('1').sort.should == ['123', '156']
-      s.purge
-      s.list_keys.should == []
+      @s.store(@r, 'abc')
+      @r.save
+      @s.store(@t, 'def')
+      @t.save
+      @s.store(@u, 'ghi')
+      @u.save
+      @s.list_keys.sort.should == ['123.jpg', '156.jpg', '456.jpg']
+      @s.list_keys('1').sort.should == ['123.jpg', '156.jpg']
+      @s.purge
+      @s.list_keys.should == []
     end
   end
 end
