@@ -52,6 +52,9 @@ module ActsAsImageStore
   autoload :UrlHelper, 'acts_as_image_store/url_helper'
   autoload :TagHelper, 'acts_as_image_store/tag_helper'
   autoload :FormBuilder, 'acts_as_image_store/form_helper'
+  module RailsAdmin
+    autoload :Image, 'acts_as_image_store/rails_admin/image'
+  end
   module StorageAdapters
     autoload :Abstract, 'acts_as_image_store/storage_adapters/abstract'
   end
