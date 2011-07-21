@@ -328,8 +328,8 @@ class StoredImage < ActiveRecord::Base
         end
       end
     end
-    @@storage.remove(self)
-    @@cache.remove(name)
+    self.class.storage.remove(self)
+    self.class.cache.remove(name)
   end
 
   #
