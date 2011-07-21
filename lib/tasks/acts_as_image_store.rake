@@ -46,7 +46,8 @@ namespace :acts_as_image_store do
       puts "Operation cancelled."
     end
   end
-  task :import, :file, :needs => :environment do |t, args|
+  task :import, [:file] => [:environment] do |t, args|
+    p args
     if args[:file]
       file = File.new(args[:file])
       puts "Image saved as:"
@@ -56,7 +57,7 @@ namespace :acts_as_image_store do
       puts "usage: rake acts_as_image_store:import[<image file name>]"
     end
   end
-  task :remove, :key, :needs => :environment do |t, args|
+  task :remove, [:key] => [:environment] do |t, args|
     if args[:key]
       StoredImage.destroy_image(args[:key])
       puts "Image #{args[:key]} deleted."
