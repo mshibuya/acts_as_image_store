@@ -41,6 +41,7 @@ module ActsAsImageStore # :nodoc:
 
       image_options = options.delete(:image_options) || {}
       input_options = options.delete(:input_options) || {}
+      link_options  = options.delete(:link_options) || {}
       if confirm
         image_options[:w] ||= 0
         image_options[:h] ||= 0
@@ -51,26 +52,29 @@ module ActsAsImageStore # :nodoc:
         image_options[:w] = options[:w] if options[:w]
         image_options[:h] = options[:h] if options[:h]
         deletable = options.delete(:deletable)
-        link_options  = options.delete(:link_options) || {}
         show_image = @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
       end
 
       output = ''.html_safe
       if show_image
+        without_br = link_options.delete(:without_br)
+        link_url  = link_options.delete(:url) || {
+          :controller => @template.controller.controller_name,
+          :action => 'image_delete',
+          :id => @object,
+          :column => method,
+        }
         # 画像を表示
         output += thumbnail(@object[method], image_options)
         # 画像削除用のリンク表示
         if deletable === nil || deletable
           output += @template.link_to(
             (I18n.translate!('acts_as_image_store.form_helper.delete') rescue 'delete'),
-            { :controller => @template.controller.controller_name,
-              :action => 'image_delete',
-              :id => @object,
-              :column => method, },
+              link_url,
               { :confirm => I18n.translate('acts_as_image_store.notices.confirm') }.merge(link_options),
           )
         end
-        output += tag('br')
+        output += tag('br') unless without_br
       end
       # 画像アップロード用フィールド表示
       if confirm
@@ -80,6 +84,20 @@ module ActsAsImageStore # :nodoc:
       else
         output +=  @template.file_field(@object_name, method, objectify_options(input_options))
       end
+    end
+    def rails_admin_image_field(method, options={})
+      image_field(method, {
+        :link_options => {
+          :without_br => true,
+          :url => {
+            :controller => "rails_admin/image_store",
+            :model_name => @template.controller.params['model_name'],
+            :action => "image_delete",
+            :id => @object,
+            :column => method,
+          }
+        }
+      }.merge(options))
     end
   end
 end

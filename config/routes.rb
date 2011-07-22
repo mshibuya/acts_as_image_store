@@ -10,9 +10,16 @@ Rails.application.routes.draw do
       }
       match "#{mount_at}flush", :to => "stored_images#flush", :via => 'post'
     end
-
-    match ':controller/:id/image_delete/:column', :action => 'image_delete'
   rescue NoMethodError
     #do nothing
   end
+
+  if defined?(::RailsAdmin)
+    scope "admin", :module => :rails_admin, :as => "rails_admin" do
+      controller "image_store" do
+        get "/:model_name/:id/image_delete/:column", :to => :image_delete, :as => "image_delete"
+      end
+    end
+  end
+  match ':controller/:id/image_delete/:column', :action => 'image_delete'
 end
