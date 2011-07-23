@@ -300,11 +300,11 @@ class StoredImage < ActiveRecord::Base
   def purge_image_data
     if ActsAsImageStore.backend['reproxy']
       urls = []
-      @@storage.list(name).each do |k|
+      self.class.storage.list(name).each do |k|
         key, format = k.split('.')
         urls.push(cache.url(key, format, 'raw'))
       end
-      @@cache.list(name).each do |k|
+      self.class.cache.list(name).each do |k|
         urls.push(cache.url(name, k.first, k.last))
       end
       urls.unique

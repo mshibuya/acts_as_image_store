@@ -36,8 +36,9 @@ describe StoredImagesController do
 
     context "Reproxing" do
       before(:all) do
-        ActsAsImageStore.backend['reproxy'] = true
-        ActsAsImageStore.backend['cache']   = 7.days
+        ActsAsImageStore.backend['reproxy'] = HashWithIndifferentAccess.new({
+          :cache => 7.days, :perlbal => 'perlbal.example.com',
+        })
       end
       after (:all){ ActsAsImageStore.backend['reproxy'] = false }
 

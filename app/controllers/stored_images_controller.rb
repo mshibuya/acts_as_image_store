@@ -14,8 +14,8 @@ class StoredImagesController < ApplicationController
       type, urls = StoredImage.fetch_urls(params[:name], params[:format], params[:size])
       response.header['Content-Type'] = type
       response.header['X-REPROXY-URL'] = urls.join(' ')
-      if ActsAsImageStore.backend['cache']
-        response.header['X-REPROXY-CACHE-FOR'] = "#{ActsAsImageStore.backend['cache']}; Content-Type"
+      if ActsAsImageStore.backend['reproxy']['cache']
+        response.header['X-REPROXY-CACHE-FOR'] = "#{ActsAsImageStore.backend['reproxy']['cache']}; Content-Type"
       end
       render :nothing => true
     else
@@ -29,7 +29,7 @@ class StoredImagesController < ApplicationController
   # reproxyが有効の際にreproxy cacheのクリアを行う
   #
   def flush
-    unless ActsAsImageStore.backend['reproxy'] && ActsAsImageStore.backend['cache']
+    unless ActsAsImageStore.backend['reproxy'] && ActsAsImageStore.backend['reproxy']['cache']
       render :nothing => true, :status => "206 No Content"
       return
     end

@@ -13,8 +13,10 @@ development:
 
 test:
   reproxy:  false
-#  cache:    86400
-#  perlbal:  192.168.11.69
+## when reproxy enabled
+#  reproxy:
+#    perlbal:  192.168.11.69
+#    cache:    86400
   base_url: 'http://image.example.com/images/'
   mount_at: /images/
   secret:   xxx
