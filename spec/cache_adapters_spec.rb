@@ -3,6 +3,20 @@
 require 'spec_helper'
 Dir["#{File.dirname(__FILE__)}/../lib/acts_as_image_store/cache_adapters/*.rb"].each { |f| require f }
 
+describe ::ActsAsImageStore::CacheAdapters::Abstract do
+  cache = ::ActsAsImageStore::CacheAdapters::Abstract.new(ActsAsImageStore.backend['abstract'])
+  it "should raise error" do
+    lambda{ cache.exist?('somekey','jpg','raw') }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+    lambda{ cache.list('someprefix') }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+    lambda{ cache.fetch('somekey', 'jpg', 'raw') }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+    lambda{ cache.url('somekey', 'jpg', 'raw') }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+    lambda{ cache.store('somekey', 'jpg', 'raw', 'somecontent') }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+    lambda{ cache.remove('somekey') }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+    lambda{ cache.purge }.should raise_error ::ActsAsImageStore::CacheAdapters::Abstract::NotImplementedError
+  end
+end
+
+
 adapters = [:file_system, :s3]
 adapters.each do |a|
   klass = ::ActsAsImageStore::CacheAdapters.const_get(a.to_s.camelcase)

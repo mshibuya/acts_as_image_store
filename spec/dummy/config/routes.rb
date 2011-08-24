@@ -1,6 +1,6 @@
 Dummy::Application.routes.draw do
   resources :confirms do
-    resources :multiples do
+    resources :image_tests do
       member do
         get :image_delete
       end
@@ -14,6 +14,7 @@ Dummy::Application.routes.draw do
   end
 
   resources :image_tests
+  resources :multiples
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

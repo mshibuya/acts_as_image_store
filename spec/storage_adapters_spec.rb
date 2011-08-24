@@ -3,6 +3,18 @@
 require 'spec_helper'
 Dir["#{File.dirname(__FILE__)}/../lib/acts_as_image_store/storage_adapters/*.rb"].each { |f| require f }
 
+describe ::ActsAsImageStore::StorageAdapters::Abstract do
+  storage = ::ActsAsImageStore::StorageAdapters::Abstract.new(ActsAsImageStore.backend['abstract'])
+  it "should raise error" do
+    lambda{ storage.exist?('somekey') }.should raise_error ::ActsAsImageStore::StorageAdapters::Abstract::NotImplementedError
+    lambda{ storage.list_keys('someprefix') }.should raise_error ::ActsAsImageStore::StorageAdapters::Abstract::NotImplementedError
+    lambda{ storage.fetch('somerecord') }.should raise_error ::ActsAsImageStore::StorageAdapters::Abstract::NotImplementedError
+    lambda{ storage.store('somekey', 'somecontent') }.should raise_error ::ActsAsImageStore::StorageAdapters::Abstract::NotImplementedError
+    lambda{ storage.remove('somerecord') }.should raise_error ::ActsAsImageStore::StorageAdapters::Abstract::NotImplementedError
+    lambda{ storage.purge }.should raise_error ::ActsAsImageStore::StorageAdapters::Abstract::NotImplementedError
+  end
+end
+
 adapters = [:file_system, :s3, :database]
 
 adapters.each do |a|

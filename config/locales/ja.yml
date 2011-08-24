@@ -14,6 +14,10 @@ ja:
         height_larger:      "の高さは%dpixel以上でなければなりません。"
         height:             "の高さは%dpixelでなければなりません。"
         cache_expired:      "は保存期限を過ぎました。再度アップロードしてください。"
+        invalid_image:      "アップロードされたファイルは無効な画像形式です。"
+        invalid_type :      "アップロードされたファイルは対応外の画像形式です。"
+        invalid_image_key:  "無効な画像キーが含まれています。"
+        must_be_valid_type: "JPEG, GIF, PNG形式のみ対応しています。"
       flashes:
         delete_failed:      "画像の削除に失敗しました。"
 

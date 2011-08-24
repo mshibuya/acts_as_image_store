@@ -44,6 +44,9 @@ class StoredImage < ActiveRecord::Base
       rescue ::Magick::ImageMagickError
         raise ::ActsAsImageStore::InvalidImage
       end
+      unless ::ActsAsImageStore::IMAGE_FORMATS.include?(imglist.first.format)
+        raise ::ActsAsImageStore::InvalidImageType
+      end
       # check if pre-resize is needed
       noresize = true
       noresize = false if ::ActsAsImageStore.options[:maxwidth] &&

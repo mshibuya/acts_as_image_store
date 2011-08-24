@@ -99,6 +99,23 @@ module ActsAsImageStore # :nodoc:
         }
       }.merge(options))
     end
+    ##
+    # form field for multiple image
+    #
+    def multiple_image_field(method, options={})
+      options = options.symbolize_keys
+
+      label = options.delete(:label) || method.to_s.singularize.camelize
+
+      @template.render(
+        :partial =>'layouts/acts_as_image_store/multiple_image',
+        :locals => {
+          :object => @object,
+          :model => @object_name,
+          :column => method.to_s.singularize,
+          :label => label
+      })
+    end
   end
 end
 

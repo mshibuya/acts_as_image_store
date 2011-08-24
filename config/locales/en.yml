@@ -14,6 +14,10 @@ en:
         height_larger:      "'s height must be larger than %d pixels."
         height:             "'s height must be %d pixels."
         cache_expired:      "has been expired. Please upload again."
+        invalid_image:      "Invalid image file was uploaded."
+        invalid_type:       "Unsupported image type."
+        invalid_image_key:  "Specified image key was not valid."
+        must_be_valid_type: "must be JPEG, GIF or PNG file."
       flashes:
         delete_failed:      "Failed to delete image."
 

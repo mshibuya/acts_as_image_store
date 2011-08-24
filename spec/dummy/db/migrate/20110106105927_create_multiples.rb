@@ -3,8 +3,6 @@ class CreateMultiples < ActiveRecord::Migration
     create_table :multiples do |t|
       t.string :title
       t.integer :confirm_id
-      t.string :banner1, :limit => 36
-      t.string :banner2, :limit => 36
 
       t.timestamps
     end

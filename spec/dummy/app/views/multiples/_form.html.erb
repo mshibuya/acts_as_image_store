@@ -20,12 +20,8 @@
     <%= f.collection_select :confirm_id, Confirm.all, :id, :name %>
   </div>
   <div class="field">
-    <%= f.label :banner1 %><br />
-    <%= f.image_field :banner1 %>
-  </div>
-  <div class="field">
-    <%= f.label :banner2 %><br />
-    <%= f.image_field :banner2 %>
+    <label>Photos</label><br />
+    <%= f.multiple_image_field(:photo) %>
   </div>
   <div class="actions">
     <%= f.submit %>

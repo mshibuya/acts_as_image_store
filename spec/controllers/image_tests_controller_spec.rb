@@ -10,6 +10,7 @@ describe ImageTestsController do
   context "With Backend", :backend => true do
     before do
       @image_test = Factory.build(:image_test)
+      @image_test.confirm = Factory(:confirm)
       @image_test.set_image_file :image, "#{File.dirname(__FILE__)}/../sample.jpg"
       @image_test.save
     end
@@ -36,6 +37,12 @@ describe ImageTestsController do
       response.status.should == 302
       response.header['Location'].should == "http://test.host/image_tests/#{@image_test.id}/edit"
       flash.now[:alert].should == 'Failed to delete image.'
+    end
+
+    it "image-delete url should be correctly set with nested resource" do
+      get 'edit', :confirm_id => @image_test.confirm_id, :id => @image_test.id
+      controller.url_for(:action => 'image_delete', :column => 'image2').should ==
+        "http://test.host/confirms/#{@image_test.confirm_id}/image_tests/#{@image_test.id}/image_delete?column=image2"
     end
   end
 end

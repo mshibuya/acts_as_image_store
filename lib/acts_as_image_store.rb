@@ -33,6 +33,7 @@ module ActsAsImageStore
   class SizeNotAllowed     < StandardError; end
   class ColumnNotFound     < StandardError; end
   class InvalidImage       < StandardError; end
+  class InvalidImageType   < StandardError; end
   class UnsupportedAdapter < StandardError; end
 
   # 認証キーがセットされるHTTPリクエストヘッダ
@@ -51,9 +52,11 @@ module ActsAsImageStore
   autoload :ImageDeletable, 'acts_as_image_store/image_deletable'
   autoload :UrlHelper, 'acts_as_image_store/url_helper'
   autoload :TagHelper, 'acts_as_image_store/tag_helper'
-  autoload :FormBuilder, 'acts_as_image_store/form_helper'
+  autoload :Task, 'acts_as_image_store/task'
+  autoload :FormBuilder, 'acts_as_image_store/form_builder'
   module RailsAdmin
     autoload :Image, 'acts_as_image_store/rails_admin/image'
+    autoload :MultipleImage, 'acts_as_image_store/rails_admin/multiple_image'
   end
   module StorageAdapters
     autoload :Abstract, 'acts_as_image_store/storage_adapters/abstract'

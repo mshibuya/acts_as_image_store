@@ -102,6 +102,15 @@ describe ImageTest do
         StoredImage.storage.list_keys.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 2
       end
+
+      it "should handle multiple image on single model" do
+        @image_test.set_image_file :image,  "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test.set_image_file :image2, "#{File.dirname(__FILE__)}/../sample.png"
+        lambda{ @image_test.save }.should_not raise_error
+        @image_test.image.should == 'bcadded5ee18bfa7c99834f307332b02.jpg'
+        @image_test.image2.should == '60de57a8f5cd0a10b296b1f553cb41a9.png'
+        StoredImage.storage.list_keys('').sort.should == ['60de57a8f5cd0a10b296b1f553cb41a9.png', 'bcadded5ee18bfa7c99834f307332b02.jpg']
+      end
     end
 
     context "retrieval" do
@@ -328,6 +337,26 @@ describe ImageTest do
         StoredImage.storage.list_keys.should be_empty
         StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').should be_nil
       end
+
+    end
+
+    context "multiple deletion" do
+      before do
+        @image_test1 = Factory.build(:image_test)
+        @image_test1.set_image_file :image , "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test1.set_image_file :image2, "#{File.dirname(__FILE__)}/../sample.png"
+        @image_test1.save!
+        @image_test2 = Factory.build(:image_test)
+        @image_test2.set_image_file :image2, "#{File.dirname(__FILE__)}/../sample.jpg"
+        @image_test2.save!
+      end
+
+      it "should decrease refcount when deleting duplicated image" do
+        lambda{ @image_test1.destroy }.should_not raise_error
+        StoredImage.storage.list_keys('').sort.should == ['bcadded5ee18bfa7c99834f307332b02.jpg']
+        StoredImage.find_by_name('bcadded5ee18bfa7c99834f307332b02').refcount.should == 1
+        StoredImage.find_by_name('60de57a8f5cd0a10b296b1f553cb41a9').should be_nil
+      end
     end
 
     context "saving image without model" do
@@ -377,5 +406,6 @@ describe ImageTest do
         imglist.first.rows.should == 1536
       end
     end
+
   end
 end

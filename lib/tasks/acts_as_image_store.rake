@@ -75,5 +75,13 @@ namespace :acts_as_image_store do
                                    :hosts  => ActsAsImageStore.backend['hosts'] })
     @mg.each_key('') {|k| puts k }
   end
+  namespace "install" do
+    task :asset do
+      ActsAsImageStore::Task.copy_asset_files
+    end
+    task :view do
+      ActsAsImageStore::Task.copy_view_files
+    end
+  end
 end
 

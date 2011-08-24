@@ -1,0 +1,27 @@
+<%
+  head_javascript 'acts_as_image_store' if self.respond_to? :head_javascript
+  images = object["uploaded_#{column.to_s.pluralize}"] ?
+    object["uploaded_#{column.to_s.pluralize}"] :
+    object.send(column.to_s.pluralize).map{|r| r.send(column.to_s)}
+%>
+            <table class="multiple_images" data-limit="" border="0">
+              <tbody>
+              <% images.each_with_index do |img, i| %>
+                <tr id="<%= model %>_<%= column %>_<%= images.size + i %>">
+                  <th><%= label %><input type="button" value="削除" /></th>
+                  <td>
+                  <%= image(img, :w => 80, :h => 80) %>
+                  <input type="hidden" name="<%= model %>[uploaded_<%= column.to_s.pluralize %>][]" value="<%= img %>" />
+                  </td>
+                </tr>
+              <% end %>
+              </tbody>
+              <tbody style="display:none">
+                <tr>
+                  <th><%= label %><input type="button" value="削除" /></th>
+                  <td><input type="file" name="<%= model %>[uploaded_<%= column.to_s.pluralize %>][]" /></td>
+                </tr>
+              </tbody>
+            </table>
+            <input class="multiple_image_add" type="button" value="追加" />
+

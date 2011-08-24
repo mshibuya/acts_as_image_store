@@ -51,6 +51,22 @@ module ActsAsImageStore
         EOV
       end
       alias :has_image :has_images
+
+      def has_multiple_images(options={})
+        cattr_accessor  :multiple_image_config
+        self.multiple_image_config = options
+        options.each do |k,v|
+          attr_accessor "uploaded_#{v.to_s.pluralize}"
+          has_many v.to_s.pluralize, :class_name => k.to_s, :dependent => :destroy, :order => '`sequence` ASC'
+        end
+
+        class_eval <<-EOV
+          include ActsAsImageStore::ActiveRecord::MultipleImagesMethods
+
+          before_validation :validate_multiple_images
+          before_save       :save_multiple_images
+        EOV
+      end
     end
     #
     # 各モデルにincludeされるモジュール
@@ -134,7 +150,7 @@ module ActsAsImageStore
         })
       end
 
-      protected
+      private
 
       def set_image_attributes(column)
         file = self[column]
@@ -155,9 +171,7 @@ module ActsAsImageStore
           # 画像ではない場合
           errors[column] << I18n.translate('acts_as_image_store.errors.messages.must_be_image')
           return
-        end
-
-        unless ::ActsAsImageStore::IMAGE_FORMATS.include?(img_attr[:type])
+        rescue ::ActsAsImageStore::InvalidImageType
           # 対応フォーマットではない場合
           errors[column] << I18n.translate('acts_as_image_store.errors.messages.must_be_valid_type')
           return
@@ -169,6 +183,104 @@ module ActsAsImageStore
         # 確認ありの時はこの時点で仮保存
         if image_options[:confirm]
           self[column] = ::StoredImage.save_image(@image_attributes[column], :temporary => true)
+        end
+      end
+    end
+    ##
+    # Included to model with multiple(variable) number of images
+    #
+    module MultipleImagesMethods
+      ##
+      # add image specified in array of filepaths
+      #
+      def add_image_file(target, file)
+        self.send("uploaded_#{target.to_s.pluralize}=", self.send("uploaded_#{target.to_s.pluralize}") || [])
+        self.send("uploaded_#{target.to_s.pluralize}").push(
+          ActionDispatch::Http::UploadedFile.new({ :tempfile => File.open(file) }))
+      end
+      ##
+      # add image specified in array of data
+      #
+      def add_image_data(target, data)
+        self.send("uploaded_#{target.to_s.pluralize}=", self.send("uploaded_#{target.to_s.pluralize}") || [])
+        self.send("uploaded_#{target.to_s.pluralize}").push(
+          ActionDispatch::Http::UploadedFile.new({ :tempfile => StringIO.new(data) }))
+      end
+      ##
+      # add image specified in key
+      #
+      def add_image_key(target, key)
+        self.send("uploaded_#{target.to_s.pluralize}=", self.send("uploaded_#{target.to_s.pluralize}") || [])
+        self.send("uploaded_#{target.to_s.pluralize}").push(key)
+      end
+      private
+      ##
+      # check and temporarily save uploaded images
+      #
+      def validate_multiple_images
+        self.multiple_image_config.each do |klass, column|
+          uploaded = self.send("uploaded_#{column.to_s.pluralize}")
+          return unless uploaded.is_a? Array
+          uploaded.map! do |image|
+            if image.is_a? ActionDispatch::Http::UploadedFile
+              begin
+                StoredImage.store_image(image.read, :temporary => true)
+              rescue ::ActsAsImageStore::InvalidImage
+                errors.add(:base, I18n.translate('acts_as_image_store.errors.messages.invalid_image'))
+                return false
+              rescue ::ActsAsImageStore::InvalidImageType
+                errors.add(:base, I18n.translate('acts_as_image_store.errors.messages.invalid_type'))
+                return false
+              end
+            else
+              image
+            end
+          end
+          # check if specified image key really exists
+          unless StoredImage.key_exist?(uploaded)
+            errors.add(:base, I18n.translate('acts_as_image_store.errors.messages.invalid_image_key'))
+            return false
+          end
+        end
+      end
+      ##
+      # commit uploaded image. Hooked to before_save
+      #
+      def save_multiple_images
+        self.multiple_image_config.each do |klass, column|
+          uploaded = self.send("uploaded_#{column.to_s.pluralize}")
+          next unless uploaded.is_a? Array
+
+          changed = false
+
+          # preload saved images
+          saved = self.send(column.to_s.pluralize).all
+
+          # delete record with missing key
+          if saved.count > 0
+            changed = true
+            deleted = saved.dup
+            uploaded.each do |k|
+              r = deleted.find{|i| i.send(column.to_s) === k}
+              if r
+                deleted.delete_if{|i| i.id === r.id}
+              end
+            end
+            deleted.each{|r| r.destroy }
+          end
+          # create or update
+          uploaded.each_with_index do |key, i|
+            changed = true
+            r = saved.find{|i| i.send(column.to_s) === key}
+            if r
+              saved.delete_if{|i| i.id === r.id}
+            else
+              StoredImage.commit_image(key)
+              r = self.send(column.to_s.pluralize).build column.to_s => key
+            end
+            r.sequence = i + 1
+            r.save
+          end
         end
       end
     end

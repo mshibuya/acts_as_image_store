@@ -1,10 +1,9 @@
 class MultiplesController < ApplicationController
-  before_filter :find_confirm
   image_deletable
   # GET /multiples
   # GET /multiples.xml
   def index
-    @multiples = @confirm.multiples.all
+    @multiples = Multiple.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -15,7 +14,7 @@ class MultiplesController < ApplicationController
   # GET /multiples/1
   # GET /multiples/1.xml
   def show
-    @multiple = @confirm.multiples.find(params[:id])
+    @multiple = Multiple.find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -26,7 +25,7 @@ class MultiplesController < ApplicationController
   # GET /multiples/new
   # GET /multiples/new.xml
   def new
-    @multiple = @confirm.multiples.new
+    @multiple = Multiple.new
 
     respond_to do |format|
       format.html # new.html.erb
@@ -36,17 +35,17 @@ class MultiplesController < ApplicationController
 
   # GET /multiples/1/edit
   def edit
-    @multiple = @confirm.multiples.find(params[:id])
+    @multiple = Multiple.find(params[:id])
   end
 
   # POST /multiples
   # POST /multiples.xml
   def create
-    @multiple = @confirm.multiples.new(params[:multiple])
+    @multiple = Multiple.new(params[:multiple])
 
     respond_to do |format|
       if @multiple.save
-        format.html { redirect_to(confirm_multiple_path(@confirm, @multiple), :notice => 'Multiple was successfully created.') }
+        format.html { redirect_to(multiple_path(@multiple), :notice => 'Multiple was successfully created.') }
         format.xml  { render :xml => @multiple, :status => :created, :location => @multiple }
       else
         format.html { render :action => "new" }
@@ -58,11 +57,11 @@ class MultiplesController < ApplicationController
   # PUT /multiples/1
   # PUT /multiples/1.xml
   def update
-    @multiple = @confirm.multiples.find(params[:id])
+    @multiple = Multiple.find(params[:id])
 
     respond_to do |format|
       if @multiple.update_attributes(params[:multiple])
-        format.html { redirect_to(confirm_multiple_path(@confirm, @multiple), :notice => 'Multiple was successfully updated.') }
+        format.html { redirect_to(multiple_path(@multiple), :notice => 'Multiple was successfully updated.') }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -74,18 +73,13 @@ class MultiplesController < ApplicationController
   # DELETE /multiples/1
   # DELETE /multiples/1.xml
   def destroy
-    @multiple = @confirm.multiples.find(params[:id])
+    @multiple = Multiple.find(params[:id])
     @multiple.destroy
 
     respond_to do |format|
-      format.html { redirect_to(confirm_multiples_url(@confirm)) }
+      format.html { redirect_to(multiples_url) }
       format.xml  { head :ok }
     end
   end
 
-  private
-
-  def find_confirm
-    @confirm = Confirm.find(params[:confirm_id])
-  end
 end
