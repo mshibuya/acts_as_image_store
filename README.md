@@ -46,7 +46,7 @@ Usage
 * Add some codes
   * Scaffold
 
-            rails generate scaffold logo:string icon:string
+            rails generate scaffold foo logo:string icon:string
 
   * Migration
 
