@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.description = %q{Rails image storage plugin with multiple backend support}
   s.email = %q{mit.shibuya@gmail.com}
   s.extra_rdoc_files = [
-    "README.rdoc"
+    "README.md"
   ]
   s.files = [
     ".document",
@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     "Gemfile",
     "Gemfile.lock",
     "MIT-LICENSE",
-    "README.rdoc",
+    "README.md",
     "Rakefile",
     "VERSION",
     "acts_as_image_store.gemspec",
