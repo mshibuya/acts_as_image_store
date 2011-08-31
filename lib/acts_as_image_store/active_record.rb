@@ -57,7 +57,7 @@ module ActsAsImageStore
         self.multiple_image_config = options
         options.each do |k,v|
           attr_accessor "uploaded_#{v.to_s.pluralize}"
-          has_many v.to_s.pluralize, :class_name => k.to_s, :dependent => :destroy, :order => '`sequence` ASC'
+          has_many v.to_s.pluralize.to_sym, :class_name => k.to_s, :dependent => :destroy, :order => '`sequence` ASC'
         end
 
         class_eval <<-EOV
