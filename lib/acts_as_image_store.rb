@@ -54,10 +54,6 @@ module ActsAsImageStore
   autoload :TagHelper, 'acts_as_image_store/tag_helper'
   autoload :Task, 'acts_as_image_store/task'
   autoload :FormBuilder, 'acts_as_image_store/form_builder'
-  module RailsAdmin
-    autoload :Image, 'acts_as_image_store/rails_admin/image'
-    autoload :MultipleImage, 'acts_as_image_store/rails_admin/multiple_image'
-  end
   module StorageAdapters
     autoload :Abstract, 'acts_as_image_store/storage_adapters/abstract'
   end
@@ -65,6 +61,12 @@ module ActsAsImageStore
     autoload :Abstract, 'acts_as_image_store/cache_adapters/abstract'
   end
 
+end
+
+if defined?(::RailsAdmin::Config::Fields::Types)
+  # Register datatypes
+  require 'acts_as_image_store/rails_admin/image'
+  require 'acts_as_image_store/rails_admin/multiple_image'
 end
 
 ActiveSupport.on_load(:active_record) do
