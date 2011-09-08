@@ -88,7 +88,7 @@ class StoredImage < ActiveRecord::Base
     def save_image(image_attrs, options = {})
       temporary = options.delete(:temporary) || false
       content = image_attrs['content']
-      name = Digest::MD5.hexdigest(content)
+      name = Digest::MD5.hexdigest(content).encode("UTF-8")
       self.transaction do
         record = find_or_initialize_by_name name
         unless record.persisted?

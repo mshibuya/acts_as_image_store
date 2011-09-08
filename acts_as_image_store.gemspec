@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mitsuhiro Shibuya"]
-  s.date = %q{2011-08-24}
+  s.date = %q{2011-09-08}
   s.description = %q{Rails image storage plugin with multiple backend support}
   s.email = %q{mit.shibuya@gmail.com}
   s.extra_rdoc_files = [
@@ -171,7 +171,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rails>, [">= 3.0.0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<rmagick>, [">= 0"])
-      s.add_development_dependency(%q<sqlite3-ruby>, [">= 0"])
+      s.add_development_dependency(%q<sqlite3>, [">= 0"])
       s.add_development_dependency(%q<mysql2>, [">= 0"])
       s.add_development_dependency(%q<mogilefs-client>, [">= 0"])
       s.add_development_dependency(%q<sauberia-aws-s3>, [">= 0"])
@@ -191,7 +191,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rails>, [">= 3.0.0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<rmagick>, [">= 0"])
-      s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
+      s.add_dependency(%q<sqlite3>, [">= 0"])
       s.add_dependency(%q<mysql2>, [">= 0"])
       s.add_dependency(%q<mogilefs-client>, [">= 0"])
       s.add_dependency(%q<sauberia-aws-s3>, [">= 0"])
@@ -212,7 +212,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rails>, [">= 3.0.0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<rmagick>, [">= 0"])
-    s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
+    s.add_dependency(%q<sqlite3>, [">= 0"])
     s.add_dependency(%q<mysql2>, [">= 0"])
     s.add_dependency(%q<mogilefs-client>, [">= 0"])
     s.add_dependency(%q<sauberia-aws-s3>, [">= 0"])

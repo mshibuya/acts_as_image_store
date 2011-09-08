@@ -5,7 +5,7 @@ gem "nokogiri" # so as not nokogiri to complain about libxml2 version
 gem "rmagick", :require => 'RMagick'
 
 group :development do
-  gem "sqlite3-ruby"
+  gem "sqlite3"
   gem "mysql2"
   gem "mogilefs-client"
   gem "sauberia-aws-s3"

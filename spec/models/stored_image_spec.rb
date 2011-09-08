@@ -20,6 +20,10 @@ describe StoredImage do
       r = StoredImage.all.first
       lambda{ r.purge_image_data }.should_not raise_error
     end
+
+    it "should have non-ASCII-8BIT encoded name" do
+      StoredImage.first.name.encoding.should_not == Encoding::ASCII_8BIT
+    end
   end
 end
 
