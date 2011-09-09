@@ -12,8 +12,9 @@ module RailsAdmin
       begin
         process_delete_image(@abstract_model.model)
       rescue ::ActiveRecord::RecordInvalid, ::ActsAsImageStore::ImageNotFound
-        redirect_to({ :action => 'edit' },
-                    :alert => I18n.translate('acts_as_image_store.errors.flashes.delete_failed'))
+        redirect_to({ :controller => 'rails_admin/main',
+                      :action => 'edit' },
+                      :alert => I18n.translate('acts_as_image_store.errors.flashes.delete_failed'))
         return
       end
       redirect_to ({
