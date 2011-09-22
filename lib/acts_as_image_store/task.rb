@@ -3,13 +3,6 @@ require 'rails/generators'
 module ActsAsImageStore
   class Task
     class << self
-      def copy_asset_files
-        puts "Copying asset files..."
-        origin = File.join(gem_path, 'public')
-        destination = Rails.root.join('public')
-        puts copy_files(%w( javascripts ), origin, destination)
-      end
-
       def copy_view_files
         puts "Copying view files..."
         origin = File.join(gem_path, 'app', 'views')
