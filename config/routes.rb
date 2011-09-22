@@ -14,12 +14,14 @@ Rails.application.routes.draw do
     #do nothing
   end
 
-  if defined?(::RailsAdmin)
-    scope "admin", :module => :rails_admin, :as => "rails_admin" do
-      controller "image_store" do
-        get "/:model_name/:id/image_delete/:column", :to => :image_delete, :as => "image_delete"
-      end
-    end
-  end
   match ':controller/:id/image_delete/:column', :action => 'image_delete'
 end
+
+if defined?(::RailsAdmin)
+  RailsAdmin::Engine.routes.append do
+    controller "image_store" do
+      get "/:model_name/:id/image_delete/:column", :to => :image_delete, :as => "image_delete"
+    end
+  end
+end
+

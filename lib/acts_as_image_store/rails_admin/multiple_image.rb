@@ -9,7 +9,10 @@ module ActsAsImageStore
       @view_helper = :multiple_image_field
 
       register_instance_option(:formatted_value) do
-        '[IMAGES]'
+        mi_map = bindings[:object].multiple_image_config
+        bindings[:object].send(@name).map do |item|
+          bindings[:view].thumbnail item.send(mi_map[item.class])
+        end.join(" ").html_safe
       end
     end
   end

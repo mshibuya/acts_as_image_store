@@ -14,5 +14,5 @@ jQuery.fn.extend({
   }
 });
 
-jQuery(function(){ jQuery('.multiple_images').multipleImage(); });
+jQuery(function($){ $('.multiple_images').multipleImage(); });
 

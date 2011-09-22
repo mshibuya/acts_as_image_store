@@ -9,7 +9,7 @@ module ActsAsImageStore
       @view_helper = :rails_admin_image_field
 
       register_instance_option(:formatted_value) do
-        ActionView::Base.new.thumbnail(value)
+        bindings[:view].thumbnail(value)
       end
     end
   end
