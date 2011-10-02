@@ -38,6 +38,10 @@ describe ActsAsImageStore::TagHelper do
     image('', :default => :another).should == '<img src="'+ActsAsImageStore.backend['base_url']+'raw/ffffffffffffffffffffffffffffffff.jpg" />'
   end
 
+  it "should show image that fits for size" do
+    image('0123456789abcdef0123456789abcdef.jpg', :w => 80, :h => 80, :fit => true).should == '<img height="80px" src="'+ActsAsImageStore.backend['base_url']+'80x80/0123456789abcdef0123456789abcdef.jpg" width="80px" />'
+  end
+
   context "thumbnail" do
     it "should show thumbnail with link to fullsize image" do
       thumbnail('0123456789abcdef0123456789abcdef.jpg').should == '<a href="'+ActsAsImageStore.backend['base_url']+'raw/0123456789abcdef0123456789abcdef.jpg" target="_blank"><img src="'+ActsAsImageStore.backend['base_url']+'80x80/0123456789abcdef0123456789abcdef.jpg" /></a>'

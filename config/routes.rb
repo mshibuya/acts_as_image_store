@@ -17,8 +17,8 @@ Rails.application.routes.draw do
   match ':controller/:id/image_delete/:column', :action => 'image_delete'
 end
 
-if defined?(::RailsAdmin)
-  RailsAdmin::Engine.routes.append do
+if defined?(::RailsAdmin::Engine)
+  ::RailsAdmin::Engine.routes.append do
     controller "image_store" do
       get "/:model_name/:id/image_delete/:column", :to => :image_delete, :as => "image_delete"
     end

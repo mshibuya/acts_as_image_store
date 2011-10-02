@@ -25,8 +25,12 @@ module ActsAsImageStore # :nodoc:
     def stored_image(key, options = {})
       options = options.symbolize_keys
       options[:default] ||= :default
+      if options[:fit] && options[:w] && options[:h]
+        options[:width] = "#{options[:w]}px"
+        options[:height] = "#{options[:h]}px"
+      end
       return unless url = image_url(key, options)
-      %w[w h method size format default].each{|i| options.delete(i.to_sym)}
+      %w[w h method size format default fit].each{|i| options.delete(i.to_sym)}
       options[:src] = url
       tag("img", options)
     end
