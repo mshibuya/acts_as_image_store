@@ -12,7 +12,7 @@ class StoredImagesController < ApplicationController
   def show
     if ActsAsImageStore.backend['reproxy']
       type, urls = StoredImage.fetch_urls(params[:name], params[:format], params[:size])
-      response.header['Content-Type'] = type
+      response.content_type = type
       response.header['X-REPROXY-URL'] = urls.join(' ')
       if ActsAsImageStore.backend['reproxy']['cache']
         response.header['X-REPROXY-CACHE-FOR'] = "#{ActsAsImageStore.backend['reproxy']['cache']}; Content-Type"
@@ -20,7 +20,7 @@ class StoredImagesController < ApplicationController
       render :nothing => true
     else
       type, data = StoredImage.fetch_data(params[:name], params[:format], params[:size])
-      response.header['Content-Type'] = type
+      response.content_type = type
       render :layout => false, :text => data
     end
   end
