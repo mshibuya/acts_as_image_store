@@ -52,6 +52,7 @@ module ActsAsImageStore # :nodoc:
         image_options[:w] = options[:w] if options[:w]
         image_options[:h] = options[:h] if options[:h]
         deletable = options.delete(:deletable)
+        uploadable = options.delete(:uploadable)
         show_image = @object[method].is_a?(String) && !@object[method].empty? && @object.persisted?
       end
 
@@ -82,8 +83,11 @@ module ActsAsImageStore # :nodoc:
           output +=  @template.hidden_field(@object_name, method, objectify_options(input_options))
         end
       else
-        output +=  @template.file_field(@object_name, method, objectify_options(input_options))
+        if uploadable === nil || uploadable
+          output +=  @template.file_field(@object_name, method, objectify_options(input_options))
+        end
       end
+      output
     end
     def rails_admin_image_field(method, options={})
       image_field(method, {
@@ -113,7 +117,8 @@ module ActsAsImageStore # :nodoc:
           :object => @object,
           :model => @object_name,
           :column => method.to_s.singularize,
-          :label => label
+          :label => label,
+          :options => options
       })
     end
   end

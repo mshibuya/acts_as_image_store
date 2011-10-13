@@ -16,12 +16,16 @@
                 </tr>
               <% end %>
               </tbody>
+              <% if options[:uploadable] || options[:uploadable] == nil %>
               <tbody style="display:none">
                 <tr>
                   <th><%= label %><input type="button" value="削除" /></th>
                   <td><input type="file" name="<%= model %>[uploaded_<%= column.to_s.pluralize %>][]" /></td>
                 </tr>
               </tbody>
+              <% end %>
             </table>
+            <% if options[:uploadable] || options[:uploadable] == nil %>
             <input class="multiple_image_add" type="button" value="追加" />
+            <% end %>
 

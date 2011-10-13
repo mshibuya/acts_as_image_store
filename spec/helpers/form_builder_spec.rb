@@ -62,6 +62,12 @@ describe ActsAsImageStore::FormBuilder, :backend => true do
       end
     end
 
+    it "should show file field with image without upload form" do
+      form_for(@image_test) do |f|
+        f.image_field(:image, :uploadable => false).should == '<a href="'+ActsAsImageStore.backend['base_url']+'raw/60de57a8f5cd0a10b296b1f553cb41a9.png" target="_blank"><img src="'+ActsAsImageStore.backend['base_url']+'80x80/60de57a8f5cd0a10b296b1f553cb41a9.png" /></a><a href="/test/1/image_delete/image" data-confirm="Are you sure?">delete</a><br />'
+      end
+    end
+
     it "should show file field for rails_admin" do
       form_for(@image_test) do |f|
         f.rails_admin_image_field(:image).should ==
@@ -81,6 +87,13 @@ describe ActsAsImageStore::FormBuilder, :backend => true do
       form_for(@multiple) do |f|
         f.multiple_image_field(:photo).should ==
                       "            <table class=\"multiple_images\" data-limit=\"\" border=\"0\">\n              <tbody>\n                <tr id=\"multiple_photo_1\">\n                  <th>Photo<input type=\"button\" value=\"削除\" /></th>\n                  <td>\n                  <img src=\"http://image.example.com/images/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png\" />\n                  <input type=\"hidden\" name=\"multiple[uploaded_photos][]\" value=\"60de57a8f5cd0a10b296b1f553cb41a9.png\" />\n                  </td>\n                </tr>\n              </tbody>\n              <tbody style=\"display:none\">\n                <tr>\n                  <th>Photo<input type=\"button\" value=\"削除\" /></th>\n                  <td><input type=\"file\" name=\"multiple[uploaded_photos][]\" /></td>\n                </tr>\n              </tbody>\n            </table>\n            <input class=\"multiple_image_add\" type=\"button\" value=\"追加\" />\n\n"
+      end
+    end
+
+    it "should show non-uploadable file field for multiple image" do
+      form_for(@multiple) do |f|
+        f.multiple_image_field(:photo, :uploadable => false).should ==
+                      "            <table class=\"multiple_images\" data-limit=\"\" border=\"0\">\n              <tbody>\n                <tr id=\"multiple_photo_1\">\n                  <th>Photo<input type=\"button\" value=\"削除\" /></th>\n                  <td>\n                  <img src=\"http://image.example.com/images/80x80/60de57a8f5cd0a10b296b1f553cb41a9.png\" />\n                  <input type=\"hidden\" name=\"multiple[uploaded_photos][]\" value=\"60de57a8f5cd0a10b296b1f553cb41a9.png\" />\n                  </td>\n                </tr>\n              </tbody>\n            </table>\n\n"
       end
     end
   end
