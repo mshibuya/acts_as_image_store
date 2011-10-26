@@ -21,7 +21,7 @@ class StoredImagesController < ApplicationController
     else
       type, data = StoredImage.fetch_data(params[:name], params[:format], params[:size])
       response.content_type = type
-      render :layout => false, :text => data
+      render :layout => false, :text => data.force_encoding('ASCII-8BIT')
     end
   end
 
